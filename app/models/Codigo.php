@@ -4,12 +4,12 @@ namespace app\models;
 
 use DateTimeImmutable;
 
-class Projeto
+class Codigo
 {
     private ?int $id;
-    private ?string $nome;
-    private ?string $equipeId;
-    private ?string $visibilidade;
+    private ?string $caminho;
+    private ?string $descricao;
+    private ?int $projetoId;
     private ?DateTimeImmutable $criadoEm;
 
     public function getId(): ?int
@@ -22,33 +22,33 @@ class Projeto
         return $this;
     }
 
-    public function getNome(): ?string
+    public function getCaminho(): ?string
     {
-        return $this->nome;
+        return $this->caminho;
     }
-    public function setNome(?string $nome): self
+    public function setCaminho(?string $caminho): self
     {
-        $this->nome = $nome;
+        $this->caminho = $caminho;
         return $this;
     }
 
-    public function getEquipeId(): ?string
+    public function getDescricao(): ?string
     {
-        return $this->equipeId;
+        return $this->descricao;
     }
-    public function setEquipeId(?string $equipeId): self
+    public function setDescricao(?string $descricao): self
     {
-        $this->equipeId = $equipeId;
+        $this->descricao = $descricao;
         return $this;
     }
 
-    public function getVisibilidade(): ?string
+    public function getProjetoId(): ?int
     {
-        return $this->visibilidade;
+        return $this->projetoId;
     }
-    public function setVisibilidade(?string $visibilidade): self
+    public function setProjetoId(?int $projetoId): self
     {
-        $this->visibilidade = $visibilidade;
+        $this->projetoId = $projetoId;
         return $this;
     }
 

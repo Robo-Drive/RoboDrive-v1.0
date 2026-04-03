@@ -2,11 +2,12 @@
 
 namespace app\models;
 
-class Equipe
+class Componente
 {
     private ?int $id;
     private ?string $nome;
-    private ?string $identidade;
+    private ?string $descricao;
+    private ?string $imagem;
 
     public function getId(): ?int
     {
@@ -27,14 +28,24 @@ class Equipe
         $this->nome = $nome;
         return $this;
     }
-    
-    public function getIdentidade(): ?string
+
+    public function getDescricao(): ?string
     {
-        return $this->identidade;
+        return $this->descricao;
     }
-    public function setIdentidade(?string $identidade): self
+    public function setDescricao(?string $descricao): self
     {
-        $this->identidade = $identidade;
+        $this->descricao = $descricao;
+        return $this;
+    }
+
+    public function getImagem(): ?string
+    {
+        return $this->imagem;
+    }
+    public function setImagem(?string $imagem): self
+    {
+        $this->imagem = $imagem;
         return $this;
     }
 }

@@ -14,12 +14,16 @@ class DatabaseInitializer
 
         $scriptPath = __DIR__ . '/script/data.sql';
 
-        if (file_exists($scriptPath)) {
+        if(file_exists($scriptPath))
+        {
             $sql = file_get_contents($scriptPath);
             
-            try {
+            try
+            {
                 $connection->exec($sql);
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e)
+            {
                 error_log("Erro ao inicializar banco de dados: " . $e->getMessage());
             }
         }

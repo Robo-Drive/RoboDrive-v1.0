@@ -30,9 +30,9 @@ class Router
         $uri  = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $method = strtolower($_SERVER['REQUEST_METHOD']);
 
-        foreach ($this->routes as $route)
+        foreach($this->routes as $route)
         {
-            if ($route['route'] == $uri && $route['method'] == $method)
+            if($route['route'] == $uri && $route['method'] == $method)
             {    
                 return $this->dispatch($route);
             }
@@ -46,12 +46,12 @@ class Router
     {
         list($controller, $method) = explode('@', $route['action']);
         $controllerClass = "app\\controllers\\$controller";
-        if (!class_exists($controllerClass))
+        if(!class_exists($controllerClass))
         {
             print "Controller $controller não encontrado";
             die;
         }
-        if (!method_exists($controllerClass, $method))
+        if(!method_exists($controllerClass, $method))
         {
             print "Método $method não encontrado em $controllerClass";
             die;
