@@ -13,7 +13,7 @@ require_once(__DIR__."/../libraries/PHPMailer/src/Exception");
 
 
 
-class Email
+class MailHelper
 {
     private string $seuEmail;
     private string $suaSenha;
