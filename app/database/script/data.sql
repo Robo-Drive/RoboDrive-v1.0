@@ -82,5 +82,3 @@ CREATE TABLE IF NOT EXISTS comentario (
 
     FOREIGN KEY (projeto_id) REFERENCES projeto(id)
 );
-
-1

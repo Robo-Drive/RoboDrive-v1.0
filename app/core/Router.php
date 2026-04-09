@@ -9,7 +9,7 @@ class Router
     public function get($route, $action)
     {
         $this->routes[] = [
-            'method' => 'get',
+            'method' => 'GET',
             'route' => $route,
             'action' => $action
         ];
@@ -18,7 +18,7 @@ class Router
     public function post($route, $action)
     {
         $this->routes[] = [
-            'method' => 'post',
+            'method' => 'POST',
             'route' => $route,
             'action' => $action
         ];
@@ -28,7 +28,7 @@ class Router
     public function run()
     {
         $uri  = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $method = strtolower($_SERVER['REQUEST_METHOD']);
+        $method = $_SERVER['REQUEST_METHOD'];
 
         foreach($this->routes as $route)
         {

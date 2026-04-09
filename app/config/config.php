@@ -19,3 +19,5 @@ define('DB_HOST', 'localhost');
 define('DB_NAME', 'robo_drive');
 define('DB_USER', getenv("DB_USER"));
 define('DB_PASS', getenv("DB_PASS"));
+
+//Configurações de gmail
