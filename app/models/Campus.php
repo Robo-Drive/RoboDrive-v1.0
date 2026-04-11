@@ -2,10 +2,11 @@
 
 namespace app\models;
 
-class Equipe
+class Campus
 {
     private ?int $id;
-    private ?string $nome;
+    private ?string $nomeCampus;
+    private ?string $nomeEquipe;
     private ?string $identidade;
 
     public function getId(): ?int
@@ -18,13 +19,23 @@ class Equipe
         return $this;
     }
 
-    public function getNome(): ?string
+    public function getNomeCampus(): ?string
     {
-        return $this->nome;
+        return $this->nomeCampus;
     }
-    public function setNome(?string $nome): self
+    public function setNomeCampus(?string $nomeCampus): self
     {
-        $this->nome = $nome;
+        $this->nomeCampus = $nomeCampus;
+        return $this;
+    }
+
+    public function getNomeEquipe(): ?string
+    {
+        return $this->nomeEquipe;
+    }
+    public function setNomeEquipe(?string $nomeEquipe): self
+    {
+        $this->nomeEquipe = $nomeEquipe;
         return $this;
     }
     

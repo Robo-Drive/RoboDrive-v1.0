@@ -3,7 +3,6 @@
 namespace app\models;
 
 use DateTimeImmutable;
-use app\models\Equipe;
 class Usuario
 {
     private ?int $id;
@@ -12,7 +11,7 @@ class Usuario
     private ?string $password;
     private ?string $imagem;
     private ?string $regra;
-    private ?Equipe $equipe;
+    private ?int $campusId;
     private ?DateTimeImmutable $criadoEm;
 
 
@@ -77,13 +76,13 @@ class Usuario
         return $this;
     }
 
-    public function getEquipe(): ?Equipe
+    public function getCampusId(): ?int
     {
-        return $this->equipe;
+        return $this->campusId;
     }
-    public function setEquipe(?Equipe $equipe): self
+    public function setCampusId(?int $campusId): self
     {
-        $this->equipe = $equipe;
+        $this->campusId = $campusId;
         return $this;
     }
 

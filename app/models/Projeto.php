@@ -8,7 +8,7 @@ class Projeto
 {
     private ?int $id;
     private ?string $nome;
-    private ?string $equipeId;
+    private ?string $campusId;
     private ?string $visibilidade;
     private ?DateTimeImmutable $criadoEm;
 
@@ -32,13 +32,13 @@ class Projeto
         return $this;
     }
 
-    public function getEquipeId(): ?string
+    public function getCampusId(): ?string
     {
-        return $this->equipeId;
+        return $this->campusId;
     }
-    public function setEquipeId(?string $equipeId): self
+    public function setCampusId(?string $campusId): self
     {
-        $this->equipeId = $equipeId;
+        $this->campusId = $campusId;
         return $this;
     }
 
