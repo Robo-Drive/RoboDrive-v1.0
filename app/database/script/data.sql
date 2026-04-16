@@ -15,17 +15,14 @@ CREATE TABLE usuario (
   senha VARCHAR(255) NOT NULL,
   imagem VARCHAR(255),
   regra ENUM('admin','professor','estudante') NOT NULL,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (campus_id) REFERENCES campus(id)
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE projeto (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
-  campus_id INT NOT NULL,
   visibilidade ENUM('privado','equipe','publico') DEFAULT 'privado',
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (campus_id) REFERENCES campus(id)
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE postagem_forum (
