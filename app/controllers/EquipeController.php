@@ -2,7 +2,9 @@
 
 namespace app\controllers;
 
-class EquipeController
-{
+use app\core\Controller;
 
+class EquipeController extends Controller
+{
+    
 }

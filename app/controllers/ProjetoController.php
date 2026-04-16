@@ -2,7 +2,9 @@
 
 namespace app\controllers;
 
-class ProjetoController
+use app\core\Controller;
+
+class ProjetoController extends Controller
 {
 
 }
