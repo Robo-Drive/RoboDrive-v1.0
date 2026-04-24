@@ -9,6 +9,25 @@ class Componente
     private ?string $descricao;
     private ?string $imagem;
 
+    public static function map(?array $componentes): array
+    {
+        if($componentes  == null)
+        {
+            return [];
+        }
+        $ComponentesObj = array();
+        foreach($componentes as $componente)
+        {
+            $componenteObj = new Componente();
+            $componenteObj->setId($componente["id"]);
+            $componenteObj->setNome($componente["nome"]);
+            $componenteObj->setDescricao($componente["descricao"]);
+            $componenteObj->setImagem($componente["imagem"]);
+            $ComponentesObj[] = $componenteObj;
+        }
+        return $ComponentesObj;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

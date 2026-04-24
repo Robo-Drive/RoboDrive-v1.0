@@ -13,7 +13,7 @@ class ConnectionFactory
         if(self::$connection == null)
         {
             try
-            { 
+            {
                 $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME ;
                 self::$connection = self::createConnection($dsn);
             }

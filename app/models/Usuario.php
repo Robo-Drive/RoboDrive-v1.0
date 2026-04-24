@@ -6,14 +6,36 @@ use DateTimeImmutable;
 class Usuario
 {
     private ?int $id;
-    private ?string $name;
+    private ?string $nome;
     private ?string $email;
-    private ?string $password;
+    private ?string $senha;
     private ?string $imagem;
     private ?string $regra;
-    private ?int $campusId;
     private ?DateTimeImmutable $criadoEm;
 
+    public static function map(?array $usuarios): array
+    {
+        if($usuarios == null)
+        {
+            return [];
+        }
+        $usuariosObj = array();
+        foreach($usuarios as $usuario)
+        {
+            $usuarioObj = new Usuario();
+            $usuarioObj->setId($usuario["id"]??null);
+            $usuarioObj->setNome($usuario["nome"]??null);
+            $usuarioObj->setEmail($usuario["email"]??null);
+            $usuarioObj->setSenha($usuario["senha"]??null);
+            $usuarioObj->setImagem($usuario["imagem"]??null);
+            $usuarioObj->setRegra($usuario["regra"]??null);
+            $usuarioObj->setCriadoEm(isset($usuario["criado_em"])
+        ? new DateTimeImmutable($usuario["criado_em"])
+        : null);
+            $usuariosObj[] = $usuarioObj;
+        }
+        return $usuariosObj;
+    }
 
     public function getId(): ?int
     {
@@ -25,13 +47,13 @@ class Usuario
         return $this;
     }
 
-    public function getName(): ?string
+    public function getNome(): ?string
     {
-        return $this->name;
+        return $this->nome;
     }
-    public function setName(?string $name): self
+    public function setNome(?string $nome): self
     {
-        $this->name = $name;
+        $this->nome = $nome;
         return $this;
     }
 
@@ -45,13 +67,13 @@ class Usuario
         return $this;
     }
     
-    public function getPassword(): ?string
+    public function getSenha(): ?string
     {
-        return $this->password;
+        return $this->senha;
     }
-    public function setPassword(?string $password): self
+    public function setSenha(?string $senha): self
     {
-        $this->password = $password;
+        $this->senha = $senha;
         return $this;
     }
 
@@ -73,16 +95,6 @@ class Usuario
     public function setRegra(?string $regra): self
     {
         $this->regra = $regra;
-        return $this;
-    }
-
-    public function getCampusId(): ?int
-    {
-        return $this->campusId;
-    }
-    public function setCampusId(?int $campusId): self
-    {
-        $this->campusId = $campusId;
         return $this;
     }
 

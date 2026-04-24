@@ -8,9 +8,27 @@ class Projeto
 {
     private ?int $id;
     private ?string $nome;
-    private ?string $campusId;
     private ?string $visibilidade;
     private ?DateTimeImmutable $criadoEm;
+
+    public static function map(?array $projetos): array
+    {
+        if($projetos == null)
+        {
+            return [];
+        }
+        $projetosObj = array();
+        foreach($projetos as $projeto)
+        {
+            $projetoObj = new Projeto();
+            $projetoObj->setId($projeto["id"]);
+            $projetoObj->setNome($projeto["nome"]);
+            $projetoObj->setVisibilidade($projeto["visibilidade"]);
+            $projetoObj->setCriadoEm($projeto["criado_em"]);
+            $projetosObj[] = $projetosObj;
+        }
+        return $projetosObj;
+    }
 
     public function getId(): ?int
     {
@@ -29,16 +47,6 @@ class Projeto
     public function setNome(?string $nome): self
     {
         $this->nome = $nome;
-        return $this;
-    }
-
-    public function getCampusId(): ?string
-    {
-        return $this->campusId;
-    }
-    public function setCampusId(?string $campusId): self
-    {
-        $this->campusId = $campusId;
         return $this;
     }
 

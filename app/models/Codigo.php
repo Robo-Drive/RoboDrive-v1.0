@@ -12,6 +12,25 @@ class Codigo
     private ?int $projetoId;
     private ?DateTimeImmutable $criadoEm;
 
+    public static function map(?array $codigos): array
+    {
+        if($codigos  == null)
+        {
+            return [];
+        }
+        $CodigosObj = array();
+        foreach($codigos as $codigo)
+        {
+            $codigoObj = new Codigo();
+            $codigoObj->setId($codigo["id"]);
+            $codigoObj->setCaminho($codigo["caminho"]);
+            $codigoObj->setDescricao($codigo["descricao"]);
+            $codigoObj->setCriadoEm($codigo["criado_em"]);
+            $CodigosObj[] = $codigoObj;
+        }
+        return $CodigosObj;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
