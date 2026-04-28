@@ -14,10 +14,10 @@ $router->post('/logar', 'AutenticacaoController@logar');
 $router->get('/usuario/listar', 'UsuarioController@listar');
 $router->get('/usuario/cadastrar', 'UsuarioController@cadastrar');
 $router->post('/usuario/salvar', 'UsuarioController@salvar');
-$router->post('/usuario/perfil', 'UsuarioController@buscarId');
+$router->post('/usuario/perfil', 'UsuarioController@perfil');
 
-$router->get('/usuario/editar', 'UsuarioController@editar');
+$router->post('/usuario/editar', 'UsuarioController@editar');
 $router->post('/usuario/atualizar', 'UsuarioController@atualizar');
-$router->get('/usuario/excluir', 'UsuarioController@excluir');
+$router->post('/usuario/excluir', 'UsuarioController@excluir');
 
 $router->run();

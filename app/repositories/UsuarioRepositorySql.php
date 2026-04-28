@@ -41,8 +41,50 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
 
         return $usuario;
     }
-    public function editar(Usuario $usuario): ?Usuario
+   public function editar(Usuario $usuario): ?Usuario
     {
+        try
+        {
+            if($usuario->getSenha())
+            {
+                $sql = "UPDATE usuario
+                        SET nome = :nome,
+                            email = :email,
+                            senha = :senha,
+                            imagem = :imagem,
+                            regra = :regra
+                        WHERE id = :id";
+
+                $stmt = $this->connection->prepare($sql);
+
+                $stmt->bindValue(':senha',password_hash($usuario->getSenha(), PASSWORD_DEFAULT));
+            }
+            else
+            {
+                $sql = "UPDATE usuario
+                        SET nome = :nome,
+                            email = :email,
+                            imagem = :imagem,
+                            regra = :regra
+                        WHERE id = :id";
+
+                $stmt = $this->connection->prepare($sql);
+            }
+
+            $stmt->bindValue(':id', $usuario->getId());
+            $stmt->bindValue(':nome', $usuario->getNome());
+            $stmt->bindValue(':email', $usuario->getEmail());
+            $stmt->bindValue(':imagem', $usuario->getImagem());
+            $stmt->bindValue(':regra', $usuario->getRegra());
+
+            $stmt->execute();
+        }
+        catch(PDOException $e)
+        {
+            print_r($e);
+            die;
+        }
+
         return $usuario;
     }
     public function buscarId(Usuario $usuario): ?Usuario

@@ -4,6 +4,7 @@ namespace app\services;
 
 use app\models\Usuario;
 use app\repositories\UsuarioRepositorySql;
+use Exception;
 
 class UsuarioService
 {
@@ -20,6 +21,18 @@ class UsuarioService
         {
             $this->repositorySql->cadastrar($usuario);
         }
+    }
+    public function editarUsuario(Usuario $usuario)
+    {
+        try
+        {
+            $this->repositorySql->editar($usuario);
+        }
+        catch(Exception $e)
+        {
+            return false;
+        }
+        return true;
     }
     public function logarUsuario(Usuario $usuario): array
     {

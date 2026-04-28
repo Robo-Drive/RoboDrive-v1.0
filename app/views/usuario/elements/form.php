@@ -19,7 +19,7 @@
 <div>
     <label for="senha" class="text-white">Senha:</label>
     <br>
-    <input type="text" name="senha" value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getSenha() : (isset($usuario["senha"])? $usuario["senha"] : "")) : "" ?>">
+    <input type="text" name="senha" value="<?= isset($usuario) ? (is_object($usuario) ? "" : (isset($usuario["senha"])? $usuario["senha"] : "")) : "" ?>">
     <?php if (isset($erros['senha'])): ?>
         <div class="text-red-500 small"><?= $erros['senha'] ?></div>
     <?php endif; ?>
@@ -46,7 +46,9 @@
         <div class="text-red-500 small"><?= $erros['regra'] ?></div>
     <?php endif; ?>
 </div>
-
+<?php if(isset($_POST["id"]) || isset($usuario)):?>
+    <input type="hidden" name="id" value="<?= isset($_POST["id"])? $_POST["id"]:(isset($usuario) ? (is_object($usuario) ? $usuario->getId() : (isset($usuario["id"])? $usuario["id"] : "")) : "")?>">
+<?php endif;?>
 <div class="flex justify-center items-center p-2">
     <button type="submit" class="text-white px-3 py-1 rounded-xl bg-green-700">Enviar</button>
 </div>
