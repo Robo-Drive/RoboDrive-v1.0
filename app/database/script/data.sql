@@ -121,10 +121,7 @@ INSERT INTO equipe (nome_equipe, senha) VALUES
 
 -- USUARIOS
 INSERT INTO usuario (nome, email, senha, imagem, regra) VALUES
-('Eduardo', 'eduardo@email.com', '123', 'eduardo.png', 'admin'),
-('Maria', 'maria@email.com', '123', 'maria.png', 'usuario'),
-('João', 'joao@email.com', '123', 'joao.png', 'usuario'),
-('Ana', 'ana@email.com', '123', 'ana.png', 'usuario');
+('Eduardo', 'admin@gmail.com', '$2y$12$Unzm5GGQii.USuAuW2a9KOt670nrvo5i77t61Dr5j4N.G.nbXMp4W', 'https://imgs.search.brave.com/K9RFYE-qe_bGx8RZL8UJ5R3AtjRdC5Pe1JpC7SGQHI0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWFn/ZXM0LmFscGhhY29k/ZXJzLmNvbS8xMzcv/dGh1bWJiaWctMTM3/NDY1MC53ZWJw', 'admin');--senha: admin12345
 
 -- PROJETOS
 INSERT INTO projeto (nome, visibilidade) VALUES
