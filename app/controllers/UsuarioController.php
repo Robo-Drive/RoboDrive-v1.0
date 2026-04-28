@@ -143,6 +143,6 @@ class UsuarioController extends Controller
         $usuario = new Usuario();
         $usuario->setId($_POST["id"]);
         $this->repositorySql->deletar($usuario);
-        $this->view("usuario/list");
+        $this->listar();
     }
 }

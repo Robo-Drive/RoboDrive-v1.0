@@ -15,8 +15,6 @@ class AutenticacaoService
     public function logar(string $email,string $senha): bool
     {
         $usuario = $this->usuarioRepositorySql->buscarEmail((new Usuario)->setEmail($email));
-        print_r($usuario);
-        die;
         if($usuario != false && password_verify($senha,$usuario->getSenha()))
         {
             $_SESSION["usuario_logado"] = $usuario;

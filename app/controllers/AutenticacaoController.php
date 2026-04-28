@@ -6,16 +6,16 @@ use app\core\Controller;
 use app\helpers\ValidadorHelper;
 use app\models\Usuario;
 use app\repositories\UsuarioRepositorySql;
-use app\services\UsuarioService;
+use app\services\AutenticacaoService;
 
 class AutenticacaoController extends Controller
 {
-    private UsuarioService $service;
+    private AutenticacaoService $service;
     private UsuarioRepositorySql $repositorySql;
 
     public function __construct()
     {
-        $this->service = new UsuarioService();
+        $this->service = new AutenticacaoService();
         $this->repositorySql = new UsuarioRepositorySql();
     }
     public function login()
@@ -42,14 +42,14 @@ class AutenticacaoController extends Controller
         }
         else
         {
-            $resposta = $this->service->logarUsuario($usuario);
+            $resposta = $this->service->logar($usuario->getEmail(),$usuario->getSenha());
             if($resposta)
             {
                 $this->redirect(URL_BASE . '/usuario/listar');
             } 
             else
             {
-                $data["erros"] = "Usuário ou senha incorretos";
+                $data["erros"] = "Email ou senha incorretos";
                 $this->view('login/login',$data);
             }
         }

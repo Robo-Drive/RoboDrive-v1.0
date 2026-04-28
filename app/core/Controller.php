@@ -26,6 +26,6 @@ class Controller
     }
     public function authRequired()
     {
-        //TODO: implementar no futuro
+        
     }
 }

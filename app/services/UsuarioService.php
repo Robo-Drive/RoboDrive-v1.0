@@ -14,13 +14,15 @@ class UsuarioService
     {
         $this->repositorySql = new UsuarioRepositorySql;
     }
-    public function salvarUsuario(Usuario $usuario)
+    public function salvarUsuario(Usuario $usuario): bool
     {
         $resposta = $this->repositorySql->buscarEmail($usuario);
         if(empty($resposta))
         {
             $this->repositorySql->cadastrar($usuario);
+            return true;
         }
+        return false;
     }
     public function editarUsuario(Usuario $usuario)
     {
@@ -33,22 +35,5 @@ class UsuarioService
             return false;
         }
         return true;
-    }
-    public function logarUsuario(Usuario $usuario): array
-    {
-        $resposta = array();
-        $login = $this->repositorySql->buscarEmail($usuario);
-        if(empty($login))
-        {
-            return [
-                "erros" => "Email não cadastrado",
-                "liberado" => false
-            ];
-        }
-        else
-        {
-            $login->getSenha();
-        }
-        return $resposta;
     }
 }
