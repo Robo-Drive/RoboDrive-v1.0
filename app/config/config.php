@@ -2,6 +2,11 @@
 
 //Configuração do ambiente
 define('DEV_ENVIRONMENT', true);
+if(session_status() == PHP_SESSION_NONE)
+{
+    session_start();
+}
+
 
 if (DEV_ENVIRONMENT == true)
 {

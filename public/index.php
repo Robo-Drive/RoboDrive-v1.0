@@ -1,5 +1,6 @@
 <?php 
 
+
 require_once __DIR__ . '/../app/core/Autoload.php';
 require_once __DIR__ . '/../app/config/config.php';
 

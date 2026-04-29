@@ -20,15 +20,18 @@ class UsuarioController extends Controller
 
     public function listar()
     {
+        $this->loginRequired();
         $data['usuarios'] = $this->repositorySql->listarTodos();
         $this->view("usuario/list",$data);
     }
     public function cadastrar()
     {
+        $this->loginRequired();
         $this->view("usuario/create");
     }
     public function salvar()
     {
+        $this->loginRequired();
         $validador = new ValidadorHelper();
         
         $validador->obrigatorio('nome',   $_POST["nome"]);
@@ -69,6 +72,7 @@ class UsuarioController extends Controller
     }
     public function editar()
     {
+        $this->loginRequired();
         $usuario = new Usuario();
         $usuario->setId($_POST["id"]);
         $data["usuario"] = $this->repositorySql->buscarId($usuario);
@@ -83,6 +87,7 @@ class UsuarioController extends Controller
     }
     public function atualizar()
     {
+        $this->loginRequired();
         $validador = new ValidadorHelper();
         
         $validador->obrigatorio('id',   $_POST["id"]);
@@ -125,6 +130,7 @@ class UsuarioController extends Controller
     }
     public function perfil()
     {
+        $this->loginRequired();
         $usuario = new Usuario();
         $usuario->setId($_POST["id"]);
         $data["usuario"] = $this->repositorySql->buscarId($usuario);
@@ -140,6 +146,7 @@ class UsuarioController extends Controller
     }
     public function excluir()
     {
+        $this->loginRequired();
         $usuario = new Usuario();
         $usuario->setId($_POST["id"]);
         $this->repositorySql->deletar($usuario);

@@ -24,8 +24,19 @@ class Controller
         header('location: ' . $url);
         exit();
     }
-    public function authRequired()
+    public function loginRequired()
     {
-        
+        if(!isset($_SESSION["usuario_logado"]))
+        {
+            $this->redirect(URL_BASE);
+        }
+    }
+    public function adminRequired()
+    {
+        if($_SESSION["usuario_logado"]->getRegra() == "admin")
+        {
+            return true;
+        }
+        return false;
     }
 }
