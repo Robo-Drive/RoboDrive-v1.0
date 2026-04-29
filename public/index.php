@@ -10,6 +10,7 @@ $router = new Router();
 
 $router->get('/', 'AutenticacaoController@login');
 $router->post('/logar', 'AutenticacaoController@logar');
+$router->post('/logout', 'AutenticacaoController@logout');
 
 //Rotas do usuario
 $router->get('/usuario/listar', 'UsuarioController@listar');

@@ -57,5 +57,6 @@ class AutenticacaoController extends Controller
     public function logout()
     {
         $this->service->logout();
+        $this->redirect(URL_BASE);
     }
 }
