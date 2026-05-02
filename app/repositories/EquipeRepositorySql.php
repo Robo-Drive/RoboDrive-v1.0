@@ -95,7 +95,7 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
     }
     public function listarTodos(): array
     {
-        $sql = "SELECT * FROM equipe p WHERE p.senha = 'publico'";
+        $sql = "SELECT * FROM equipe";
         $stmt = $this->connection->prepare($sql);
         $stmt->execute();
         return Equipe::map($stmt->fetchAll());

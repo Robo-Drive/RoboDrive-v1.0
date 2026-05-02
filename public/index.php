@@ -11,15 +11,20 @@ $router = new Router();
 $router->get('/', 'AutenticacaoController@login');
 $router->post('/logar', 'AutenticacaoController@logar');
 $router->post('/logout', 'AutenticacaoController@logout');
+$router->get('/home', 'AutenticacaoController@home');
 
-//Rotas do usuario
-$router->get('/usuario/listar', 'UsuarioController@listar');
-$router->get('/usuario/cadastrar', 'UsuarioController@cadastrar');
-$router->post('/usuario/salvar', 'UsuarioController@salvar');
-$router->post('/usuario/perfil', 'UsuarioController@perfil');
+$crudsPrincipais = ["usuario","equipe","projeto","componente"];
 
-$router->post('/usuario/editar', 'UsuarioController@editar');
-$router->post('/usuario/atualizar', 'UsuarioController@atualizar');
-$router->post('/usuario/excluir', 'UsuarioController@excluir');
+foreach($crudsPrincipais as $cp)
+{
+    $router->get('/'.$cp.'/listar', ucfirst($cp).'Controller@listar');
+    $router->get('/'.$cp.'/cadastrar', ucfirst($cp).'Controller@cadastrar');
+    $router->post('/'.$cp.'/salvar', ucfirst($cp).'Controller@salvar');
+    $router->post('/'.$cp.'/perfil', ucfirst($cp).'Controller@perfil');
+
+    $router->post('/'.$cp.'/editar', ucfirst($cp).'Controller@editar');
+    $router->post('/'.$cp.'/atualizar', ucfirst($cp).'Controller@atualizar');
+    $router->post('/'.$cp.'/excluir', ucfirst($cp).'Controller@excluir');
+}
 
 $router->run();

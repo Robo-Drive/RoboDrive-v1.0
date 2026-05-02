@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS usuario (
 CREATE TABLE IF NOT EXISTS projeto (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
+  descricao VARCHAR(100) NOT NULL,
   visibilidade ENUM('privado','equipe','publico') DEFAULT 'privado',
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -90,6 +91,7 @@ CREATE TABLE IF NOT EXISTS projeto_usuario (
   id INT AUTO_INCREMENT PRIMARY KEY,
   projeto_id INT NOT NULL,
   usuario_id INT NOT NULL,
+  tipo ENUM('coodenador','participante') NOT NULL,
   FOREIGN KEY (projeto_id) REFERENCES projeto(id),
   FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 );
@@ -113,74 +115,94 @@ CREATE TABLE IF NOT EXISTS seguidores (
 
 USE robo_drive;
 
--- EQUIPE
 INSERT INTO equipe (nome_equipe, senha) VALUES
-('Equipe Alpha', '123'),
-('Equipe Beta', '123'),
-('Equipe Gamma', '123');
+('Equipe Alpha', '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2'),
+('Equipe Beta',  '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2'),
+('Equipe Gamma', '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2');
 
--- USUARIOS
+-- =====================
+-- USUARIOS (senha: admin12345)
+-- =====================
 INSERT INTO usuario (nome, email, senha, imagem, regra) VALUES
-('Eduardo', 'admin@gmail.com', '$2y$12$Unzm5GGQii.USuAuW2a9KOt670nrvo5i77t61Dr5j4N.G.nbXMp4W', 'https://imgs.search.brave.com/K9RFYE-qe_bGx8RZL8UJ5R3AtjRdC5Pe1JpC7SGQHI0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWFn/ZXM0LmFscGhhY29k/ZXJzLmNvbS8xMzcv/dGh1bWJiaWctMTM3/NDY1MC53ZWJw', 'admin');--senha: admin12345
+('Monkey D. Luffy', 'luffy@gmail.com',
+'$2y$12$twxVhhtHCFpYcOk8W02lq.PP/4hxFB9Urf9sV2lKPP4/JgF.Nkd16',
+'https://cdn.pixabay.com/photo/2021/08/04/13/06/anime-6523770_960_720.png', 'admin'),
 
+('Naruto Uzumaki', 'naruto@gmail.com',
+'$2y$12$twxVhhtHCFpYcOk8W02lq.PP/4hxFB9Urf9sV2lKPP4/JgF.Nkd16',
+'https://cdn.pixabay.com/photo/2023/03/27/14/31/anime-7884390_960_720.png', 'admin'),
+
+('Sakura Haruno', 'sakura@gmail.com',
+'$2y$12$twxVhhtHCFpYcOk8W02lq.PP/4hxFB9Urf9sV2lKPP4/JgF.Nkd16',
+'https://cdn.pixabay.com/photo/2022/10/16/17/24/anime-7525455_960_720.png', 'usuario'),
+
+('Goku', 'goku@gmail.com',
+'$2y$12$twxVhhtHCFpYcOk8W02lq.PP/4hxFB9Urf9sV2lKPP4/JgF.Nkd16',
+'https://cdn.pixabay.com/photo/2023/06/20/17/17/anime-8076614_960_720.png', 'usuario');
+
+-- =====================
 -- PROJETOS
-INSERT INTO projeto (nome, visibilidade) VALUES
-('Robô Seguidor de Linha', 'publico'),
-('Braço Robótico', 'equipe'),
-('Drone Arduino', 'privado');
+-- =====================
+INSERT INTO projeto (nome, descricao, visibilidade) VALUES
+('Robô Seguidor de Linha', 'Robô que segue uma linha usando sensores', 'publico'),
+('Braço Robótico', 'Braço mecânico controlado por servo motores', 'equipe'),
+('Drone Arduino', 'Drone controlado por Arduino com sensores', 'privado');
 
--- POSTAGENS
+-- =====================
+-- COMPONENTES
+-- =====================
+INSERT INTO componente (nome, descricao, imagem) VALUES
+('Arduino Uno', 'Microcontrolador',
+'https://upload.wikimedia.org/wikipedia/commons/3/38/Arduino_Uno_-_R3.jpg'),
+
+('Sensor Ultrassônico', 'Mede distância',
+'https://upload.wikimedia.org/wikipedia/commons/0/0b/HCSR04.jpg'),
+
+('Servo Motor', 'Movimento angular',
+'https://upload.wikimedia.org/wikipedia/commons/3/3e/Servo.jpg');
+
+-- =====================
+-- RESTANTE
+-- =====================
 INSERT INTO postagem_forum (conteudo, visibilidade, usuario_id) VALUES
 ('Como melhorar PID no robô?', 'publico', 1),
 ('Alguém tem código para servo?', 'equipe', 2);
 
--- COMENTÁRIOS DE POSTAGEM
 INSERT INTO comentario_postagem_forum (conteudo, postagem_forum_id, usuario_id) VALUES
 ('Tenta ajustar o Kp primeiro', 1, 2),
 ('Tenho sim, depois te mando', 2, 3);
 
--- COMENTÁRIOS DE PROJETO
 INSERT INTO comentario_projeto (conteudo, projeto_id, usuario_id) VALUES
 ('Projeto muito bom!', 1, 2),
 ('Precisa melhorar a estrutura', 2, 3);
 
--- COMPONENTES
-INSERT INTO componente (nome, descricao, imagem) VALUES
-('Arduino Uno', 'Microcontrolador', 'arduino.png'),
-('Sensor Ultrassônico', 'Mede distância', 'ultra.png'),
-('Servo Motor', 'Movimento angular', 'servo.png');
-
--- IMAGENS PROJETO
 INSERT INTO imagem_projeto (caminho, projeto_id) VALUES
 ('linha1.png', 1),
 ('braco1.png', 2);
 
--- CÓDIGOS
 INSERT INTO codigo (caminho, descricao, projeto_id) VALUES
 ('codigo1.ino', 'Controle do robô', 1),
 ('codigo2.ino', 'Movimento do braço', 2);
 
--- PROJETO COMPONENTE
 INSERT INTO projeto_componente (quantidade, projeto_id, componente_id) VALUES
 (2, 1, 1),
 (1, 1, 2),
 (3, 2, 3);
 
--- PROJETO USUARIO
-INSERT INTO projeto_usuario (projeto_id, usuario_id) VALUES
-(1, 1),
-(1, 2),
-(2, 3);
+INSERT INTO projeto_usuario (projeto_id, usuario_id, tipo) VALUES
+(1, 1, "coordenador"),
+(1, 2, "participante"),
+(2, 3, "coordenador"),
+(3, 4, "participante");
 
--- EQUIPE USUARIO
 INSERT INTO equipe_usuario (equipe_id, usuario_id, tipo) VALUES
-(1, 1, 'coodenador'),
+(1, 1, 'coordenador'),
 (1, 2, 'participante'),
-(2, 3, 'coodenador'),
+(2, 3, 'coordenador'),
 (3, 4, 'participante');
 
--- SEGUIDORES
 INSERT INTO seguidores (usuario_id, usuario_id_segue) VALUES
 (1, 2),
 (2, 3),
-(3, 1);
+(3, 1),
+(4, 1);

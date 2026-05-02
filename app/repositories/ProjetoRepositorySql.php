@@ -8,6 +8,7 @@ use app\models\Usuario;
 use app\models\Equipe;
 use app\repositories\ProjetoRepositoryInterface;
 use PDO;
+use PDOException;
 
 class ProjetoRepositorySql implements ProjetoRepositoryInterface
 {
@@ -19,32 +20,49 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
     }
     public function cadastrar(Projeto $projeto): ?Projeto
     {
-        $sql = "INSERT INTO projeto (nome, visibilidade)
-                VALUES (:nome, :visibilidade)";
-
-        $stmt = $this->connection->prepare($sql);
-
-        $stmt->bindValue(':nome', $projeto->getNome());
-        $stmt->bindValue(':visibilidade', $projeto->getVisibilidade());
-
-        if ($stmt->execute()) {
+        try
+        {
+            $sql = "INSERT INTO projeto (nome, visibilidade, descricao)
+                    VALUES (:nome, :visibilidade, :descricao)";
+    
+            $stmt = $this->connection->prepare($sql);
+    
+            $stmt->bindValue(':nome', $projeto->getNome());
+            $stmt->bindValue(':visibilidade', $projeto->getVisibilidade());
+            $stmt->bindValue(':descricao', $projeto->getDescricao());
+            $stmt->execute();
             $projeto->setId($this->connection->lastInsertId());
+            $sqlAssoc = "INSERT INTO projeto_usuario (projeto_id, usuario_id, tipo)
+                        VALUES (:projeto_id, :usuario_id, :tipo)";
+
+            $stmtAssoc = $this->connection->prepare($sqlAssoc);
+            $stmtAssoc->bindValue(':projeto_id', $projeto->getId());
+            $stmtAssoc->bindValue(':usuario_id', $_SESSION['usuario_logado']->getId());
+            $stmtAssoc->bindValue(':tipo', "coordenador");
+            $stmtAssoc->execute();
+
             return $projeto;
         }
-
-        return null;
+        catch(PDOException $e)
+        {
+            print_r($e);
+            die;
+        }
+        
     }
     public function editar(Projeto $projeto): ?Projeto
     {
         $sql = "UPDATE projeto
                 SET 
                 nome = :nome,
+                descricao = :descricao
                 visibilidade = :visibilidade
                 WHERE id = :id";
 
         $stmt = $this->connection->prepare($sql);
 
         $stmt->bindValue(':nome', $projeto->getNome());
+        $stmt->bindValue(':descricao', $projeto->getDescricao());
         $stmt->bindValue(':visibilidade', $projeto->getVisibilidade());
         $stmt->bindValue(':id', $projeto->getId(), PDO::PARAM_INT);
 
@@ -107,6 +125,13 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
     }
     public function listarTodos(): array
     {
+        $sql = "SELECT * FROM projeto";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute();
+        return Projeto::map($stmt->fetchAll());
+    }
+    public function buscarPublico(): array
+    {
         $sql = "SELECT * FROM projeto p WHERE p.visibilidade = 'publico'";
         $stmt = $this->connection->prepare($sql);
         $stmt->execute();
@@ -114,6 +139,11 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
     }
     public function deletar(Projeto $projeto): bool
     {
+        $sqlAssoc = "DELETE FROM projeto_usuario WHERE projeto_id = :projeto_id";
+        $stmt = $this->connection->prepare($sqlAssoc);
+        $stmt->bindValue(':projeto_id', $projeto->getId());
+        $stmt->execute();
+
         $sql = "DELETE FROM projeto WHERE id = :id";
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':id', $projeto->getId());

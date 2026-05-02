@@ -3,6 +3,10 @@ $titulo = "Listagem de Usuários";
 $header = "Usuários";
 $menu = [
     [
+        "rota" => URL_BASE."/home",
+        "nome" => "Home"
+    ],
+    [
         "rota" => URL_BASE."/usuario/cadastrar",
         "nome" => "Cadastro"
     ]

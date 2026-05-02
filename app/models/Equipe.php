@@ -17,11 +17,10 @@ class Equipe
         $equipesObj = array();
         foreach($equipes as $equipe)
         {
-            $equipeObj = new Projeto();
+            $equipeObj = new Equipe();
             $equipeObj->setId($equipe["id"]);
-            $equipeObj->setNome($equipe["nome"]);
-            $equipeObj->setVisibilidade($equipe["visibilidade"]);
-            $equipeObj->setCriadoEm($equipe["criado_em"]);
+            $equipeObj->setNome($equipe["nome_equipe"]);
+            $equipeObj->setSenha($equipe["senha"]);
             $equipesObj[] = $equipeObj;
         }
         return $equipesObj;
@@ -51,7 +50,7 @@ class Equipe
     {
         return $this->senha;
     }
-    public function setIdentidade(?string $senha): self
+    public function setSenha(?string $senha): self
     {
         $this->senha = $senha;
         return $this;

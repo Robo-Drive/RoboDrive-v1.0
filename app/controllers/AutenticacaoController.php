@@ -45,7 +45,7 @@ class AutenticacaoController extends Controller
             $resposta = $this->service->logar($usuario->getEmail(),$usuario->getSenha());
             if($resposta)
             {
-                $this->redirect(URL_BASE . '/usuario/listar');
+                $this->redirect(URL_BASE . '/home');
             } 
             else
             {
@@ -53,6 +53,10 @@ class AutenticacaoController extends Controller
                 $this->view('login/login',$data);
             }
         }
+    }
+    public function home()
+    {
+        $this->view("home/home");
     }
     public function logout()
     {

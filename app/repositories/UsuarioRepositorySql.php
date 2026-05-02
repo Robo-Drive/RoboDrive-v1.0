@@ -18,7 +18,6 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
     }
     public function cadastrar(Usuario $usuario): ?Usuario
     {
-
         try
         {
             $sql = "INSERT INTO usuario (nome, email, senha, imagem, regra) VALUES(:nome, :email, :senha, :imagem, :regra)";

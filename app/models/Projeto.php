@@ -8,24 +8,26 @@ class Projeto
 {
     private ?int $id;
     private ?string $nome;
+    private ?string $descricao;
     private ?string $visibilidade;
     private ?DateTimeImmutable $criadoEm;
 
     public static function map(?array $projetos): array
     {
-        if($projetos == null)
-        {
+        if ($projetos == null) {
             return [];
         }
         $projetosObj = array();
-        foreach($projetos as $projeto)
-        {
+        foreach ($projetos as $projeto) {
             $projetoObj = new Projeto();
             $projetoObj->setId($projeto["id"]);
             $projetoObj->setNome($projeto["nome"]);
+            $projetoObj->setDescricao($projeto["descricao"]);
             $projetoObj->setVisibilidade($projeto["visibilidade"]);
-            $projetoObj->setCriadoEm($projeto["criado_em"]);
-            $projetosObj[] = $projetosObj;
+            $projetoObj->setCriadoEm(isset($projeto["criado_em"])
+                ? new DateTimeImmutable($projeto["criado_em"])
+                : null);
+            $projetosObj[] = $projetoObj;
         }
         return $projetosObj;
     }
@@ -67,6 +69,16 @@ class Projeto
     public function setCriadoEm(?DateTimeImmutable $criadoEm): self
     {
         $this->criadoEm = $criadoEm;
+        return $this;
+    }
+
+    public function getDescricao(): ?string
+    {
+        return $this->descricao;
+    }
+    public function setDescricao(?string $descricao): self
+    {
+        $this->descricao = $descricao;
         return $this;
     }
 }
