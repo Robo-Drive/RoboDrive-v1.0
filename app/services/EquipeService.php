@@ -4,6 +4,7 @@ namespace app\services;
 
 use app\models\Equipe;
 use app\repositories\EquipeRepositorySql;
+use Exception;
 
 class EquipeService
 {
@@ -18,9 +19,18 @@ class EquipeService
         $this->repositorySql->cadastrar($equipe);
         return true;
     }
-    public function editarEquipe(Equipe $equipe): bool
+    public function editarEquipe(Equipe $equipe):bool
     {
-        $resposta = new Equipe();
+        try
+        {
+            $this->repositorySql->editar($equipe);
+        }
+        catch(Exception $e)
+        {
+            print_r($e);
+            die;
+            return false;
+        }
         return true;
     }
 }

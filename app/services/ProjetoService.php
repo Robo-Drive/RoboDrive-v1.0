@@ -4,6 +4,7 @@ namespace app\services;
 
 use app\models\Projeto;
 use app\repositories\ProjetoRepositorySql;
+use Exception;
 
 class ProjetoService
 {
@@ -18,9 +19,16 @@ class ProjetoService
         $this->repositorySql->cadastrar($projeto);
         return true;
     }
-    public function editarProjeto(Projeto $projeto): bool
+    public function editarProjeto(Projeto $projeto):bool
     {
-        $resposta = new Projeto();
+        try
+        {
+            $this->repositorySql->editar($projeto);
+        }
+        catch(Exception $e)
+        {
+            return false;
+        }
         return true;
     }
 }

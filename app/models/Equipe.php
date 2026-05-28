@@ -18,9 +18,9 @@ class Equipe
         foreach($equipes as $equipe)
         {
             $equipeObj = new Equipe();
-            $equipeObj->setId($equipe["id"]);
-            $equipeObj->setNome($equipe["nome_equipe"]);
-            $equipeObj->setSenha($equipe["senha"]);
+            $equipeObj->setId($equipe["id"]??null);
+            $equipeObj->setNome($equipe["nome"]??null);
+            $equipeObj->setSenha($equipe["senha"]??null);
             $equipesObj[] = $equipeObj;
         }
         return $equipesObj;

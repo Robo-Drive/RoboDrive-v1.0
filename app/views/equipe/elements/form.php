@@ -10,7 +10,7 @@
 <div>
     <label for="senha" class="text-white">Senha:</label>
     <br>
-    <input type="text" name="senha" value="<?= isset($equipe) ? (is_object($equipe) ? $equipe->getSenha() : (isset($equipe["senha"])? $equipe["senha"] : "") ) : ""?>">
+    <input type="text" name="senha" value="<?= isset($usuario) ? (is_object($usuario) ? "" : (isset($usuario["senha"])? $usuario["senha"] : "")) : "" ?>">
     <?php if (isset($erros['senha'])): ?>
         <div class="text-red-500 small"><?= $erros['senha'] ?></div>
     <?php endif; ?>

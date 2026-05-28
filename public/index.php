@@ -8,19 +8,20 @@ use app\core\Router;
 
 $router = new Router();
 
-$router->get('/', 'AutenticacaoController@login');
+$router->get('/login', 'AutenticacaoController@login');
 $router->post('/logar', 'AutenticacaoController@logar');
+$router->get('/cadastro', 'AutenticacaoController@cadastro');
 $router->post('/logout', 'AutenticacaoController@logout');
-$router->get('/home', 'AutenticacaoController@home');
+$router->get('/', 'HomeController@home');
 
-$crudsPrincipais = ["usuario","equipe","projeto","componente"];
+$crudsPrincipais = ["usuario","equipe","projeto","componente","forum"];
 
 foreach($crudsPrincipais as $cp)
 {
-    $router->get('/'.$cp.'/listar', ucfirst($cp).'Controller@listar');
+    $router->get('/'.$cp, ucfirst($cp).'Controller@listar');
     $router->get('/'.$cp.'/cadastrar', ucfirst($cp).'Controller@cadastrar');
     $router->post('/'.$cp.'/salvar', ucfirst($cp).'Controller@salvar');
-    $router->post('/'.$cp.'/perfil', ucfirst($cp).'Controller@perfil');
+    $router->get('/'.$cp.'/perfil', ucfirst($cp).'Controller@perfil');
 
     $router->post('/'.$cp.'/editar', ucfirst($cp).'Controller@editar');
     $router->post('/'.$cp.'/atualizar', ucfirst($cp).'Controller@atualizar');

@@ -6,9 +6,6 @@
             <?= $equipe->getNome() ?>
         </h1>
 
-        <span class="mt-2 px-4 py-1 bg-blue-600 text-white rounded-full text-sm">
-            <?= ucfirst($equipe->getVisibilidade()) ?>
-        </span>
     </div>
 
     <div class="mt-8 space-y-4">
@@ -18,14 +15,6 @@
             <p class="text-zinc-400 text-sm">ID do equipe</p>
             <p class="text-white text-lg">
                 #<?= $equipe->getId() ?>
-            </p>
-        </div>
-
-        <div class="bg-zinc-800 rounded-xl p-4">
-            <p class="text-zinc-400 text-sm">Tipo de visibilidade
-            </p>
-            <p class="text-white text-lg">
-                <?= ucfirst($equipe->getVisibilidade()) ?>
             </p>
         </div>
 

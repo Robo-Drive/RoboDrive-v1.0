@@ -33,19 +33,20 @@
         <div class="text-red-500 small"><?= $erros['imagem'] ?></div>
     <?php endif; ?>
 </div>
-
-<div>
-    <label for="Regra" class="text-white">Regra:</label>
-    <br>
-    <select name="regra">
-        <option value="">Selecione</option>
-        <option value="admin" <?= isset($usuario) ? (is_object($usuario) ? ($usuario->getRegra() == "admin" ? "selected" : "") : (isset($usuario["regra"])? ($usuario["regra"] == "admin" ? "selected" : "" ) : "")) : "" ?>>Admin</option>
-        <option value="usuario" <?= isset($usuario) ? (is_object($usuario) ? ($usuario->getRegra() == "usuario" ? "selected" : "") : (isset($usuario["regra"])? ($usuario["regra"] == "usuario" ? "selected" : "" ) : "")) : "" ?>>Usuario</option>
-    </select>
-    <?php if (isset($erros['regra'])): ?>
-        <div class="text-red-500 small"><?= $erros['regra'] ?></div>
-    <?php endif; ?>
-</div>
+<?php if($_SESSION["usuario_logado"]->getRegra() == "admin"):?>    
+    <div>
+        <label for="Regra" class="text-white">Regra:</label>
+        <br>
+        <select name="regra">
+            <option value="">Selecione</option>
+            <option value="admin" <?= isset($usuario) ? (is_object($usuario) ? ($usuario->getRegra() == "admin" ? "selected" : "") : (isset($usuario["regra"])? ($usuario["regra"] == "admin" ? "selected" : "" ) : "")) : "" ?>>Admin</option>
+            <option value="usuario" <?= isset($usuario) ? (is_object($usuario) ? ($usuario->getRegra() == "usuario" ? "selected" : "") : (isset($usuario["regra"])? ($usuario["regra"] == "usuario" ? "selected" : "" ) : "")) : "" ?>>Usuario</option>
+        </select>
+        <?php if (isset($erros['regra'])): ?>
+            <div class="text-red-500 small"><?= $erros['regra'] ?></div>
+        <?php endif; ?>
+    </div>
+<?php endif;?>
 <?php if(isset($_POST["id"]) || isset($usuario)):?>
     <input type="hidden" name="id" value="<?= isset($_POST["id"])? $_POST["id"]:(isset($usuario) ? (is_object($usuario) ? $usuario->getId() : (isset($usuario["id"])? $usuario["id"] : "")) : "")?>">
 <?php endif;?>

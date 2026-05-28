@@ -8,6 +8,7 @@ class Componente
     private ?string $nome;
     private ?string $descricao;
     private ?string $imagem;
+    private ?int $quantidade;
 
     public static function map(?array $componentes): array
     {
@@ -19,10 +20,11 @@ class Componente
         foreach($componentes as $componente)
         {
             $componenteObj = new Componente();
-            $componenteObj->setId($componente["id"]);
-            $componenteObj->setNome($componente["nome"]);
-            $componenteObj->setDescricao($componente["descricao"]);
-            $componenteObj->setImagem($componente["imagem"]);
+            $componenteObj->setId($componente["id"]??null);
+            $componenteObj->setNome($componente["nome"]??null);
+            $componenteObj->setDescricao($componente["descricao"]??null);
+            $componenteObj->setImagem($componente["imagem"]??null);
+            $componenteObj->setQuantidade($componente["quantidade"]??null);
             $ComponentesObj[] = $componenteObj;
         }
         return $ComponentesObj;
@@ -65,6 +67,17 @@ class Componente
     public function setImagem(?string $imagem): self
     {
         $this->imagem = $imagem;
+        return $this;
+    }
+
+
+    public function getQuantidade(): ?int
+    {
+        return $this->quantidade;
+    }
+    public function setQuantidade(?int $quantidade): self
+    {
+        $this->quantidade = $quantidade;
         return $this;
     }
 }

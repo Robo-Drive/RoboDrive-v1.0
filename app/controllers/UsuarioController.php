@@ -5,17 +5,23 @@ namespace app\controllers;
 use app\core\Controller;
 use app\helpers\ValidadorHelper;
 use app\models\Usuario;
+use app\repositories\EquipeRepositorySql;
+use app\repositories\ProjetoRepositorySql;
 use app\repositories\UsuarioRepositorySql;
 use app\services\UsuarioService;
 class UsuarioController extends Controller
 {
     private UsuarioService $service;
     private UsuarioRepositorySql $repositorySql;
+    private EquipeRepositorySql $equipeRepositorySql;
+    private ProjetoRepositorySql $projetoRepositorySql;
 
     public function __construct()
     {
         $this->service = new UsuarioService();
         $this->repositorySql = new UsuarioRepositorySql();
+        $this->equipeRepositorySql = new EquipeRepositorySql();
+        $this->projetoRepositorySql = new ProjetoRepositorySql();
     }
 
     public function listar()
@@ -31,42 +37,47 @@ class UsuarioController extends Controller
     }
     public function salvar()
     {
-        $this->loginRequired();
         $validador = new ValidadorHelper();
         
         $validador->obrigatorio('nome',   $_POST["nome"]);
         $validador->obrigatorio('email',  $_POST["email"]);
         $validador->obrigatorio('senha',  $_POST["senha"]);
-        $validador->obrigatorio('imagem', $_POST["imagem"]);
-        $validador->obrigatorio('regra',  $_POST["regra"]);
-        $validador->tamanho('nome', $_POST["nome"], 3,100);
-        $validador->tamanho('senha',$_POST["senha"],8,100);
-        $validador->email($_POST["email"]);
+        if(!isset($validador->getErros()["nome"]))
+        {
+            $validador->tamanho('nome', $_POST["nome"], 3,100);
+        }
+        if(!isset($validador->getErros()["senha"]))
+        {
+            $validador->tamanho('senha',$_POST["senha"],8,100);
+        }
+        if(!isset($validador->getErros()["email"]))
+        {
+            $validador->email($_POST["email"]);
+        }
+
         
         $posts["nome"]   = filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $posts["email"]  = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
-        $posts["regra"]  = filter_input(INPUT_POST, 'regra', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $posts["senha"]  = $_POST["senha"];
-        $posts["imagem"] = filter_input(INPUT_POST, 'imagem', FILTER_SANITIZE_URL);
-
+        
         $usuario = Usuario::map([$posts])[0];
         if($validador->temErros())
         {
             $data["usuario"] = $posts;
             $data["erros"] = $validador->getErros();
-            $this->view('usuario/create',$data);
+            $this->view('cadastro/cadastro',$data);
         }
         else
         {
             if ($this->service->salvarUsuario($usuario))
             {
-                $this->redirect(URL_BASE . '/usuario/listar');
+                (new AutenticacaoController())->logar();
             } 
             else
             {
-                $data["usuario"] = $usuario;
+                $data["usuario"] = $posts;
                 $data["erros"]["email"] = "Erro: Este e-mail já está cadastrado!";
-                $this->view('usuario/create',$data);
+                $this->view('cadastro/cadastro',$data);
             }
         }
     }
@@ -93,8 +104,6 @@ class UsuarioController extends Controller
         $validador->obrigatorio('id',   $_POST["id"]);
         $validador->obrigatorio('nome',   $_POST["nome"]);
         $validador->obrigatorio('email',  $_POST["email"]);
-        $validador->obrigatorio('imagem', $_POST["imagem"]);
-        $validador->obrigatorio('regra',  $_POST["regra"]);
         $validador->tamanho('nome', $_POST["nome"], 3,100);
         if(isset($_POST["senha"]) && ($_POST["senha"] != "" && $_POST["senha"] != null))
         {
@@ -104,9 +113,15 @@ class UsuarioController extends Controller
         $posts["id"] = $_POST["id"];
         $posts["nome"]   = filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $posts["email"]  = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
-        $posts["regra"]  = filter_input(INPUT_POST, 'regra', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        if(isset($_POST["regra"]))
+        {
+            $posts["regra"]  = filter_input(INPUT_POST, 'regra', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        }
         $posts["senha"]  = isset($_POST["senha"]) ? ($_POST["senha"] == "" ? null : $_POST["senha"] ): null;
-        $posts["imagem"] = filter_input(INPUT_POST, 'imagem', FILTER_SANITIZE_URL);
+        if(isset($_POST["imagem"]))    
+        {
+            $posts["imagem"] = filter_input(INPUT_POST, 'imagem', FILTER_SANITIZE_URL);
+        }
 
         $usuario = Usuario::map([$posts])[0];
         if($validador->temErros())
@@ -131,16 +146,30 @@ class UsuarioController extends Controller
     public function perfil()
     {
         $this->loginRequired();
-        $usuario = new Usuario();
-        $usuario->setId($_POST["id"]);
-        $data["usuario"] = $this->repositorySql->buscarId($usuario);
-        if($data["usuario"]->getNome() != null)
+        if(isset($_GET["id"]))
         {
-            $this->view("usuario/perfil",$data);
+            $usuario = new Usuario();
+            $usuario->setId($_GET["id"]);
+            $data["usuario"] = $this->repositorySql->buscarId($usuario);
+            $data["equipes"] = $this->equipeRepositorySql->buscarUsuario($usuario);
+            $data["projetos"] = $this->projetoRepositorySql->buscarUsuario($usuario);
+            
+            if($data["usuario"]->getNome() != null)
+            {
+                $this->view("usuario/perfil",$data);
+            }
+            else
+            {
+                $this->view("usuario/list");    
+            }
         }
         else
         {
-            $this->view("usuario/list");    
+            $data["usuario"] = $_SESSION["usuario_logado"];
+            $data["projetos"] = $this->projetoRepositorySql->buscarUsuario($data["usuario"]);
+            $data["equipes"] = $this->equipeRepositorySql->buscarUsuario($data["usuario"]);
+            
+            $this->view("usuario/perfil",$data);
         }
 
     }

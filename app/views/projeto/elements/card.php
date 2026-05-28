@@ -1,34 +1,26 @@
 <?php if(isset($projeto)):?>
-<div class="bg-zinc-900 rounded-2xl shadow-2xl p-8 w-full max-w-xl border border-zinc-700">
-    <div class="flex flex-col items-center">
-
-        <h1 class="mt-4 text-3xl font-bold text-white">
+<div class="p-8 col-span-10 row-span-12 border border-zinc-700 overflow-y-auto">
+    <div class="w-full flex items-center justify-center h-[5dvh]">
+        <h1 class="text-3xl font-bold text-white">
             <?= $projeto->getNome() ?>
         </h1>
-
-        <span class="mt-2 px-4 py-1 bg-blue-600 text-white rounded-full text-sm">
-            <?= ucfirst($projeto->getVisibilidade()) ?>
-        </span>
     </div>
-
+    <hr>
     <div class="mt-8 space-y-4">
-
-
-        <div class="bg-zinc-800 rounded-xl p-4">
-            <p class="text-zinc-400 text-sm">ID do projeto</p>
+        <div class="border border-[#FF1A1A] p-4">
+            <p class="text-zinc-400 text-sm">Descrição:</p>
             <p class="text-white text-lg">
-                #<?= $projeto->getId() ?>
+                <?= $projeto->getDescricao() ?>
             </p>
         </div>
-
-        <div class="bg-zinc-800 rounded-xl p-4">
-            <p class="text-zinc-400 text-sm">Tipo de visibilidade
-            </p>
-            <p class="text-white text-lg">
-                <?= ucfirst($projeto->getVisibilidade()) ?>
-            </p>
+        <div class="border border-[#FF1A1A] p-4 text-white">
+            <p class="text-zinc-400 text-sm">Componentes:</p>
+            <div class="w-full h-full flex gap-2 p-2">
+                <?php foreach($projeto->getComponentes() as $componente): ?>
+                    <?php include(__DIR__."/cardComponente.php");?>
+                <?php endforeach; ?>
+            </div>
         </div>
-
     </div>
 
     <div class="mt-8 flex justify-center gap-4">

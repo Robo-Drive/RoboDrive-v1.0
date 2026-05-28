@@ -11,7 +11,8 @@ class Projeto
     private ?string $descricao;
     private ?string $visibilidade;
     private ?DateTimeImmutable $criadoEm;
-
+    private array $componentes;
+    
     public static function map(?array $projetos): array
     {
         if ($projetos == null) {
@@ -79,6 +80,16 @@ class Projeto
     public function setDescricao(?string $descricao): self
     {
         $this->descricao = $descricao;
+        return $this;
+    }
+
+    public function getComponentes(): array
+    {
+        return $this->componentes;
+    }
+    public function setComponentes(array $componentes): self
+    {
+        $this->componentes = $componentes;
         return $this;
     }
 }

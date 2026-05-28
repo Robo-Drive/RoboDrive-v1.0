@@ -4,10 +4,10 @@ if(isset($projeto)):
 $header = "Projeto";
 include_once(__DIR__."/../elements/header.php");
 ?>
-<div class="h-[80dvh] w-full flex flex-col justify-center items-center">
+<div class="h-[90dvh] w-full grid grid-cols-12 grid-rows-12 bg-black">
+    <?php include_once(__DIR__."/../elements/sidebar.php") ?>
     <?php include_once(__DIR__."/elements/card.php")?>
 </div>
 <?php
-$marquee = "{$projeto->getNome()}";
 include_once(__DIR__."/../elements/footer.php");
 endif;

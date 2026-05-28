@@ -3,23 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php if(file_exists(__DIR__."css/style.css")):?>
+        <link rel="stylesheet" href="css/style.css">
+    <?php endif;?>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="<?= IMG_URL_BASE ?>/robodrive-logo.png">
     <title><?= $titulo ?></title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="w-screen h-screen">
 <header>
-    <div class="w-full h-[<?= isset($menu) ? 8 : 10 ?>dvh] bg-black flex justify-center items-center">
-        <h1 class="text-white text-3xl font-bold"><?= $header ?></h1>
-        <?php if(isset($_SESSION["usuario_logado"])): ?>
-            <form action="<?= URL_BASE ?>/logout" method="post" class="absolute right-6">
-                <button type="submit" class="bg-red-700 px-3 py-2 rounded-2xl houver:text-white">Sair</button>
-            </form>
-        <?php endif; ?>
+    <div class="w-full h-[10dvh] bg-black flex justify-center items-center">
+        <h1 class="text-3xl font-bold font-['Orbitron'] text-[#FF1A1A]">Robo</h1>
+        <h1 class="text-3xl font-bold font-['Orbitron'] text-white">Drive</h1>
     </div>
-    <?php if(isset($menu)): ?>
-        <div class="w-full h-[2dvh] bg-gray-700 flex justify-evenly items-center">
-            <?php foreach($menu as $i): ?>
-                <a href="<?= $i["rota"] ?>" class="text-white"><?= $i["nome"] ?></a>
-            <?php endforeach;?>
-        </div>
-    <?php endif; ?>
+    
 </header>

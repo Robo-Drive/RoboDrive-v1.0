@@ -3,7 +3,7 @@ $titulo = "Listagem de Equipes";
 $header = "Equipes";
 $menu = [
     [
-        "rota" => URL_BASE."/home",
+        "rota" => URL_BASE,
         "nome" => "Home"
     ],
     [

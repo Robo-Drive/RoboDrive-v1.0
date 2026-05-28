@@ -1,20 +1,12 @@
 <?php
 $titulo = "Listagem de Projetos";
 $header = "Projetos";
-$menu = [
-    [
-        "rota" => URL_BASE."/home",
-        "nome" => "Home"
-    ],
-    [
-        "rota" => URL_BASE."/projeto/cadastrar",
-        "nome" => "Cadastro"
-    ]
-];
+
 include_once(__DIR__."/../elements/header.php");
 ?>
-<div class="h-[80dvh] w-full ">
-    <table class="w-full ">
+<div class="h-[90dvh] w-full grid grid-cols-12 grid-rows-12">
+    <?php include_once(__DIR__."/../elements/sidebar.php") ?>    
+    <table class="w-full col-span-10">
         <tr>
             <th class="bg-blue-500 text-center">Id</th>
             <th class="bg-red-500 text-white text-center">Nome</th>
@@ -42,5 +34,4 @@ include_once(__DIR__."/../elements/header.php");
     </table>
 </div>
 <?php
-$marquee = "Listagem de projetos do projeto Robo Drive";
 include_once(__DIR__."/../elements/footer.php");

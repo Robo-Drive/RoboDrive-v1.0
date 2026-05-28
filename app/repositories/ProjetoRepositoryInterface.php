@@ -15,6 +15,7 @@ interface ProjetoRepositoryInterface
     public function buscarUsuario(Usuario $usuario):?array;
     public function buscarSeguindo(Usuario $usuario):?array;
     public function listarTodos():array;
+    public function listarPublico():array;
     public function editar(Projeto $projeto):?Projeto;
     public function deletar(Projeto $projeto):bool;
 }

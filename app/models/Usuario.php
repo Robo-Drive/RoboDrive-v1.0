@@ -3,35 +3,36 @@
 namespace app\models;
 
 use DateTimeImmutable;
+
 class Usuario
 {
     private ?int $id;
     private ?string $nome;
     private ?string $email;
     private ?string $senha;
+    private ?string $biografia;
     private ?string $imagem;
     private ?string $regra;
     private ?DateTimeImmutable $criadoEm;
 
     public static function map(?array $usuarios): array
     {
-        if($usuarios == null)
-        {
+        if ($usuarios == null) {
             return [];
         }
         $usuariosObj = array();
-        foreach($usuarios as $usuario)
-        {
+        foreach ($usuarios as $usuario) {
             $usuarioObj = new Usuario();
-            $usuarioObj->setId($usuario["id"]??null);
-            $usuarioObj->setNome($usuario["nome"]??null);
-            $usuarioObj->setEmail($usuario["email"]??null);
-            $usuarioObj->setSenha($usuario["senha"]??null);
-            $usuarioObj->setImagem($usuario["imagem"]??null);
-            $usuarioObj->setRegra($usuario["regra"]??null);
+            $usuarioObj->setId($usuario["id"] ?? null);
+            $usuarioObj->setNome($usuario["nome"] ?? null);
+            $usuarioObj->setEmail($usuario["email"] ?? null);
+            $usuarioObj->setSenha($usuario["senha"] ?? null);
+            $usuarioObj->setBiografia($usuario["biografia"] ?? null);
+            $usuarioObj->setImagem($usuario["imagem"] ?? null);
+            $usuarioObj->setRegra($usuario["regra"] ?? null);
             $usuarioObj->setCriadoEm(isset($usuario["criado_em"])
-        ? new DateTimeImmutable($usuario["criado_em"])
-        : null);
+                ? new DateTimeImmutable($usuario["criado_em"])
+                : null);
             $usuariosObj[] = $usuarioObj;
         }
         return $usuariosObj;
@@ -66,7 +67,7 @@ class Usuario
         $this->email = $email;
         return $this;
     }
-    
+
     public function getSenha(): ?string
     {
         return $this->senha;
@@ -105,6 +106,17 @@ class Usuario
     public function setCriadoEm(?DateTimeImmutable $criadoEm): self
     {
         $this->criadoEm = $criadoEm;
+        return $this;
+    }
+
+    public function getBiografia(): ?string
+    {
+        return $this->biografia;
+    }
+    public function setBiografia(?string $biografia): self
+    {
+        $this->biografia = $biografia;
+
         return $this;
     }
 }

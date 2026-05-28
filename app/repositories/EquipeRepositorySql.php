@@ -24,7 +24,7 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         $stmt = $this->connection->prepare($sql);
 
         $stmt->bindValue(':nome', $equipe->getNome());
-        $stmt->bindValue(':senha', $equipe->getSenha());
+        $stmt->bindValue(':senha', password_hash($equipe->getSenha(),PASSWORD_DEFAULT));
 
         if ($stmt->execute()) {
             $equipe->setId($this->connection->lastInsertId());
@@ -35,17 +35,32 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
     }
     public function editar(Equipe $equipe): ?Equipe
     {
-        $sql = "UPDATE equipe
-                SET 
-                nome = :nome,
-                senha = :senha
-                WHERE id = :id";
-
-        $stmt = $this->connection->prepare($sql);
-
-        $stmt->bindValue(':nome', $equipe->getNome());
-        $stmt->bindValue(':senha', $equipe->getSenha());
-        $stmt->bindValue(':id', $equipe->getId(), PDO::PARAM_INT);
+        if($equipe->getSenha() != null)
+        {
+            $sql = "UPDATE equipe
+                    SET 
+                    nome = :nome,
+                    senha = :senha
+                    WHERE id = :id";
+    
+            $stmt = $this->connection->prepare($sql);
+    
+            $stmt->bindValue(':nome', $equipe->getNome());
+            $stmt->bindValue(':senha', password_hash($equipe->getSenha(),PASSWORD_DEFAULT));
+            $stmt->bindValue(':id', $equipe->getId(), PDO::PARAM_INT);
+        }
+        else 
+        {
+            $sql = "UPDATE equipe
+                    SET 
+                    nome = :nome
+                    WHERE id = :id";
+    
+            $stmt = $this->connection->prepare($sql);
+    
+            $stmt->bindValue(':nome', $equipe->getNome());
+            $stmt->bindValue(':id', $equipe->getId(), PDO::PARAM_INT);
+        }
 
         if ($stmt->execute()) {
             return $equipe;

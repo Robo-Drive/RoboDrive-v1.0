@@ -28,7 +28,10 @@ class AutenticacaoController extends Controller
 
         $validador->obrigatorio('email',  $_POST["email"]);
         $validador->obrigatorio('senha',  $_POST["senha"]);
-        $validador->email($_POST["email"]);
+        if(!isset($validador->getErros()["email"]))
+        {
+            $validador->email($_POST["email"]);
+        }
 
         $posts["email"]  = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
         $posts["senha"]  = $_POST["senha"];
@@ -38,25 +41,26 @@ class AutenticacaoController extends Controller
         {
             $data["usuario"] = $posts;
             $data["erros"] = $validador->getErros();
-            $this->view('usuario/create',$data);
+            $this->view('login/login',$data);
         }
         else
         {
             $resposta = $this->service->logar($usuario->getEmail(),$usuario->getSenha());
             if($resposta)
             {
-                $this->redirect(URL_BASE . '/home');
+                $this->redirect(URL_BASE . '/usuario/perfil');
             } 
             else
             {
-                $data["erros"] = "Email ou senha incorretos";
+                $data["usuario"] = $posts;
+                $data["erros"]["login"] = "Email ou senha incorretos";
                 $this->view('login/login',$data);
             }
         }
     }
-    public function home()
+    public function cadastro()
     {
-        $this->view("home/home");
+        $this->view("cadastro/cadastro");
     }
     public function logout()
     {

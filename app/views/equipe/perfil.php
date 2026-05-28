@@ -1,6 +1,6 @@
 <?php
 $titulo = "Perfil da equipe";
-if(isset($projeto)):
+if(isset($equipe)):
 $header = "Equipe";
 include_once(__DIR__."/../elements/header.php");
 ?>
@@ -8,6 +8,6 @@ include_once(__DIR__."/../elements/header.php");
     <?php include_once(__DIR__."/elements/card.php")?>
 </div>
 <?php
-$marquee = "{$projeto->getNome()}";
+$marquee = "{$equipe->getNome()}";
 include_once(__DIR__."/../elements/footer.php");
 endif;

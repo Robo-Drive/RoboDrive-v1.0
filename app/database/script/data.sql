@@ -4,24 +4,25 @@ USE robo_drive;
 
 CREATE TABLE IF NOT EXISTS equipe (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nome_equipe VARCHAR(100) NOT NULL UNIQUE,
-  senha VARCHAR(100) NOT NULL
+  nome TEXT NOT NULL UNIQUE,
+  senha TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS usuario (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(100) NOT NULL,
-  email VARCHAR(150) NOT NULL UNIQUE,
-  senha VARCHAR(255) NOT NULL,
-  imagem VARCHAR(255),
+  nome TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  senha TEXT NOT NULL,
+  biografia TEXT,
+  imagem TEXT,
   regra ENUM('admin','usuario') NOT NULL,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS projeto (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(100) NOT NULL,
-  descricao VARCHAR(100) NOT NULL,
+  nome TEXT NOT NULL,
+  descricao TEXT NOT NULL,
   visibilidade ENUM('privado','equipe','publico') DEFAULT 'privado',
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -57,22 +58,22 @@ CREATE TABLE IF NOT EXISTS comentario_projeto (
 
 CREATE TABLE IF NOT EXISTS componente (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(100) NOT NULL,
-  descricao VARCHAR(255),
-  imagem VARCHAR(255)
+  nome TEXT NOT NULL,
+  descricao TEXT,
+  imagem TEXT
 );
 
 CREATE TABLE IF NOT EXISTS imagem_projeto (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  caminho VARCHAR(255) NOT NULL,
+  caminho TEXT NOT NULL,
   projeto_id INT NOT NULL,
   FOREIGN KEY (projeto_id) REFERENCES projeto(id)
 );
 
 CREATE TABLE IF NOT EXISTS codigo (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  caminho VARCHAR(255) NOT NULL,
-  descricao VARCHAR(255),
+  caminho TEXT NOT NULL,
+  descricao TEXT,
   projeto_id INT NOT NULL,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (projeto_id) REFERENCES projeto(id)
@@ -91,7 +92,7 @@ CREATE TABLE IF NOT EXISTS projeto_usuario (
   id INT AUTO_INCREMENT PRIMARY KEY,
   projeto_id INT NOT NULL,
   usuario_id INT NOT NULL,
-  tipo ENUM('coodenador','participante') NOT NULL,
+  tipo ENUM('coordenador','participante') NOT NULL,
   FOREIGN KEY (projeto_id) REFERENCES projeto(id),
   FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 );
@@ -100,22 +101,14 @@ CREATE TABLE IF NOT EXISTS equipe_usuario (
   id INT AUTO_INCREMENT PRIMARY KEY,
   equipe_id INT NOT NULL,
   usuario_id INT NOT NULL,
-  tipo ENUM('coodenador','participante') NOT NULL,
+  tipo ENUM('coordenador','participante') NOT NULL,
   FOREIGN KEY (equipe_id) REFERENCES equipe(id),
   FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 );
 
-CREATE TABLE IF NOT EXISTS seguidores (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  usuario_id INT NOT NULL,
-  usuario_id_segue INT NOT NULL,
-  FOREIGN KEY (usuario_id) REFERENCES usuario(id),
-  FOREIGN KEY (usuario_id_segue) REFERENCES usuario(id)
-);
-
 USE robo_drive;
 
-INSERT INTO equipe (nome_equipe, senha) VALUES
+INSERT INTO equipe (nome, senha) VALUES
 ('Equipe Alpha', '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2'),
 ('Equipe Beta',  '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2'),
 ('Equipe Gamma', '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2');
@@ -124,9 +117,9 @@ INSERT INTO equipe (nome_equipe, senha) VALUES
 -- USUARIOS (senha: admin12345)
 -- =====================
 INSERT INTO usuario (nome, email, senha, imagem, regra) VALUES
-('Monkey D. Luffy', 'luffy@gmail.com',
-'$2y$12$twxVhhtHCFpYcOk8W02lq.PP/4hxFB9Urf9sV2lKPP4/JgF.Nkd16',
-'https://cdn.pixabay.com/photo/2021/08/04/13/06/anime-6523770_960_720.png', 'admin'),
+('Walmonn Eduardo', 'walmonn.eduardo.tds2023@gmail.com',
+'$2y$12$/E551s2RVpWQgvvUnbq4E.ZZvKoaE2V1cNwPp2aTJokiCd6lle3/a',
+'https://imgs.search.brave.com/NqH3jeCkzn-2YsnzIUEdiXq8UUKAkid746LYzGWHRTA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWFn/ZS5nZWVrc2hpcC5j/b20uYnIvMHo4dF96/QkZNYWR6djhheTFy/SHBFajJQX2tRPS8y/MjAweDAvc21hcnQv/ZmlsdGVyczpzdHJp/cF9pY2MoKTpmb3Jt/YXQod2VicCkvaHVs/bC5nZWVrc2hpcC5j/b20uYnIvd3AtY29u/dGVudC91cGxvYWRz/LzIwMjYvMDMvU2Fp/LWRyLXN0b25lLTEu/anBn', 'admin'),
 
 ('Naruto Uzumaki', 'naruto@gmail.com',
 '$2y$12$twxVhhtHCFpYcOk8W02lq.PP/4hxFB9Urf9sV2lKPP4/JgF.Nkd16',
@@ -200,9 +193,3 @@ INSERT INTO equipe_usuario (equipe_id, usuario_id, tipo) VALUES
 (1, 2, 'participante'),
 (2, 3, 'coordenador'),
 (3, 4, 'participante');
-
-INSERT INTO seguidores (usuario_id, usuario_id_segue) VALUES
-(1, 2),
-(2, 3),
-(3, 1),
-(4, 1);

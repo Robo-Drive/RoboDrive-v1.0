@@ -55,7 +55,7 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
         $sql = "UPDATE projeto
                 SET 
                 nome = :nome,
-                descricao = :descricao
+                descricao = :descricao,
                 visibilidade = :visibilidade
                 WHERE id = :id";
 
@@ -100,7 +100,7 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':id', $usuario->getId());
         $stmt->execute();
-        return Projeto::map($stmt->fetchAll())[0];
+        return Projeto::map($stmt->fetchAll());
     }
     public function buscarEquipe(Equipe $equipe): ?array
     {
@@ -126,6 +126,13 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
     public function listarTodos(): array
     {
         $sql = "SELECT * FROM projeto";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute();
+        return Projeto::map($stmt->fetchAll());
+    }
+    public function listarPublico(): array
+    {
+        $sql = "SELECT * FROM projeto WHERE projeto.visibilidade = 'publico'";
         $stmt = $this->connection->prepare($sql);
         $stmt->execute();
         return Projeto::map($stmt->fetchAll());
