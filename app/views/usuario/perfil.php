@@ -28,7 +28,7 @@ include_once(__DIR__."/../elements/header.php");
             <div class="p-5 text-2xl font-bold w-full text-center text-white">
                 <h1>Projetos</h1>
             </div>
-            <div class="p-5 w-full text-white border border-zinc-700 flex">
+            <div class="p-5 w-full text-white border border-zinc-700 flex flex-wrap gap-2">
                 <?php if(isset($projetos)):?>
                     <?php foreach($projetos as $projeto):?>
                         <?php include(__DIR__."/elements/cardProjeto.php")?>

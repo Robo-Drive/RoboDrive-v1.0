@@ -54,9 +54,14 @@
                 <img  class="confirmarPasswordButton" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
             </button>
         </div>
-        <p class="confirmarErro">
-
+        <p class="confirmarErro text-[#FF1A1A] mt-3">
+            <?php if(isset($erros)): ?>
+                <?php if(isset($erros["confirmarSenha"])): ?>
+                    <?= $erros["confirmarSenha"] ?>
+                <?php endif;?>
+            <?php endif;?>
         </p>
+        
     </div>
     <?php if(isset($erros["login"])): ?>
         <p class="text-[#FF1A1A] mt-3"><?= $erros["login"] ?></p>

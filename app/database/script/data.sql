@@ -4,32 +4,44 @@ USE robo_drive;
 
 CREATE TABLE IF NOT EXISTS equipe (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nome TEXT NOT NULL UNIQUE,
-  senha TEXT NOT NULL
+  nome VARCHAR(100) NOT NULL UNIQUE,
+  senha VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS usuario (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nome TEXT NOT NULL,
-  email TEXT NOT NULL UNIQUE,
-  senha TEXT NOT NULL,
-  biografia TEXT,
-  imagem TEXT,
+  nome VARCHAR(100) NOT NULL,
+  nome_usuario VARCHAR(100) NOT NULL UNIQUE,
+  email VARCHAR(100) NOT NULL UNIQUE,
+  senha VARCHAR(100) NOT NULL,
+  biografia VARCHAR(100),
+  imagem VARCHAR(10000),
   regra ENUM('admin','usuario') NOT NULL,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS categoria (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(100) NOT NULL,
+  usuario_id INT NOT NULL,
+  FOREIGN KEY (usuario_id) REFERENCES usuario(id)
+);
+
 CREATE TABLE IF NOT EXISTS projeto (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nome TEXT NOT NULL,
-  descricao TEXT NOT NULL,
+  nome VARCHAR(100) NOT NULL,
+  descricao VARCHAR(100) NOT NULL,
   visibilidade ENUM('privado','equipe','publico') DEFAULT 'privado',
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  categoria_id INT NOT NULL,
+  equipe_id INT,
+  FOREIGN KEY (categoria_id) REFERENCES categoria(id),
+  FOREIGN KEY (equipe_id) REFERENCES equipe(id)
 );
 
 CREATE TABLE IF NOT EXISTS postagem_forum (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  conteudo TEXT NOT NULL,
+  conteudo VARCHAR(100) NOT NULL,
   visibilidade ENUM('equipe','publico') DEFAULT 'equipe',
   usuario_id INT NOT NULL,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -38,7 +50,7 @@ CREATE TABLE IF NOT EXISTS postagem_forum (
 
 CREATE TABLE IF NOT EXISTS comentario_postagem_forum (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  conteudo TEXT NOT NULL,
+  conteudo VARCHAR(100) NOT NULL,
   postagem_forum_id INT NOT NULL,
   usuario_id INT NOT NULL,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -48,7 +60,7 @@ CREATE TABLE IF NOT EXISTS comentario_postagem_forum (
 
 CREATE TABLE IF NOT EXISTS comentario_projeto (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  conteudo TEXT NOT NULL,
+  conteudo VARCHAR(100) NOT NULL,
   projeto_id INT NOT NULL,
   usuario_id INT NOT NULL,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -58,22 +70,22 @@ CREATE TABLE IF NOT EXISTS comentario_projeto (
 
 CREATE TABLE IF NOT EXISTS componente (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nome TEXT NOT NULL,
-  descricao TEXT,
-  imagem TEXT
+  nome VARCHAR(100) NOT NULL,
+  descricao VARCHAR(100),
+  imagem VARCHAR(10000)
 );
 
 CREATE TABLE IF NOT EXISTS imagem_projeto (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  caminho TEXT NOT NULL,
+  caminho VARCHAR(100) NOT NULL,
   projeto_id INT NOT NULL,
   FOREIGN KEY (projeto_id) REFERENCES projeto(id)
 );
 
 CREATE TABLE IF NOT EXISTS codigo (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  caminho TEXT NOT NULL,
-  descricao TEXT,
+  caminho VARCHAR(100) NOT NULL,
+  descricao VARCHAR(100),
   projeto_id INT NOT NULL,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (projeto_id) REFERENCES projeto(id)
@@ -101,62 +113,96 @@ CREATE TABLE IF NOT EXISTS equipe_usuario (
   id INT AUTO_INCREMENT PRIMARY KEY,
   equipe_id INT NOT NULL,
   usuario_id INT NOT NULL,
-  tipo ENUM('coordenador','participante') NOT NULL,
+  categoria ENUM('coordenador','participante') NOT NULL,
   FOREIGN KEY (equipe_id) REFERENCES equipe(id),
   FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 );
 
-USE robo_drive;
-
 INSERT INTO equipe (nome, senha) VALUES
 ('Equipe Alpha', '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2'),
-('Equipe Beta',  '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2'),
+('Equipe Beta', '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2'),
 ('Equipe Gamma', '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2');
 
--- =====================
--- USUARIOS (senha: admin12345)
--- =====================
-INSERT INTO usuario (nome, email, senha, imagem, regra) VALUES
-('Walmonn Eduardo', 'walmonn.eduardo.tds2023@gmail.com',
+INSERT INTO usuario
+(nome, nome_usuario, email, senha, imagem, regra)
+VALUES
+(
+'Walmonn Eduardo Barbosa Ramalho da Silva',
+'WalmonnEduardo',
+'walmonn.eduardo.tds2023@gmail.com',
 '$2y$12$/E551s2RVpWQgvvUnbq4E.ZZvKoaE2V1cNwPp2aTJokiCd6lle3/a',
-'https://imgs.search.brave.com/NqH3jeCkzn-2YsnzIUEdiXq8UUKAkid746LYzGWHRTA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWFn/ZS5nZWVrc2hpcC5j/b20uYnIvMHo4dF96/QkZNYWR6djhheTFy/SHBFajJQX2tRPS8y/MjAweDAvc21hcnQv/ZmlsdGVyczpzdHJp/cF9pY2MoKTpmb3Jt/YXQod2VicCkvaHVs/bC5nZWVrc2hpcC5j/b20uYnIvd3AtY29u/dGVudC91cGxvYWRz/LzIwMjYvMDMvU2Fp/LWRyLXN0b25lLTEu/anBn', 'admin'),
-
-('Naruto Uzumaki', 'naruto@gmail.com',
+'https://imgs.search.brave.com/NqH3jeCkzn-2YsnzIUEdiXq8UUKAkid746LYzGWHRTA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWFnZS5nZWVrc2hpcC5jb20uYnIvMHo4dF96QkZNYWR6djhheTFySHBFajJQX2tRPS8yMjAweDAvc21hcnQvZmlsdGVyczpzdHJpcF9pY2MoKTpmb3JtYXQod2VicCkvaHVsbC5nZWVrc2hpcC5jb20uYnIvd3AtY29udGVudC91cGxvYWRzLzIwMjYvMDMvU2FpLWRyLXN0b25lLTEuanBn',
+'admin'
+),
+(
+'Guilherme Canever Wernke',
+'guilherme',
+'guilherme.wernke.tds2023@gmail.com',
+'$2y$12$pIqRCJLzv2Ia0jGlzk9VSOTAIK4YZk4/UB0Zs/3gjUerizr0DSTpW',
+'https://imgs.search.brave.com/Z74bF9aCDjhJpKYzmZityTXB9jhz6CS0DY4V87IsQiY/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly80a3dhbGxwYXBlcnMuY29tL2ltYWdlcy93YWxscy90aHVtYnMvMjU0OTkuanBn',
+'admin'
+),
+(
+'Petrus Mito de Souza',
+'petrus',
+'petrus.souza.tds2023@gmail.com',
+'$2y$12$ECX23EPvPazaiSUN2asdwOLf0carz.YsWft/4Y93ziODDBmoq08PW',
+'https://imgs.search.brave.com/doD7wVUtS-TJ0EGe1XCSmit08ijnmpgGGYdVIGYkOwE/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxscGFwZXIuZG9nL3RodW1ibmFpbC81NDQyMDI5LnBuZw',
+'admin'
+),
+(
+'teste',
+'teste',
+'teste@gmail.com',
 '$2y$12$twxVhhtHCFpYcOk8W02lq.PP/4hxFB9Urf9sV2lKPP4/JgF.Nkd16',
-'https://cdn.pixabay.com/photo/2023/03/27/14/31/anime-7884390_960_720.png', 'admin'),
+NULL,
+'usuario'
+);
 
-('Sakura Haruno', 'sakura@gmail.com',
-'$2y$12$twxVhhtHCFpYcOk8W02lq.PP/4hxFB9Urf9sV2lKPP4/JgF.Nkd16',
-'https://cdn.pixabay.com/photo/2022/10/16/17/24/anime-7525455_960_720.png', 'usuario'),
+INSERT INTO categoria (nome, usuario_id) VALUES
+('Arduino', 1),
+('Mecânica', 2),
+('Eletrônica', 3);
 
-('Goku', 'goku@gmail.com',
-'$2y$12$twxVhhtHCFpYcOk8W02lq.PP/4hxFB9Urf9sV2lKPP4/JgF.Nkd16',
-'https://cdn.pixabay.com/photo/2023/06/20/17/17/anime-8076614_960_720.png', 'usuario');
+INSERT INTO projeto
+(nome, descricao, visibilidade, categoria_id)
+VALUES
+(
+'Robô Seguidor de Linha',
+'Robô que segue uma linha usando sensores',
+'publico',
+1
+),
+(
+'Braço Robótico',
+'Braço mecânico controlado por servo motores',
+'equipe',
+2
+),
+(
+'Drone Arduino',
+'Drone controlado por Arduino com sensores',
+'privado',
+3
+);
 
--- =====================
--- PROJETOS
--- =====================
-INSERT INTO projeto (nome, descricao, visibilidade) VALUES
-('Robô Seguidor de Linha', 'Robô que segue uma linha usando sensores', 'publico'),
-('Braço Robótico', 'Braço mecânico controlado por servo motores', 'equipe'),
-('Drone Arduino', 'Drone controlado por Arduino com sensores', 'privado');
-
--- =====================
--- COMPONENTES
--- =====================
 INSERT INTO componente (nome, descricao, imagem) VALUES
-('Arduino Uno', 'Microcontrolador',
-'https://upload.wikimedia.org/wikipedia/commons/3/38/Arduino_Uno_-_R3.jpg'),
+(
+'Arduino Uno',
+'Microcontrolador',
+'https://upload.wikimedia.org/wikipedia/commons/3/38/Arduino_Uno_-_R3.jpg'
+),
+(
+'Sensor Ultrassônico',
+'Mede distância',
+'https://imgs.search.brave.com/Jeb6qq3pIOwx3frg9E5iH7_YLmR0r09GRcexR5aXDq0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu.bWVjYW5pY2FpbmR1c3RyaWFsLmNvbS5ici93cC1jb250ZW50L3VwbG9hZHMvMjAxMi8wNi9TZW5zb3ItdWx0cmFzcyVDMyVCNG5pY28uanBn'
+),
+(
+'Servo Motor',
+'Movimento angular',
+'https://imgs.search.brave.com/TjXrujPor7WNt-O4Pcf25UYJ-iruGygJ3IJ5PCXB3rY/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jdXJ0b2NpcmN1aXRvLmNvLmJyL21lZGlhL2NhdGFsb2cvcHJvZHVjdC9jYWNoZS8zMWE3YjlhOGQxYTM4MTgzYzk0ZmIyZGVjYTliYTE1Yy9fL3MvX3NfZV9zZXJ2b19tb3Rvcl8tX3NnOTBfLV90b3dlcnByb19fMV8xXzEuanBn'
+);
 
-('Sensor Ultrassônico', 'Mede distância',
-'https://upload.wikimedia.org/wikipedia/commons/0/0b/HCSR04.jpg'),
-
-('Servo Motor', 'Movimento angular',
-'https://upload.wikimedia.org/wikipedia/commons/3/3e/Servo.jpg');
-
--- =====================
--- RESTANTE
--- =====================
 INSERT INTO postagem_forum (conteudo, visibilidade, usuario_id) VALUES
 ('Como melhorar PID no robô?', 'publico', 1),
 ('Alguém tem código para servo?', 'equipe', 2);
@@ -183,12 +229,12 @@ INSERT INTO projeto_componente (quantidade, projeto_id, componente_id) VALUES
 (3, 2, 3);
 
 INSERT INTO projeto_usuario (projeto_id, usuario_id, tipo) VALUES
-(1, 1, "coordenador"),
-(1, 2, "participante"),
-(2, 3, "coordenador"),
-(3, 4, "participante");
+(1, 1, 'coordenador'),
+(1, 2, 'participante'),
+(2, 3, 'coordenador'),
+(3, 4, 'participante');
 
-INSERT INTO equipe_usuario (equipe_id, usuario_id, tipo) VALUES
+INSERT INTO equipe_usuario (equipe_id, usuario_id, categoria) VALUES
 (1, 1, 'coordenador'),
 (1, 2, 'participante'),
 (2, 3, 'coordenador'),

@@ -16,7 +16,7 @@ if (DEV_ENVIRONMENT == true)
 }
 
 //Configuração do Sistema
-define('APP_NAME', 'Robo Drive');
+define('APP_NAME', 'RoboDrive');
 define('URL_BASE', 'http://127.0.0.1:8080');
 define('CSS_URL_BASE', 'http://127.0.0.1:8080/assets/css');
 define('JS_URL_BASE', 'http://127.0.0.1:8080/assets/scripts');

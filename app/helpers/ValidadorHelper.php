@@ -29,6 +29,13 @@ class ValidadorHelper
             $this->erros["email"] = "Email inválido";
         }
     }
+    public function confirmarValor(string $valorInicial,string $valorConfirmado,string $campo,?string $mensagem=null)
+    {
+        if($valorInicial != $valorConfirmado)
+        {
+            $this->erros[$campo] = $mensagem;
+        }
+    }
     public function temErros() :bool 
     {
         return !empty($this->erros);

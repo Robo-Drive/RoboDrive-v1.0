@@ -1,5 +1,5 @@
-<div class="w-full border border-zinc-700  p-3 shadow-xl">
-    <div class="flex items-center  gap-4">
+<div class="w-full border border-zinc-700 overflow-x-auto  p-3 shadow-xl">
+    <div class="flex items-center gap-4">
         <?php if(isset($equipes)):?>
         <?php foreach($equipes as $equipe): ?>
             <a

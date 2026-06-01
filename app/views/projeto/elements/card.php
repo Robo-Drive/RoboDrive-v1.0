@@ -21,6 +21,16 @@
                 <?php endforeach; ?>
             </div>
         </div>
+        <div class="border border-[#FF1A1A] p-4 text-white">
+            <p class="text-zinc-400 text-sm">Desenvolvedores:</p>
+            <div class="w-full h-full flex gap-2 p-2">
+                <?php if(isset($usuarios)): ?>
+                    <?php foreach($usuarios as $usuario): ?>
+                        <?php include(__DIR__."/cardUsuario.php");?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 
     <div class="mt-8 flex justify-center gap-4">

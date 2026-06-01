@@ -110,11 +110,11 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
     }
     public function buscarProjeto(int $projetoId): array
     {
-        $sql = "SELECT u.*
+        $sql = "SELECT u.*,pu.tipo
                 FROM usuario u
                 JOIN projeto_usuario pu 
                 ON pu.usuario_id = u.id
-                WHERE pc.projeto_id = :id";
+                WHERE pu.projeto_id = :id";
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':id', $projetoId);
         $stmt->execute();

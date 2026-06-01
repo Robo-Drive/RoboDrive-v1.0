@@ -128,7 +128,7 @@ class ProjetoController extends Controller
         $data["projeto"] = $this->repositorySql->buscarId($projeto);
         $componentes = $this->componenteRepositorySql->buscarProjeto($projeto->getId());
         $data["projeto"]->setComponentes($componentes);
-        $data["colaboradores"] = $this->usuarioRepositorySql->buscarProjeto($projeto);
+        $data["usuarios"] = $this->usuarioRepositorySql->buscarProjeto($projeto->getId());
         if($data["projeto"]->getNome() != null)
         {
             $this->view("projeto/perfil",$data);

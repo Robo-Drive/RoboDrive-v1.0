@@ -13,6 +13,8 @@ class Usuario
     private ?string $biografia;
     private ?string $imagem;
     private ?string $regra;
+    private ?string $tipo;
+    private ?string $categoria;
     private ?DateTimeImmutable $criadoEm;
 
     public static function map(?array $usuarios): array
@@ -30,6 +32,8 @@ class Usuario
             $usuarioObj->setBiografia($usuario["biografia"] ?? null);
             $usuarioObj->setImagem($usuario["imagem"] ?? null);
             $usuarioObj->setRegra($usuario["regra"] ?? null);
+            $usuarioObj->setTipo($usuario["tipo"] ?? null);
+            $usuarioObj->setCategoria($usuario["categoria"] ?? null);
             $usuarioObj->setCriadoEm(isset($usuario["criado_em"])
                 ? new DateTimeImmutable($usuario["criado_em"])
                 : null);
@@ -116,6 +120,27 @@ class Usuario
     public function setBiografia(?string $biografia): self
     {
         $this->biografia = $biografia;
+        return $this;
+    }
+
+    public function getCategoria(): ?string
+    {
+        return $this->categoria;
+    }
+    public function setCategoria(?string $categoria): self
+    {
+        $this->categoria = $categoria;
+
+        return $this;
+    }
+
+    public function getTipo(): ?string
+    {
+        return $this->tipo;
+    }
+    public function setTipo(?string $tipo): self
+    {
+        $this->tipo = $tipo;
 
         return $this;
     }

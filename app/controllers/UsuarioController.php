@@ -42,6 +42,7 @@ class UsuarioController extends Controller
         $validador->obrigatorio('nome',   $_POST["nome"]);
         $validador->obrigatorio('email',  $_POST["email"]);
         $validador->obrigatorio('senha',  $_POST["senha"]);
+        $validador->obrigatorio('confirmarSenha',  $_POST["confirmarSenha"],"O campo de confirmação de senha é obrigatório");
         if(!isset($validador->getErros()["nome"]))
         {
             $validador->tamanho('nome', $_POST["nome"], 3,100);
@@ -49,6 +50,10 @@ class UsuarioController extends Controller
         if(!isset($validador->getErros()["senha"]))
         {
             $validador->tamanho('senha',$_POST["senha"],8,100);
+        }
+        if(!isset($validador->getErros()["senha"]) && !isset($validador->getErros()["confirmarSenha"]))
+        {
+            $validador->confirmarValor($_POST["senha"],$_POST["confirmarSenha"],"confirmarSenha","A senha digitada é diferente da do campo senha");
         }
         if(!isset($validador->getErros()["email"]))
         {
