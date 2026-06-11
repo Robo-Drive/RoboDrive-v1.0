@@ -19,7 +19,7 @@ $crudsPrincipais = ["usuario","equipe","projeto","componente","forum"];
 foreach($crudsPrincipais as $cp)
 {
     $router->get('/'.$cp, ucfirst($cp).'Controller@listar');
-    $router->get('/'.$cp.'/cadastrar', ucfirst($cp).'Controller@cadastrar');
+    $router->get('/'.$cp.'/cadastro', ucfirst($cp).'Controller@cadastrar');
     $router->post('/'.$cp.'/salvar', ucfirst($cp).'Controller@salvar');
     $router->get('/'.$cp.'/perfil', ucfirst($cp).'Controller@perfil');
 

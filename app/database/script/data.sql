@@ -13,10 +13,11 @@ CREATE TABLE IF NOT EXISTS usuario (
   nome VARCHAR(100) NOT NULL,
   nome_usuario VARCHAR(100) NOT NULL UNIQUE,
   email VARCHAR(100) NOT NULL UNIQUE,
-  senha VARCHAR(100) NOT NULL,
+  senha VARCHAR(1000) NOT NULL,
   biografia VARCHAR(100),
-  imagem VARCHAR(10000),
+  imagem TEXT,
   regra ENUM('admin','usuario') NOT NULL,
+  status BOOLEAN NOT NULL,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -33,8 +34,10 @@ CREATE TABLE IF NOT EXISTS projeto (
   descricao VARCHAR(100) NOT NULL,
   visibilidade ENUM('privado','equipe','publico') DEFAULT 'privado',
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  usuario_id INT NOT NULL,
   categoria_id INT NOT NULL,
   equipe_id INT,
+  FOREIGN KEY (usuario_id) REFERENCES usuario(id),
   FOREIGN KEY (categoria_id) REFERENCES categoria(id),
   FOREIGN KEY (equipe_id) REFERENCES equipe(id)
 );
@@ -44,8 +47,10 @@ CREATE TABLE IF NOT EXISTS postagem_forum (
   conteudo VARCHAR(100) NOT NULL,
   visibilidade ENUM('equipe','publico') DEFAULT 'equipe',
   usuario_id INT NOT NULL,
+  equipe_id INT,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (usuario_id) REFERENCES usuario(id)
+  FOREIGN KEY (usuario_id) REFERENCES usuario(id),
+  FOREIGN KEY (equipe_id) REFERENCES equipe(id)
 );
 
 CREATE TABLE IF NOT EXISTS comentario_postagem_forum (
@@ -72,7 +77,7 @@ CREATE TABLE IF NOT EXISTS componente (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
   descricao VARCHAR(100),
-  imagem VARCHAR(10000)
+  imagem TEXT
 );
 
 CREATE TABLE IF NOT EXISTS imagem_projeto (
@@ -118,13 +123,17 @@ CREATE TABLE IF NOT EXISTS equipe_usuario (
   FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 );
 
+----------------------------------------------------
+-- DADOS
+----------------------------------------------------
+
 INSERT INTO equipe (nome, senha) VALUES
 ('Equipe Alpha', '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2'),
 ('Equipe Beta', '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2'),
 ('Equipe Gamma', '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2');
 
 INSERT INTO usuario
-(nome, nome_usuario, email, senha, imagem, regra)
+(nome, nome_usuario, email, senha, imagem, regra, status)
 VALUES
 (
 'Walmonn Eduardo Barbosa Ramalho da Silva',
@@ -132,7 +141,8 @@ VALUES
 'walmonn.eduardo.tds2023@gmail.com',
 '$2y$12$/E551s2RVpWQgvvUnbq4E.ZZvKoaE2V1cNwPp2aTJokiCd6lle3/a',
 'https://imgs.search.brave.com/NqH3jeCkzn-2YsnzIUEdiXq8UUKAkid746LYzGWHRTA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWFnZS5nZWVrc2hpcC5jb20uYnIvMHo4dF96QkZNYWR6djhheTFySHBFajJQX2tRPS8yMjAweDAvc21hcnQvZmlsdGVyczpzdHJpcF9pY2MoKTpmb3JtYXQod2VicCkvaHVsbC5nZWVrc2hpcC5jb20uYnIvd3AtY29udGVudC91cGxvYWRzLzIwMjYvMDMvU2FpLWRyLXN0b25lLTEuanBn',
-'admin'
+'admin',
+1
 ),
 (
 'Guilherme Canever Wernke',
@@ -140,7 +150,8 @@ VALUES
 'guilherme.wernke.tds2023@gmail.com',
 '$2y$12$pIqRCJLzv2Ia0jGlzk9VSOTAIK4YZk4/UB0Zs/3gjUerizr0DSTpW',
 'https://imgs.search.brave.com/Z74bF9aCDjhJpKYzmZityTXB9jhz6CS0DY4V87IsQiY/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly80a3dhbGxwYXBlcnMuY29tL2ltYWdlcy93YWxscy90aHVtYnMvMjU0OTkuanBn',
-'admin'
+'admin',
+1
 ),
 (
 'Petrus Mito de Souza',
@@ -148,7 +159,8 @@ VALUES
 'petrus.souza.tds2023@gmail.com',
 '$2y$12$ECX23EPvPazaiSUN2asdwOLf0carz.YsWft/4Y93ziODDBmoq08PW',
 'https://imgs.search.brave.com/doD7wVUtS-TJ0EGe1XCSmit08ijnmpgGGYdVIGYkOwE/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxscGFwZXIuZG9nL3RodW1ibmFpbC81NDQyMDI5LnBuZw',
-'admin'
+'admin',
+1
 ),
 (
 'teste',
@@ -156,7 +168,8 @@ VALUES
 'teste@gmail.com',
 '$2y$12$twxVhhtHCFpYcOk8W02lq.PP/4hxFB9Urf9sV2lKPP4/JgF.Nkd16',
 NULL,
-'usuario'
+'usuario',
+1
 );
 
 INSERT INTO categoria (nome, usuario_id) VALUES
@@ -165,24 +178,27 @@ INSERT INTO categoria (nome, usuario_id) VALUES
 ('Eletrônica', 3);
 
 INSERT INTO projeto
-(nome, descricao, visibilidade, categoria_id)
+(nome, descricao, visibilidade, usuario_id, categoria_id)
 VALUES
 (
 'Robô Seguidor de Linha',
 'Robô que segue uma linha usando sensores',
 'publico',
+1,
 1
 ),
 (
 'Braço Robótico',
 'Braço mecânico controlado por servo motores',
 'equipe',
+2,
 2
 ),
 (
 'Drone Arduino',
 'Drone controlado por Arduino com sensores',
 'privado',
+3,
 3
 );
 
@@ -203,9 +219,9 @@ INSERT INTO componente (nome, descricao, imagem) VALUES
 'https://imgs.search.brave.com/TjXrujPor7WNt-O4Pcf25UYJ-iruGygJ3IJ5PCXB3rY/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jdXJ0b2NpcmN1aXRvLmNvLmJyL21lZGlhL2NhdGFsb2cvcHJvZHVjdC9jYWNoZS8zMWE3YjlhOGQxYTM4MTgzYzk0ZmIyZGVjYTliYTE1Yy9fL3MvX3NfZV9zZXJ2b19tb3Rvcl8tX3NnOTBfLV90b3dlcnByb19fMV8xXzEuanBn'
 );
 
-INSERT INTO postagem_forum (conteudo, visibilidade, usuario_id) VALUES
-('Como melhorar PID no robô?', 'publico', 1),
-('Alguém tem código para servo?', 'equipe', 2);
+INSERT INTO postagem_forum (conteudo, visibilidade, usuario_id, equipe_id) VALUES
+('Como melhorar PID no robô?', 'publico', 1, NULL),
+('Alguém tem código para servo?', 'equipe', 2, NULL);
 
 INSERT INTO comentario_postagem_forum (conteudo, postagem_forum_id, usuario_id) VALUES
 ('Tenta ajustar o Kp primeiro', 1, 2),

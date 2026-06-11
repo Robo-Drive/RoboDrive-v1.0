@@ -46,27 +46,34 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
             $bind = array();
             $itens = ["nome","email","senha","imagem","regra"];
             $sql = "UPDATE usuario SET ";
-            for($i = 0 ; $i < count($itens); $i++)
+            $itensNaoNulos = array();
+            foreach($itens as $i)
             {
-                $metodo = "get".ucfirst($itens[$i]);
+                $metodo = "get".ucfirst($i);
                 if($usuario->$metodo() != null)
                 {
-                    if($i != (count($itens)-2))
-                    {
-                        $sql .= "$itens[$i] = :$itens[$i], ";
-                        $bind[] = [
-                            "posicao" => ":".$itens[$i],
-                            "metodo" => $metodo
-                        ];
-                    }
-                    else
-                    {
-                        $sql .= "$itens[$i] = :$itens[$i] ";
-                        $bind[] = [
-                            "posicao" => ":".$itens[$i],
-                            "metodo" => $metodo
-                        ];
-                    }
+                    $itensNaoNulos[] = $i;
+                }
+            }
+            for($i = 0 ; $i < count($itensNaoNulos); $i++)
+            {
+                $metodo = "get".ucfirst($itensNaoNulos[$i]);
+                
+                if($i != (count($itensNaoNulos)-1))
+                {
+                    $sql .= "$itensNaoNulos[$i] = :$itensNaoNulos[$i], ";
+                    $bind[] = [
+                        "posicao" => ":".$itensNaoNulos[$i],
+                        "metodo" => $metodo
+                    ];
+                }
+                else
+                {
+                    $sql .= "$itensNaoNulos[$i] = :$itensNaoNulos[$i] ";
+                    $bind[] = [
+                        "posicao" => ":".$itensNaoNulos[$i],
+                        "metodo" => $metodo
+                    ];
                 }
             }
             $sql .= "WHERE id = :id";
@@ -89,7 +96,7 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
             print_r($e);
             die;
         }
-
+        
         return $usuario;
     }
     public function buscarId(Usuario $usuario): ?Usuario

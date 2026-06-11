@@ -137,9 +137,11 @@ class UsuarioController extends Controller
         }
         else
         {
-            if ($this->service->editarUsuario($usuario))
+            $resposta = $this->service->editarUsuario($usuario);
+            if($resposta)
             {
-                $this->redirect(URL_BASE . '/usuario/listar');
+                $_SESSION["usuario_logado"] = $this->repositorySql->buscarId($_SESSION["usuario_logado"]);
+                $this->redirect(URL_BASE . '/usuario/perfil');
             } 
             else
             {

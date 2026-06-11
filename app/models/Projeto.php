@@ -21,10 +21,10 @@ class Projeto
         $projetosObj = array();
         foreach ($projetos as $projeto) {
             $projetoObj = new Projeto();
-            $projetoObj->setId($projeto["id"]);
-            $projetoObj->setNome($projeto["nome"]);
-            $projetoObj->setDescricao($projeto["descricao"]);
-            $projetoObj->setVisibilidade($projeto["visibilidade"]);
+            $projetoObj->setId($projeto["id"]??null);
+            $projetoObj->setNome($projeto["nome"]??null);
+            $projetoObj->setDescricao($projeto["descricao"]??null);
+            $projetoObj->setVisibilidade($projeto["visibilidade"])??null;
             $projetoObj->setCriadoEm(isset($projeto["criado_em"])
                 ? new DateTimeImmutable($projeto["criado_em"])
                 : null);
