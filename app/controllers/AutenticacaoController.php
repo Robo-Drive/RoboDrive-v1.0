@@ -1,0 +1,70 @@
+<?php
+
+namespace app\controllers;
+
+use app\core\Controller;
+use app\helpers\ValidadorHelper;
+use app\models\Usuario;
+use app\repositories\UsuarioRepositorySql;
+use app\services\AutenticacaoService;
+
+class AutenticacaoController extends Controller
+{
+    private AutenticacaoService $service;
+    private UsuarioRepositorySql $repositorySql;
+
+    public function __construct()
+    {
+        $this->service = new AutenticacaoService();
+        $this->repositorySql = new UsuarioRepositorySql();
+    }
+    public function login()
+    {
+        $this->view("login/login");
+    }
+    public function logar()
+    {
+        $validador = new ValidadorHelper();
+
+        $validador->obrigatorio('email',  $_POST["email"]);
+        $validador->obrigatorio('senha',  $_POST["senha"]);
+        if(!isset($validador->getErros()["email"]))
+        {
+            $validador->email($_POST["email"]);
+        }
+
+        $posts["email"]  = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+        $posts["senha"]  = $_POST["senha"];
+        
+        $usuario = Usuario::map([$posts])[0];
+        if($validador->temErros())
+        {
+            $data["usuario"] = $posts;
+            $data["erros"] = $validador->getErros();
+            $this->view('login/login',$data);
+        }
+        else
+        {
+            $resposta = $this->service->logar($usuario->getEmail(),$usuario->getSenha());
+            if($resposta)
+            {
+                $this->redirect(URL_BASE . '/usuario/perfil');
+            } 
+            else
+            {
+                $data["usuario"] = $posts;
+                $data["erros"]["login"] = "Email ou senha incorretos";
+                $this->view('login/login',$data);
+            }
+        }
+    }
+    public function cadastro()
+    {
+        $this->view("cadastro/cadastro");
+    }
+    public function logout()
+    {
+        $this->service->logout();
+        $this->redirect(URL_BASE);
+    }
+}
