@@ -132,21 +132,32 @@
     /* ── SECTION DIVIDER ── */
     .divider-red { width: 100%; height: 3px; background: #FF2D2D; }
     .divider-white { width: 100%; height: 3px; background: #fff; }
+    
+    .marquee-container {
+    /* desaparece nas laterais */
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 10%,
+      black 90%,
+      transparent 100%
+    );
+
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 10%,
+      black 90%,
+      transparent 100%
+    );
+  }
   </style>
 </head>
 
 <body>
 
   <div class="video-bg h-screen w-screen" aria-hidden="true">
-    <iframe
-      src="https://www.youtube.com/embed/B5aY6jblH9o?autoplay=1&mute=1&controls=0&loop=1&playlist=B5aY6jblH9o&playsinline=1&rel=0&modestbranding=1&showinfo=0"
-      title="Infinite Black and Red Abstract Loop Background Visuals | 2 Hours 4K 60fps"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      referrerpolicy="strict-origin-when-cross-origin"
-      style="pointer-events:none; filter:brightness(0.4) contrast(1.2);"
-      class="h-screen w-screen"
-      allowfullscreen>
-    </iframe>
+    <canvas id="myCanvas" class="h-100 w-100"></canvas>
   </div>
 
   <div class="video-bg-overlay" aria-hidden="true"></div>
@@ -163,11 +174,6 @@
 
     <!-- noise layer -->
     <div style="position:absolute;inset:0;opacity:.03;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22/></filter><rect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22/></svg>');"></div>
-
-    <!-- deco shapes -->
-    <div style="position:absolute;top:8%;right:6%;width:22vw;height:22vw;border:3px solid rgba(255,45,45,.25);transform:rotate(15deg);"></div>
-    <div style="position:absolute;top:18%;right:12%;width:12vw;height:12vw;background:#FF2D2D;opacity:.12;"></div>
-    <div style="position:absolute;bottom:15%;left:4%;width:8vw;height:8vw;border:3px solid rgba(255,255,255,.12);transform:rotate(-8deg);"></div>
 
     <!-- eyebrow -->
     <div style="position:absolute;top:2.5rem;left:2.5rem;" class="eyebrow">
@@ -211,19 +217,87 @@
   <!-- ═══════════════════════════════════════
        2. MARQUEE TICKER
   ═══════════════════════════════════════ -->
-  <div style="background:#FF2D2D;border-bottom:3px solid #fff;overflow:hidden;padding:.75rem 0;">
+  
+  
+  
+  
+  
+  
+  
+  
+  <!-- TODO: arrumar os marquees -->
+   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <div class="marquee-container mt-[0.15%] mb-[0.15%]" style="background: transparent; overflow:hidden; padding:.75rem 0; ">
     <div class="marquee-track-left">
-      <!-- repeat twice for seamless loop -->
-      <span style="white-space:nowrap;font-weight:900;font-size:.9rem;letter-spacing:.12em;text-transform:uppercase;padding:0 2rem;">
-        CENTRALIZE &nbsp;·&nbsp; ORGANIZE &nbsp;·&nbsp; REUTILIZE &nbsp;·&nbsp;
-        CÓDIGO &nbsp;·&nbsp; COMPONENTES &nbsp;·&nbsp; EQUIPES &nbsp;·&nbsp; FÓRUM &nbsp;·&nbsp;
-        ROBÓTICA EDUCACIONAL &nbsp;·&nbsp; IFPR &nbsp;·&nbsp; REPOSITÓRIO &nbsp;·&nbsp;
-        CENTRALIZE &nbsp;·&nbsp; ORGANIZE &nbsp;·&nbsp; REUTILIZE &nbsp;·&nbsp;
-        CÓDIGO &nbsp;·&nbsp; COMPONENTES &nbsp;·&nbsp; EQUIPES &nbsp;·&nbsp; FÓRUM &nbsp;·&nbsp;
-        ROBÓTICA EDUCACIONAL &nbsp;·&nbsp; IFPR &nbsp;·&nbsp; REPOSITÓRIO &nbsp;·&nbsp;
+      <span style="
+        white-space:nowrap;
+        font-weight:900;
+        font-size:.9rem;
+        letter-spacing:.12em;
+        text-transform:uppercase;
+        padding:0 2rem;
+      ">
+        CENTRALIZE · ORGANIZE · REUTILIZE ·
+        CÓDIGO · COMPONENTES · EQUIPES · FÓRUM ·
+        ROBÓTICA EDUCACIONAL · IFPR · REPOSITÓRIO ·
+        CENTRALIZE · ORGANIZE · REUTILIZE ·
+        CÓDIGO · COMPONENTES · EQUIPES · FÓRUM ·
+        ROBÓTICA EDUCACIONAL · IFPR · REPOSITÓRIO ·
       </span>
     </div>
   </div>
+  
+  <div class="divider-white"></div>
 
 
   <!-- ═══════════════════════════════════════
@@ -264,10 +338,10 @@
     <!-- section header -->
     <div style="padding:4rem 2.5rem 2.5rem;display:flex;align-items:flex-end;justify-content:space-between;gap:2rem;border-bottom:3px solid #fff;">
       <div>
-        <div class="eyebrow" style="margin-bottom:.75rem;">O QUE FAZEMOS</div>
+        <div class="eyebrow" style="margin-bottom:.75rem;">O QUE FAZEMOS?</div>
         <h2 style="font-size:clamp(2.5rem,6vw,5rem);font-weight:900;letter-spacing:-.04em;line-height:.95;">
           TUDO QUE<br>
-          <span style="color:#0066FF;">VOCÊ PRECISA</span>
+          <span style="color: #FF2D2D;">VOCÊ</span> PRECISA
         </h2>
       </div>
       <p style="max-width:36ch;color:#a3a3a3;line-height:1.6;font-size:1rem;padding-bottom:.4rem;">
@@ -586,10 +660,6 @@
        10. CTA FINAL — fullscreen call to action
   ═══════════════════════════════════════ -->
   <section style="position:relative;overflow:hidden;min-height:60vh;display:flex;flex-direction:column;justify-content:center;">
-    <div class="grid-bg" style="position:absolute;inset:0;opacity:.6;"></div>
-    <div style="position:absolute;top:-5rem;right:-5rem;width:35vw;height:35vw;border:3px solid rgba(255,45,45,.2);transform:rotate(25deg);"></div>
-    <div style="position:absolute;bottom:-3rem;left:8%;width:18vw;height:18vw;border:3px solid rgba(255,255,255,.08);transform:rotate(-12deg);"></div>
-    <div style="position:absolute;top:20%;right:15%;width:10vw;height:10vw;background:#FF2D2D;opacity:.08;"></div>
 
     <div style="position:relative;z-index:1;padding:6rem 2.5rem;text-align:center;">
       <div class="eyebrow" style="margin-bottom:1.5rem;">FAÇA PARTE DA COMUNIDADE</div>
@@ -616,3 +686,5 @@
 
 </body>
 </html>
+
+<script src="<?= JS_URL_BASE ?>/wallpaper.js"></script>
