@@ -31,17 +31,6 @@
       background: #000;
     }
 
-    .video-bg iframe {
-      width: 100vw;
-      height: 100vh;
-      border: 0;
-      position: absolute;
-      top: 0;
-      left: 0;
-      transform: scale(1.15);
-      transform-origin: center center;
-    }
-
     .video-bg-overlay {
       position: fixed;
       inset: 0;
@@ -57,18 +46,6 @@
       position: relative;
       z-index: 2;
     }
-
-    /* ── MARQUEE ── */
-    @keyframes marquee-left {
-      from { transform: translateX(0); }
-      to   { transform: translateX(-50%); }
-    }
-    @keyframes marquee-right {
-      from { transform: translateX(-50%); }
-      to   { transform: translateX(0); }
-    }
-    .marquee-track-left  { animation: marquee-left  18s linear infinite; display: flex; width: max-content; }
-    .marquee-track-right { animation: marquee-right 22s linear infinite; display: flex; width: max-content; }
 
     /* ── ORBITRON only for branding ── */
     .brand { font-family: 'Orbitron', sans-serif; }
@@ -133,74 +110,109 @@
     .divider-red { width: 100%; height: 3px; background: #FF2D2D; }
     .divider-white { width: 100%; height: 3px; background: #fff; }
     
-    .marquee-container {
-    /* desaparece nas laterais */
-    -webkit-mask-image: linear-gradient(
-      to right,
-      transparent 0%,
-      black 10%,
-      black 90%,
-      transparent 100%
-    );
+    /* Marquee styles */
+    .marquee {
+      --gap: 1rem;
+      position: relative;
+      display: flex;
+      overflow: hidden;
+      user-select: none;
+      gap: var(--gap);
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+    }
 
-    mask-image: linear-gradient(
-      to right,
-      transparent 0%,
-      black 10%,
-      black 90%,
-      transparent 100%
-    );
-  }
+    .marquee--primary {
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+      mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-size: 100% 100%;
+      mask-size: 100% 100%;
+    }
+
+    .marquee__track {
+      display: flex;
+      align-items: center;
+      width: max-content;
+      will-change: transform;
+    }
+
+    .marquee__content {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--gap);
+      width: max-content;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .marquee__content li {
+      flex: 0 0 auto;
+      white-space: nowrap;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #fff;
+      padding: .95rem 1.5rem;
+    }
   </style>
 </head>
 
 <body>
 
-  <div class="video-bg h-screen w-screen" aria-hidden="true">
-    <canvas id="myCanvas" class="h-100 w-100"></canvas>
-  </div>
+  <!-- ═══════════════════════════════════════
+       0. WALLPAPER — plano de fudo animado
+  ═══════════════════════════════════════ -->
+  <section>
+    <div class="video-bg h-screen w-screen" aria-hidden="true">
+      <canvas id="myCanvas" class="h-100 w-100"></canvas>
+    </div>
 
-  <div class="video-bg-overlay" aria-hidden="true"></div>
+    <div class="video-bg-overlay" aria-hidden="true"></div>
+  </section>
 
   <div class="page-content">
 
   <!-- ═══════════════════════════════════════
        1. HERO — fullscreen imersivo
   ═══════════════════════════════════════ -->
-  <section style="min-height:100svh; position:relative; display:flex; flex-direction:column; justify-content:flex-end; overflow:hidden; border-bottom: 3px solid #fff;">
+  <section class="relative flex min-h-[100svh] flex-col justify-end overflow-hidden border-b-[3px] border-white">
 
     <!-- grid background -->
-    <div class="grid-bg" style="position:absolute;inset:0;"></div>
+    <div class="grid-bg absolute inset-0"></div>
 
     <!-- noise layer -->
-    <div style="position:absolute;inset:0;opacity:.03;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22/></filter><rect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22/></svg>');"></div>
+    <div class="absolute inset-0 opacity-[0.03] [background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22/></filter><rect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22/></svg>')]"></div>
 
     <!-- eyebrow -->
-    <div style="position:absolute;top:2.5rem;left:2.5rem;" class="eyebrow">
+    <div class="eyebrow absolute top-10 left-10">
       IFPR &nbsp;·&nbsp; SISTEMA DE GESTÃO &nbsp;·&nbsp; 2025
     </div>
 
     <!-- counter top-right -->
-    <div style="position:absolute;top:2.2rem;right:2.5rem;text-align:right;">
-      <div class="eyebrow" style="margin-bottom:.3rem;">PROJETOS ATIVOS</div>
-      <div class="impact" style="font-size:2.5rem;color:#FF2D2D;line-height:1;">24+</div>
+    <div class="absolute top-[2.2rem] right-10 text-right">
+      <div class="eyebrow mb-1">PROJETOS ATIVOS</div>
+      <div class="impact text-[2.5rem] leading-none text-[#FF2D2D]">24+</div>
     </div>
 
     <!-- main content -->
-    <div style="position:relative;z-index:1;padding:0 2.5rem 5rem;">
-      <div class="eyebrow" style="margin-bottom:1.2rem;color:#FF2D2D;">
+    <div class="relative z-[1] px-10 pb-20">
+      <div class="eyebrow mb-5 text-[#FF2D2D]">
         ● PLATAFORMA EDUCACIONAL DE ROBÓTICA
       </div>
 
-      <h1 class="brand" style="font-size:clamp(3.5rem,11vw,10rem);line-height:.92;letter-spacing:-.03em;margin-bottom:2rem;max-width:14ch;">
-        ROBO<span style="color:#FF2D2D;">DRIVE</span>
+      <h1 class="brand mb-8 max-w-[14ch] text-[clamp(3.5rem,11vw,10rem)] leading-[0.92] tracking-[-0.03em]">
+        ROBO<span class="text-[#FF2D2D]">DRIVE</span>
       </h1>
 
-      <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:2rem;">
-        <p style="font-size:clamp(1rem,2vw,1.4rem);color:#a3a3a3;max-width:42ch;line-height:1.55;border-left:4px solid #FF2D2D;padding-left:1.25rem;">
+      <div class="flex flex-wrap items-end justify-between gap-8">
+        <p class="max-w-[42ch] border-l-4 border-[#FF2D2D] pl-5 text-[clamp(1rem,2vw,1.4rem)] leading-[1.55] text-zinc-400">
           Repositório central de projetos de robótica educacional do IFPR. Centralize código, componentes, equipes e conhecimento — tudo em um lugar.
         </p>
-        <div style="display:flex;flex-wrap:wrap;gap:1rem;">
+        <div class="flex flex-wrap gap-4">
           <a href="#" class="btn-primary">
             COMEÇAR AGORA
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -218,82 +230,25 @@
        2. MARQUEE TICKER
   ═══════════════════════════════════════ -->
   
-  
-  
-  
-  
-  
-  
-  
-  <!-- TODO: arrumar os marquees -->
-   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  <div class="marquee-container mt-[0.15%] mb-[0.15%]" style="background: transparent; overflow:hidden; padding:.75rem 0; ">
-    <div class="marquee-track-left">
-      <span style="
-        white-space:nowrap;
-        font-weight:900;
-        font-size:.9rem;
-        letter-spacing:.12em;
-        text-transform:uppercase;
-        padding:0 2rem;
-      ">
-        CENTRALIZE · ORGANIZE · REUTILIZE ·
-        CÓDIGO · COMPONENTES · EQUIPES · FÓRUM ·
-        ROBÓTICA EDUCACIONAL · IFPR · REPOSITÓRIO ·
-        CENTRALIZE · ORGANIZE · REUTILIZE ·
-        CÓDIGO · COMPONENTES · EQUIPES · FÓRUM ·
-        ROBÓTICA EDUCACIONAL · IFPR · REPOSITÓRIO ·
-      </span>
+  <div class="marquee marquee--primary" aria-label="Marquee de navegação rápida">
+    <div class="marquee__track">
+      <ul class="marquee__content">
+        <li class="text-white"><span class="text-[#FF2D2D]">Robótica</span> educacional</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Código</span> versionado</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Componentes</span> catalogados</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Equipes</span> organizadas</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Fórum</span> colaborativo</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Projetos</span> públicos</li>
+      </ul>
+
+      <ul aria-hidden="true" class="marquee__content">
+        <li class="text-white"><span class="text-[#FF2D2D]">Robótica</span> educacional</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Código</span> versionado</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Componentes</span> catalogados</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Equipes</span> organizadas</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Fórum</span> colaborativo</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Projetos</span> públicos</li>
+      </ul>
     </div>
   </div>
   
@@ -303,27 +258,27 @@
   <!-- ═══════════════════════════════════════
        3. STATS — números grandes
   ═══════════════════════════════════════ -->
-  <section style="border-bottom:3px solid #fff;">
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);">
+  <section class="border-b-[3px] border-white">
+    <div class="grid grid-cols-4">
 
-      <div class="stat-cell" style="padding:3.5rem 2rem;border-right:3px solid #fff;text-align:center;">
-        <div class="eyebrow" style="margin-bottom:.75rem;">PROJETOS</div>
-        <div class="impact" style="font-size:clamp(4rem,8vw,7rem);line-height:1;color:#FF2D2D;">24+</div>
+      <div class="stat-cell border-r-[3px] border-white px-8 py-14 text-center">
+        <div class="eyebrow mb-3">PROJETOS</div>
+        <div class="impact text-[clamp(4rem,8vw,7rem)] leading-none text-[#FF2D2D]">50+</div>
       </div>
 
-      <div class="stat-cell" style="padding:3.5rem 2rem;border-right:3px solid #fff;text-align:center;">
-        <div class="eyebrow" style="margin-bottom:.75rem;">EQUIPES</div>
-        <div class="impact" style="font-size:clamp(4rem,8vw,7rem);line-height:1;color:#fff;">8</div>
+      <div class="stat-cell border-r-[3px] border-white px-8 py-14 text-center">
+        <div class="eyebrow mb-3">EQUIPES</div>
+        <div class="impact text-[clamp(4rem,8vw,7rem)] leading-none text-white">8</div>
       </div>
 
-      <div class="stat-cell" style="padding:3.5rem 2rem;border-right:3px solid #fff;text-align:center;">
-        <div class="eyebrow" style="margin-bottom:.75rem;">COMPONENTES</div>
-        <div class="impact" style="font-size:clamp(4rem,8vw,7rem);line-height:1;color:#FF2D2D;">156</div>
+      <div class="stat-cell border-r-[3px] border-white px-8 py-14 text-center">
+        <div class="eyebrow mb-3">COMPONENTES</div>
+        <div class="impact text-[clamp(4rem,8vw,7rem)] leading-none text-[#FF2D2D]">156</div>
       </div>
 
-      <div class="stat-cell" style="padding:3.5rem 2rem;text-align:center;">
-        <div class="eyebrow" style="margin-bottom:.75rem;">CAMPI IFPR</div>
-        <div class="impact" style="font-size:clamp(4rem,8vw,7rem);line-height:1;color:#fff;">3</div>
+      <div class="stat-cell px-8 py-14 text-center">
+        <div class="eyebrow mb-3">USUARIOS</div>
+        <div class="impact text-[clamp(4rem,8vw,7rem)] leading-none text-white">186</div>
       </div>
 
     </div>
@@ -333,75 +288,75 @@
   <!-- ═══════════════════════════════════════
        4. FUNCIONALIDADES — feature grid
   ═══════════════════════════════════════ -->
-  <section style="border-bottom:3px solid #fff;">
+  <section class="mt-10">
 
     <!-- section header -->
-    <div style="padding:4rem 2.5rem 2.5rem;display:flex;align-items:flex-end;justify-content:space-between;gap:2rem;border-bottom:3px solid #fff;">
+    <div class="flex items-end justify-between gap-8 px-10 pb-10 pt-16">
       <div>
-        <div class="eyebrow" style="margin-bottom:.75rem;">O QUE FAZEMOS?</div>
-        <h2 style="font-size:clamp(2.5rem,6vw,5rem);font-weight:900;letter-spacing:-.04em;line-height:.95;">
+        <div class="eyebrow mb-3">O QUE FAZEMOS?</div>
+        <h2 class="text-[clamp(2.5rem,6vw,5rem)] font-black tracking-[-.04em] leading-[.95]">
           TUDO QUE<br>
-          <span style="color: #FF2D2D;">VOCÊ</span> PRECISA
+          <span class="text-[#FF2D2D]">VOCÊ</span> PRECISA
         </h2>
       </div>
-      <p style="max-width:36ch;color:#a3a3a3;line-height:1.6;font-size:1rem;padding-bottom:.4rem;">
+      <p class="max-w-[36ch] pb-1 text-base leading-[1.6] text-zinc-400">
         Quatro pilares que resolvem o problema da dispersão de conhecimento em projetos de robótica educacional.
       </p>
     </div>
 
     <!-- 2×2 grid -->
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);">
+    <div class="grid grid-cols-2 gap-8 px-10 border-b-[3px] border-white">
 
       <!-- CÓDIGO -->
-      <div class="proj-card" style="padding:3rem;border-right:3px solid #fff;border-bottom:3px solid #fff;position:relative;overflow:hidden;">
-        <div class="line-grow" style="position:absolute;top:0;left:0;height:4px;width:100%;background:#FF2D2D;"></div>
-        <div style="display:inline-flex;padding:1rem;border:3px solid #FF2D2D;color:#FF2D2D;margin-bottom:2rem;">
+      <div class="proj-card relative overflow-hidden border-[3px] border-b-[3px] border-white p-12">
+        <div class="line-grow absolute top-0 left-0 h-1 w-full bg-[#FF2D2D]"></div>
+        <div class="mb-8 inline-flex border-[3px] border-[#FF2D2D] p-4 text-[#FF2D2D]">
           <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;">
-          <h3 style="font-size:2rem;font-weight:900;letter-spacing:-.03em;">CÓDIGO</h3>
-          <span class="eyebrow" style="padding:.4rem .8rem;border:2px solid #333;">01</span>
+        <div class="mb-4 flex items-start justify-between">
+          <h3 class="text-[2rem] font-black tracking-[-.03em]">CÓDIGO</h3>
+          <span class="eyebrow border-2 border-[#333] px-3 py-1">01</span>
         </div>
-        <p style="color:#737373;line-height:1.65;">Armazene e versione códigos dos seus robôs. Nunca mais perca uma linha de código importante entre turmas. Suporte a Arduino, Python e C++.</p>
+        <p class="leading-[1.65] text-zinc-500">Armazene e versione códigos dos seus robôs. Nunca mais perca uma linha de código importante entre turmas. Suporte a Arduino, Python e C++.</p>
       </div>
 
       <!-- COMPONENTES -->
-      <div class="proj-card" style="padding:3rem;border-bottom:3px solid #fff;position:relative;overflow:hidden;">
-        <div class="line-grow" style="position:absolute;top:0;left:0;height:4px;width:100%;background:#FF2D2D;"></div>
-        <div style="display:inline-flex;padding:1rem;border:3px solid #FF2D2D;color:#FF2D2D;margin-bottom:2rem;">
+      <div class="proj-card relative overflow-hidden border-[3px] border-b-[3px] border-white p-12">
+        <div class="line-grow absolute top-0 left-0 h-1 w-full bg-[#FF2D2D]"></div>
+        <div class="mb-8 inline-flex border-[3px] border-[#FF2D2D] p-4 text-[#FF2D2D]">
           <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;">
-          <h3 style="font-size:2rem;font-weight:900;letter-spacing:-.03em;">COMPONENTES</h3>
-          <span class="eyebrow" style="padding:.4rem .8rem;border:2px solid #333;">02</span>
+        <div class="mb-4 flex items-start justify-between">
+          <h3 class="text-[2rem] font-black tracking-[-.03em]">COMPONENTES</h3>
+          <span class="eyebrow border-2 border-[#333] px-3 py-1">02</span>
         </div>
-        <p style="color:#737373;line-height:1.65;">Catalogue sensores, motores e atuadores com imagens e especificações técnicas. Construa uma biblioteca reutilizável para todo o campus.</p>
+        <p class="leading-[1.65] text-zinc-500">Catalogue sensores, motores e atuadores com imagens e especificações técnicas. Construa uma biblioteca reutilizável para todo o campus.</p>
       </div>
 
       <!-- EQUIPES -->
-      <div class="proj-card" style="padding:3rem;border-right:3px solid #fff;position:relative;overflow:hidden;">
-        <div class="line-grow" style="position:absolute;top:0;left:0;height:4px;width:100%;background:#FF2D2D;"></div>
-        <div style="display:inline-flex;padding:1rem;border:3px solid #FF2D2D;color:#FF2D2D;margin-bottom:2rem;">
+      <div class="proj-card relative overflow-hidden border-[3px] border-b-[0px] border-white p-12">
+        <div class="line-grow absolute top-0 left-0 h-1 w-full bg-[#FF2D2D]"></div>
+        <div class="mb-8 inline-flex border-[3px] border-[#FF2D2D] p-4 text-[#FF2D2D]">
           <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;">
-          <h3 style="font-size:2rem;font-weight:900;letter-spacing:-.03em;">EQUIPES</h3>
-          <span class="eyebrow" style="padding:.4rem .8rem;border:2px solid #333;">03</span>
+        <div class="mb-4 flex items-start justify-between">
+          <h3 class="text-[2rem] font-black tracking-[-.03em]">EQUIPES</h3>
+          <span class="eyebrow border-2 border-[#333] px-3 py-1">03</span>
         </div>
-        <p style="color:#737373;line-height:1.65;">Gerencie equipes por campus. Controle de acesso granular por roles — professor controla tudo, aluno contribui, visitante visualiza.</p>
+        <p class="leading-[1.65] text-zinc-500">Gerencie equipes por campus. Controle de acesso granular por roles — professor controla tudo, aluno contribui, visitante visualiza.</p>
       </div>
 
       <!-- FÓRUM -->
-      <div class="proj-card" style="padding:3rem;position:relative;overflow:hidden;">
-        <div class="line-grow" style="position:absolute;top:0;left:0;height:4px;width:100%;background:#FF2D2D;"></div>
-        <div style="display:inline-flex;padding:1rem;border:3px solid #FF2D2D;color:#FF2D2D;margin-bottom:2rem;">
+      <div class="proj-card relative overflow-hidden border-[3px] border-b-[0px] border-white p-12">
+        <div class="line-grow absolute top-0 left-0 h-1 w-full bg-[#FF2D2D]"></div>
+        <div class="mb-8 inline-flex border-[3px] border-[#FF2D2D] p-4 text-[#FF2D2D]">
           <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;">
-          <h3 style="font-size:2rem;font-weight:900;letter-spacing:-.03em;">FÓRUM</h3>
-          <span class="eyebrow" style="padding:.4rem .8rem;border:2px solid #333;">04</span>
+        <div class="mb-4 flex items-start justify-between">
+          <h3 class="text-[2rem] font-black tracking-[-.03em]">FÓRUM</h3>
+          <span class="eyebrow border-2 border-[#333] px-3 py-1">04</span>
         </div>
-        <p style="color:#737373;line-height:1.65;">Discuta, pergunte e compartilhe conhecimento. Conecte equipes de diferentes campi do IFPR. Dúvidas de hardware, software e estratégias de competição.</p>
+        <p class="leading-[1.65] text-zinc-500">Discuta, pergunte e compartilhe conhecimento. Conecte equipes de diferentes campi do IFPR. Dúvidas de hardware, software e estratégias de competição.</p>
       </div>
 
     </div>
@@ -411,16 +366,16 @@
   <!-- ═══════════════════════════════════════
        5. PROJETOS — card grid (estilo F1 highlights)
   ═══════════════════════════════════════ -->
-  <section style="background:#0a0a0a;border-bottom:3px solid #fff;">
+  <section class="border-b-[3px] border-white bg-transparent">
 
-    <div style="padding:4rem 2.5rem 2.5rem;display:flex;align-items:flex-end;justify-content:space-between;gap:2rem;border-bottom:3px solid #404040;">
+    <div class="flex items-end justify-between gap-8 border-b-[3px] border-[#404040] px-10 pb-10 pt-16">
       <div>
-        <div class="eyebrow" style="margin-bottom:.75rem;">PROJETOS RECENTES</div>
-        <h2 style="font-size:clamp(2.5rem,6vw,5rem);font-weight:900;letter-spacing:-.04em;line-height:.95;">
+        <div class="eyebrow mb-3">PROJETOS RECENTES</div>
+        <h2 class="text-[clamp(2.5rem,6vw,5rem)] font-black tracking-[-.04em] leading-[.95]">
           DA<br>COMUNIDADE
         </h2>
       </div>
-      <a href="#" style="text-decoration:none;color:#a3a3a3;font-size:.9rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-bottom:2px solid #404040;padding-bottom:.3rem;white-space:nowrap;transition:color .2s,border-color .2s;" onmouseover="this.style.color='#fff';this.style.borderColor='#fff'" onmouseout="this.style.color='#a3a3a3';this.style.borderColor='#404040'">
+      <a href="#" class="border-b-2 border-[#404040] pb-1 text-sm font-bold uppercase tracking-[.08em] text-zinc-400 no-underline transition-colors duration-200 hover:border-white hover:text-white">
         VER TODOS →
       </a>
     </div>
@@ -428,68 +383,68 @@
     <!-- project list rows (F1-style) -->
     <div>
 
-      <div class="proj-card" style="display:grid;grid-template-columns:4rem 1fr auto;align-items:center;gap:2rem;padding:1.75rem 2.5rem;border-bottom:1px solid #1a1a1a;cursor:pointer;position:relative;overflow:hidden;">
-        <div class="line-grow" style="position:absolute;bottom:0;left:0;height:2px;width:100%;background:#FF2D2D;"></div>
-        <div class="impact" style="font-size:2.5rem;color:#333;line-height:1;">01</div>
+      <div class="proj-card relative grid cursor-pointer grid-cols-[4rem_1fr_auto] items-center gap-8 overflow-hidden border-b border-[#1a1a1a] px-10 py-7">
+        <div class="line-grow absolute bottom-0 left-0 h-0.5 w-full bg-[#FF2D2D]"></div>
+        <div class="impact text-[2.5rem] leading-none text-[#333]">01</div>
         <div>
-          <div style="font-size:1.2rem;font-weight:900;letter-spacing:-.02em;margin-bottom:.35rem;">Robô Seguidor de Linha</div>
-          <div class="eyebrow">Equipe Alpha &nbsp;·&nbsp; Campus Cascavel &nbsp;·&nbsp; Arduino</div>
+          <div class="mb-1.5 text-[1.2rem] font-black tracking-[-.02em]">Robô Seguidor de Linha</div>
+          <div class="eyebrow">Equipe Alpha &nbsp;·&nbsp; Cascavel &nbsp;·&nbsp; Arduino</div>
         </div>
-        <div style="display:flex;align-items:center;gap:1rem;">
-          <span style="padding:.35rem .9rem;background:rgba(255,45,45,.15);border:2px solid #FF2D2D;color:#FF2D2D;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;">PÚBLICO</span>
-          <span style="color:#737373;font-size:.85rem;font-weight:700;">12 componentes</span>
+        <div class="flex items-center gap-4">
+          <span class="border-2 border-[#FF2D2D] bg-[rgba(255,45,45,.15)] px-4 py-1.5 text-[.7rem] font-bold uppercase tracking-[.1em] text-[#FF2D2D]">PÚBLICO</span>
+          <span class="text-[.85rem] font-bold text-zinc-500">12 componentes</span>
         </div>
       </div>
 
-      <div class="proj-card" style="display:grid;grid-template-columns:4rem 1fr auto;align-items:center;gap:2rem;padding:1.75rem 2.5rem;border-bottom:1px solid #1a1a1a;cursor:pointer;position:relative;overflow:hidden;">
-        <div class="line-grow" style="position:absolute;bottom:0;left:0;height:2px;width:100%;background:#FF2D2D;"></div>
-        <div class="impact" style="font-size:2.5rem;color:#333;line-height:1;">02</div>
+      <div class="proj-card relative grid cursor-pointer grid-cols-[4rem_1fr_auto] items-center gap-8 overflow-hidden border-b border-[#1a1a1a] px-10 py-7">
+        <div class="line-grow absolute bottom-0 left-0 h-0.5 w-full bg-[#FF2D2D]"></div>
+        <div class="impact text-[2.5rem] leading-none text-[#333]">02</div>
         <div>
-          <div style="font-size:1.2rem;font-weight:900;letter-spacing:-.02em;margin-bottom:.35rem;">Braço Robótico Arduino</div>
-          <div class="eyebrow">Equipe Beta &nbsp;·&nbsp; Campus Londrina &nbsp;·&nbsp; Servo Motors</div>
+          <div class="mb-1.5 text-[1.2rem] font-black tracking-[-.02em]">Braço Robótico Arduino</div>
+          <div class="eyebrow">Equipe Beta &nbsp;·&nbsp; Londrina &nbsp;·&nbsp; Servo Motors</div>
         </div>
-        <div style="display:flex;align-items:center;gap:1rem;">
-          <span style="padding:.35rem .9rem;background:rgba(0,102,255,.12);border:2px solid #0066FF;color:#0066FF;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;">CAMPUS</span>
-          <span style="color:#737373;font-size:.85rem;font-weight:700;">8 componentes</span>
+        <div class="flex items-center gap-4">
+          <span class="border-2 border-[#0066FF] bg-[rgba(0,102,255,.12)] px-4 py-1.5 text-[.7rem] font-bold uppercase tracking-[.1em] text-[#0066FF]">EQUIPE</span>
+          <span class="text-[.85rem] font-bold text-zinc-500">8 componentes</span>
         </div>
       </div>
 
-      <div class="proj-card" style="display:grid;grid-template-columns:4rem 1fr auto;align-items:center;gap:2rem;padding:1.75rem 2.5rem;border-bottom:1px solid #1a1a1a;cursor:pointer;position:relative;overflow:hidden;">
-        <div class="line-grow" style="position:absolute;bottom:0;left:0;height:2px;width:100%;background:#FF2D2D;"></div>
-        <div class="impact" style="font-size:2.5rem;color:#333;line-height:1;">03</div>
+      <div class="proj-card relative grid cursor-pointer grid-cols-[4rem_1fr_auto] items-center gap-8 overflow-hidden border-b border-[#1a1a1a] px-10 py-7">
+        <div class="line-grow absolute bottom-0 left-0 h-0.5 w-full bg-[#FF2D2D]"></div>
+        <div class="impact text-[2.5rem] leading-none text-[#333]">03</div>
         <div>
-          <div style="font-size:1.2rem;font-weight:900;letter-spacing:-.02em;margin-bottom:.35rem;">Robô Sumô 500g</div>
-          <div class="eyebrow">Equipe Gamma &nbsp;·&nbsp; Campus Curitiba &nbsp;·&nbsp; C++</div>
+          <div class="mb-1.5 text-[1.2rem] font-black tracking-[-.02em]">Robô Sumô 500g</div>
+          <div class="eyebrow">Equipe Gamma &nbsp;·&nbsp; Curitiba &nbsp;·&nbsp; C++</div>
         </div>
-        <div style="display:flex;align-items:center;gap:1rem;">
-          <span style="padding:.35rem .9rem;background:rgba(255,45,45,.15);border:2px solid #FF2D2D;color:#FF2D2D;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;">PÚBLICO</span>
-          <span style="color:#737373;font-size:.85rem;font-weight:700;">19 componentes</span>
+        <div class="flex items-center gap-4">
+          <span class="border-2 border-[#FF2D2D] bg-[rgba(255,45,45,.15)] px-4 py-1.5 text-[.7rem] font-bold uppercase tracking-[.1em] text-[#FF2D2D]">PÚBLICO</span>
+          <span class="text-[.85rem] font-bold text-zinc-500">19 componentes</span>
         </div>
       </div>
 
-      <div class="proj-card" style="display:grid;grid-template-columns:4rem 1fr auto;align-items:center;gap:2rem;padding:1.75rem 2.5rem;border-bottom:1px solid #1a1a1a;cursor:pointer;position:relative;overflow:hidden;">
-        <div class="line-grow" style="position:absolute;bottom:0;left:0;height:2px;width:100%;background:#FF2D2D;"></div>
-        <div class="impact" style="font-size:2.5rem;color:#333;line-height:1;">04</div>
+      <div class="proj-card relative grid cursor-pointer grid-cols-[4rem_1fr_auto] items-center gap-8 overflow-hidden border-b border-[#1a1a1a] px-10 py-7">
+        <div class="line-grow absolute bottom-0 left-0 h-0.5 w-full bg-[#FF2D2D]"></div>
+        <div class="impact text-[2.5rem] leading-none text-[#333]">04</div>
         <div>
-          <div style="font-size:1.2rem;font-weight:900;letter-spacing:-.02em;margin-bottom:.35rem;">Controlador PID para Seguidor</div>
-          <div class="eyebrow">Equipe Alpha &nbsp;·&nbsp; Campus Cascavel &nbsp;·&nbsp; Python</div>
+          <div class="mb-1.5 text-[1.2rem] font-black tracking-[-.02em]">Controlador PID para Seguidor</div>
+          <div class="eyebrow">Equipe Alpha &nbsp;·&nbsp; Cascavel &nbsp;·&nbsp; Python</div>
         </div>
-        <div style="display:flex;align-items:center;gap:1rem;">
-          <span style="padding:.35rem .9rem;background:#1a1a1a;border:2px solid #404040;color:#737373;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;">EQUIPE</span>
-          <span style="color:#737373;font-size:.85rem;font-weight:700;">6 componentes</span>
+        <div class="flex items-center gap-4">
+          <span class="border-2 border-[#404040] bg-[#1a1a1a] px-4 py-1.5 text-[.7rem] font-bold uppercase tracking-[.1em] text-zinc-500">PRIVADO</span>
+          <span class="text-[.85rem] font-bold text-zinc-500">6 componentes</span>
         </div>
       </div>
 
-      <div class="proj-card" style="display:grid;grid-template-columns:4rem 1fr auto;align-items:center;gap:2rem;padding:1.75rem 2.5rem;cursor:pointer;position:relative;overflow:hidden;">
-        <div class="line-grow" style="position:absolute;bottom:0;left:0;height:2px;width:100%;background:#FF2D2D;"></div>
-        <div class="impact" style="font-size:2.5rem;color:#333;line-height:1;">05</div>
+      <div class="proj-card relative grid cursor-pointer grid-cols-[4rem_1fr_auto] items-center gap-8 overflow-hidden px-10 py-7">
+        <div class="line-grow absolute bottom-0 left-0 h-0.5 w-full bg-[#FF2D2D]"></div>
+        <div class="impact text-[2.5rem] leading-none text-[#333]">05</div>
         <div>
-          <div style="font-size:1.2rem;font-weight:900;letter-spacing:-.02em;margin-bottom:.35rem;">Visão Computacional com OpenCV</div>
-          <div class="eyebrow">Equipe Delta &nbsp;·&nbsp; Campus Londrina &nbsp;·&nbsp; Python</div>
+          <div class="mb-1.5 text-[1.2rem] font-black tracking-[-.02em]">Visão Computacional com OpenCV</div>
+          <div class="eyebrow">Equipe Delta &nbsp;·&nbsp; Londrina &nbsp;·&nbsp; Python</div>
         </div>
-        <div style="display:flex;align-items:center;gap:1rem;">
-          <span style="padding:.35rem .9rem;background:rgba(255,45,45,.15);border:2px solid #FF2D2D;color:#FF2D2D;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;">PÚBLICO</span>
-          <span style="color:#737373;font-size:.85rem;font-weight:700;">11 componentes</span>
+        <div class="flex items-center gap-4">
+          <span class="border-2 border-[#FF2D2D] bg-[rgba(255,45,45,.15)] px-4 py-1.5 text-[.7rem] font-bold uppercase tracking-[.1em] text-[#FF2D2D]">PÚBLICO</span>
+          <span class="text-[.85rem] font-bold text-zinc-500">11 componentes</span>
         </div>
       </div>
 
@@ -500,85 +455,85 @@
   <!-- ═══════════════════════════════════════
        6. SOBRE — why it exists (two-col)
   ═══════════════════════════════════════ -->
-  <section style="border-bottom:3px solid #fff;display:grid;grid-template-columns:1fr 1fr;">
+  <section class="grid grid-cols-2 border-b-[3px] border-white">
 
     <!-- left col: big title -->
-    <div style="padding:5rem 3rem;border-right:3px solid #fff;position:relative;overflow:hidden;">
-      <div style="position:absolute;bottom:-4rem;right:-4rem;width:20rem;height:20rem;border:3px solid rgba(255,45,45,.15);transform:rotate(20deg);"></div>
-      <div class="eyebrow" style="margin-bottom:1.5rem;">SOBRE O PROJETO</div>
-      <h2 style="font-size:clamp(3rem,7vw,6rem);font-weight:900;letter-spacing:-.04em;line-height:.92;position:relative;z-index:1;">
+    <div class="relative overflow-hidden border-r-[3px] border-white px-12 py-20">
+      <div class="absolute -bottom-16 -right-16 h-[20rem] w-[20rem] rotate-[20deg] border-[3px] border-[rgba(255,45,45,.15)]"></div>
+      <div class="eyebrow mb-6">SOBRE O PROJETO</div>
+      <h2 class="relative z-[1] text-[clamp(3rem,7vw,6rem)] font-black tracking-[-.04em] leading-[.92]">
         POR QUE<br>O
-        <span class="brand" style="color:#FF2D2D;">ROBO<wbr>DRIVE</span><br>
+        <span class="brand text-[#FF2D2D]">ROBO<wbr>DRIVE</span><br>
         EXISTE?
       </h2>
     </div>
 
     <!-- right col: text + tags -->
-    <div style="padding:5rem 3rem;display:flex;flex-direction:column;justify-content:space-between;gap:3rem;">
-      <div style="display:flex;flex-direction:column;gap:1.5rem;">
-        <p style="font-size:1.15rem;color:#d4d4d4;line-height:1.7;">
-          O RoboDrive nasceu para resolver o problema da <strong style="color:#fff;">dispersão de conhecimento</strong> em projetos de robótica educacional no IFPR.
+    <div class="flex flex-col justify-between gap-12 px-12 py-20">
+      <div class="flex flex-col gap-6">
+        <p class="text-[1.15rem] leading-[1.7] text-zinc-300">
+          O RoboDrive nasceu para resolver o problema da <strong class="text-white">dispersão de conhecimento</strong> em projetos de robótica educacional no IFPR.
         </p>
-        <p style="font-size:1rem;color:#737373;line-height:1.7;">
+        <p class="text-base leading-[1.7] text-zinc-500">
           Quando códigos, documentações e decisões técnicas ficam espalhados em dispositivos pessoais, grupos de WhatsApp e pen drives, perde-se a capacidade de reaproveitar esse conhecimento em turmas futuras — e todo o esforço se perde com a formatura.
         </p>
-        <p style="font-size:1rem;color:#737373;line-height:1.7;">
-          Com o RoboDrive, professores organizam equipes, alunos documentam projetos e o campus constrói um acervo técnico duradouro.
+        <p class="text-base leading-[1.7] text-zinc-500">
+          Com o RoboDrive, você pode facilmente gerenciar equipes, ou entrar em uma e documentar projetos, sua equipe constrói um acervo técnico duradouro.
         </p>
       </div>
 
-      <div style="display:flex;flex-wrap:wrap;gap:.75rem;">
-        <span style="padding:.85rem 2rem;background:#FF2D2D;border:3px solid #fff;font-weight:900;letter-spacing:.06em;text-transform:uppercase;font-size:.9rem;">CENTRALIZE</span>
-        <span style="padding:.85rem 2rem;background:#0066FF;border:3px solid #fff;font-weight:900;letter-spacing:.06em;text-transform:uppercase;font-size:.9rem;">ORGANIZE</span>
-        <span style="padding:.85rem 2rem;background:#FF2D2D;border:3px solid #fff;font-weight:900;letter-spacing:.06em;text-transform:uppercase;font-size:.9rem;">REUTILIZE</span>
+      <div class="flex flex-wrap gap-3">
+        <span class="border-[3px] border-white bg-[#FF2D2D] px-8 py-3.5 text-[.9rem] font-black uppercase tracking-[.06em]">CENTRALIZE</span>
+        <span class="border-[3px] border-white bg-[#0066FF] px-8 py-3.5 text-[.9rem] font-black uppercase tracking-[.06em]">ORGANIZE</span>
+        <span class="border-[3px] border-white bg-[#FF2D2D] px-8 py-3.5 text-[.9rem] font-black uppercase tracking-[.06em]">REUTILIZE</span>
       </div>
     </div>
 
   </section>
 
 
-  <!-- ═══════════════════════════════════════
-       7. COMO FUNCIONA — 3 steps horizontal
-  ═══════════════════════════════════════ -->
-  <section style="background:#0a0a0a;border-bottom:3px solid #fff;">
+    <!-- ═══════════════════════════════════════
+      7. COMO FUNCIONA — 3 steps horizontal
+    ═══════════════════════════════════════ -->
+  <section class="border-b-[3px] border-white section-07">
 
-    <div style="padding:4rem 2.5rem 2.5rem;border-bottom:3px solid #222;">
-      <div class="eyebrow" style="margin-bottom:.75rem;">PRIMEIROS PASSOS</div>
-      <h2 style="font-size:clamp(2.5rem,6vw,5rem);font-weight:900;letter-spacing:-.04em;line-height:.95;">
-        COMO <span style="color:#0066FF;">FUNCIONA</span>
+    <div class="border-b-[3px] border-[#222] px-10 pb-10 pt-16">
+      <div class="eyebrow mb-3">PRIMEIROS PASSOS</div>
+      <h2 class="text-[clamp(2.5rem,6vw,5rem)] font-black tracking-[-.04em] leading-[.95]">
+        COMO <span class="text-[#FF2D2D]">FUNCIONA</span>
       </h2>
     </div>
 
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);">
+    <div class="grid grid-cols-3">
 
-      <div style="padding:3rem 2.5rem;border-right:3px solid #222;position:relative;">
-        <div style="position:absolute;top:0;left:0;height:4px;width:100%;background:#FF2D2D;"></div>
-        <div class="impact" style="font-size:5rem;color:#FF2D2D;opacity:.15;line-height:1;margin-bottom:1rem;">01</div>
-        <div style="display:inline-flex;padding:.85rem;border:2px solid #FF2D2D;color:#FF2D2D;margin-bottom:1.5rem;">
+      <div class="relative border-r-[3px] border-[#222] px-10 py-12">
+        <div class="absolute top-0 left-0 h-1 w-full bg-[#FF2D2D]"></div>
+        <div class="impact mb-4 text-[5rem] leading-none text-[#FF2D2D] opacity-[0.25]">01</div>
+        <div class="mb-6 inline-flex border-2 border-[#FF2D2D] p-3.5 text-[#FF2D2D]">
           <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
-        <h3 style="font-size:1.6rem;font-weight:900;letter-spacing:-.03em;margin-bottom:.85rem;">CADASTRE-SE</h3>
-        <p style="color:#525252;line-height:1.7;font-size:.95rem;">Crie sua conta com e-mail institucional do IFPR. Professores validam membros e gerenciam equipes por campus.</p>
+        <h3 class="mb-3.5 text-[1.6rem] font-black tracking-[-.03em]">CADASTRE-SE</h3>
+        <p class="text-[.95rem] leading-[1.7] text-zinc-500">Crie sua conta com e-mail institucional do IFPR. Professores validam membros e gerenciam equipes por campus.</p>
       </div>
 
-      <div style="padding:3rem 2.5rem;border-right:3px solid #222;position:relative;">
-        <div style="position:absolute;top:0;left:0;height:4px;width:100%;background:#FF2D2D;"></div>
-        <div class="impact" style="font-size:5rem;color:#FF2D2D;opacity:.15;line-height:1;margin-bottom:1rem;">02</div>
-        <div style="display:inline-flex;padding:.85rem;border:2px solid #FF2D2D;color:#FF2D2D;margin-bottom:1.5rem;">
+      <div class="relative border-r-[3px] border-[#222] px-10 py-12">
+        <div class="absolute top-0 left-0 h-1 w-full bg-[#FF2D2D]"></div>
+        <div class="impact mb-4 text-[5rem] leading-none text-[#FF2D2D] opacity-[0.25]">02</div>
+        <div class="mb-6 inline-flex border-2 border-[#FF2D2D] p-3.5 text-[#FF2D2D]">
           <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
         </div>
-        <h3 style="font-size:1.6rem;font-weight:900;letter-spacing:-.03em;margin-bottom:.85rem;">CRIE PROJETOS</h3>
-        <p style="color:#525252;line-height:1.7;font-size:.95rem;">Documente robôs com código, componentes, imagens e descrições técnicas. Defina a visibilidade: equipe, campus ou público.</p>
+        <h3 class="mb-3.5 text-[1.6rem] font-black tracking-[-.03em]">CRIE PROJETOS</h3>
+        <p class="text-[.95rem] leading-[1.7] text-zinc-500">Documente robôs com código, componentes, imagens e descrições técnicas. Defina a visibilidade: equipe, campus ou público.</p>
       </div>
 
-      <div style="padding:3rem 2.5rem;position:relative;">
-        <div style="position:absolute;top:0;left:0;height:4px;width:100%;background:#FF2D2D;"></div>
-        <div class="impact" style="font-size:5rem;color:#FF2D2D;opacity:.15;line-height:1;margin-bottom:1rem;">03</div>
-        <div style="display:inline-flex;padding:.85rem;border:2px solid #FF2D2D;color:#FF2D2D;margin-bottom:1.5rem;">
+      <div class="relative px-10 py-12">
+        <div class="absolute top-0 left-0 h-1 w-full bg-[#FF2D2D]"></div>
+        <div class="impact mb-4 text-[5rem] leading-none text-[#FF2D2D] opacity-[0.25]">03</div>
+        <div class="mb-6 inline-flex border-2 border-[#FF2D2D] p-3.5 text-[#FF2D2D]">
           <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
-        <h3 style="font-size:1.6rem;font-weight:900;letter-spacing:-.03em;margin-bottom:.85rem;">COLABORE</h3>
-        <p style="color:#525252;line-height:1.7;font-size:.95rem;">Compartilhe com sua equipe, publique para o campus ou abra para toda a comunidade IFPR. Use o fórum para tirar dúvidas.</p>
+        <h3 class="mb-3.5 text-[1.6rem] font-black tracking-[-.03em]">COLABORE</h3>
+        <p class="text-[.95rem] leading-[1.7] text-zinc-500">Compartilhe com sua equipe, publique para o campus ou abra para toda a comunidade IFPR. Use o fórum para tirar dúvidas.</p>
       </div>
 
     </div>
@@ -588,21 +543,21 @@
   <!-- ═══════════════════════════════════════
        8. ROLES — quem usa
   ═══════════════════════════════════════ -->
-  <section style="border-bottom:3px solid #fff;">
+  <section class="border-b-[3px] border-white">
 
-    <div style="padding:4rem 2.5rem 2.5rem;border-bottom:3px solid #fff;">
-      <div class="eyebrow" style="margin-bottom:.75rem;">CONTROLE DE ACESSO</div>
-      <h2 style="font-size:clamp(2.5rem,6vw,5rem);font-weight:900;letter-spacing:-.04em;line-height:.95;">
-        QUEM <span style="color:#FF2D2D;">USA</span>
+    <div class="border-b-[3px] border-white px-10 pb-10 pt-16">
+      <div class="eyebrow mb-3">CONTROLE DE ACESSO</div>
+      <h2 class="text-[clamp(2.5rem,6vw,5rem)] font-black tracking-[-.04em] leading-[.95]">
+        QUEM <span class="text-[#FF2D2D]">USA</span>
       </h2>
     </div>
 
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);">
+    <div class="grid grid-cols-3">
 
-      <div style="padding:3rem;border-right:3px solid #fff;position:relative;">
-        <div style="font-size:.7rem;font-weight:700;letter-spacing:.15em;color:#FF2D2D;text-transform:uppercase;margin-bottom:1.5rem;padding:.4rem .9rem;border:2px solid #FF2D2D;display:inline-block;">PROFESSOR</div>
-        <h3 style="font-size:1.75rem;font-weight:900;letter-spacing:-.03em;margin-bottom:1rem;">Controle Total</h3>
-        <ul style="color:#737373;line-height:2;font-size:.95rem;list-style:none;padding:0;">
+      <div class="relative border-r-[3px] border-white p-12">
+        <div class="mb-6 inline-block border-2 border-[#FF2D2D] px-3.5 py-1 text-[.7rem] font-bold uppercase tracking-[.15em] text-[#FF2D2D]">COORDENADOR</div>
+        <h3 class="mb-4 text-[1.75rem] font-black tracking-[-.03em]">Controle Total</h3>
+        <ul class="list-none p-0 text-[.95rem] leading-[2] text-zinc-500">
           <li>→ &nbsp;Criar e gerenciar equipes</li>
           <li>→ &nbsp;Validar alunos no campus</li>
           <li>→ &nbsp;Definir visibilidade de projetos</li>
@@ -611,10 +566,10 @@
         </ul>
       </div>
 
-      <div style="padding:3rem;border-right:3px solid #fff;position:relative;">
-        <div style="font-size:.7rem;font-weight:700;letter-spacing:.15em;color:#0066FF;text-transform:uppercase;margin-bottom:1.5rem;padding:.4rem .9rem;border:2px solid #0066FF;display:inline-block;">ALUNO</div>
-        <h3 style="font-size:1.75rem;font-weight:900;letter-spacing:-.03em;margin-bottom:1rem;">Contribuidor</h3>
-        <ul style="color:#737373;line-height:2;font-size:.95rem;list-style:none;padding:0;">
+      <div class="relative border-r-[3px] border-white p-12">
+        <div class="mb-6 inline-block border-2 border-[#0066FF] px-3.5 py-1 text-[.7rem] font-bold uppercase tracking-[.15em] text-[#0066FF]">CONTRIBUIDOR</div>
+        <h3 class="mb-4 text-[1.75rem] font-black tracking-[-.03em]">Faz a Mágica Acontecer</h3>
+        <ul class="list-none p-0 text-[.95rem] leading-[2] text-zinc-500">
           <li>→ &nbsp;Criar e documentar projetos</li>
           <li>→ &nbsp;Usar componentes da biblioteca</li>
           <li>→ &nbsp;Colaborar com a equipe</li>
@@ -623,15 +578,15 @@
         </ul>
       </div>
 
-      <div style="padding:3rem;position:relative;">
-        <div style="font-size:.7rem;font-weight:700;letter-spacing:.15em;color:#737373;text-transform:uppercase;margin-bottom:1.5rem;padding:.4rem .9rem;border:2px solid #404040;display:inline-block;">VISITANTE</div>
-        <h3 style="font-size:1.75rem;font-weight:900;letter-spacing:-.03em;margin-bottom:1rem;">Leitor</h3>
-        <ul style="color:#525252;line-height:2;font-size:.95rem;list-style:none;padding:0;">
+      <div class="relative p-12">
+        <div class="mb-6 inline-block border-2 border-[#404040] px-3.5 py-1 text-[.7rem] font-bold uppercase tracking-[.15em] text-zinc-500">VISITANTE</div>
+        <h3 class="mb-4 text-[1.75rem] font-black tracking-[-.03em]">Leitor</h3>
+        <ul class="list-none p-0 text-[.95rem] leading-[2] text-zinc-600">
           <li>→ &nbsp;Ver projetos públicos</li>
           <li>→ &nbsp;Explorar componentes públicos</li>
           <li>→ &nbsp;Ler threads do fórum</li>
-          <li style="color:#404040;">✕ &nbsp;Criar projetos</li>
-          <li style="color:#404040;">✕ &nbsp;Participar de equipes</li>
+          <li class="text-[#404040]">✕ &nbsp;Criar projetos</li>
+          <li class="text-[#404040]">✕ &nbsp;Participar de equipes</li>
         </ul>
       </div>
 
@@ -642,40 +597,50 @@
   <!-- ═══════════════════════════════════════
        9. MARQUEE 2 — segundo ticker (branco)
   ═══════════════════════════════════════ -->
-  <div style="background:#fff;border-bottom:3px solid #fff;overflow:hidden;padding:.75rem 0;">
-    <div class="marquee-track-right">
-      <span style="white-space:nowrap;font-weight:900;font-size:.9rem;letter-spacing:.12em;text-transform:uppercase;color:#000;padding:0 2rem;">
-        PROFESSOR &nbsp;·&nbsp; ALUNO &nbsp;·&nbsp; EQUIPE &nbsp;·&nbsp; CAMPUS &nbsp;·&nbsp;
-        REPOSITÓRIO &nbsp;·&nbsp; CÓDIGO &nbsp;·&nbsp; DOCUMENTAÇÃO &nbsp;·&nbsp;
-        ARDUINO &nbsp;·&nbsp; PYTHON &nbsp;·&nbsp; C++ &nbsp;·&nbsp; SENSOR &nbsp;·&nbsp; MOTOR &nbsp;·&nbsp;
-        PROFESSOR &nbsp;·&nbsp; ALUNO &nbsp;·&nbsp; EQUIPE &nbsp;·&nbsp; CAMPUS &nbsp;·&nbsp;
-        REPOSITÓRIO &nbsp;·&nbsp; CÓDIGO &nbsp;·&nbsp; DOCUMENTAÇÃO &nbsp;·&nbsp;
-        ARDUINO &nbsp;·&nbsp; PYTHON &nbsp;·&nbsp; C++ &nbsp;·&nbsp; SENSOR &nbsp;·&nbsp; MOTOR &nbsp;·&nbsp;
-      </span>
+  <div class="marquee marquee--primary mt-1 mb-1" aria-label="Marquee de navegação rápida">
+    <div class="marquee__track">
+      <ul class="marquee__content">
+        <li class="text-white"><span class="text-[#FF2D2D]">Professor</span> orientador</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Aluno</span> desenvolvedor</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Equipe</span> colaborativa</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Campus</span> integrado</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Repositório</span> central</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Projetos</span> publicados</li>
+      </ul>
+
+      <ul aria-hidden="true" class="marquee__content">
+        <li class="text-white"><span class="text-[#FF2D2D]">Professor</span> orientador</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Aluno</span> desenvolvedor</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Equipe</span> colaborativa</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Campus</span> integrado</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Repositório</span> central</li>
+        <li class="text-white"><span class="text-[#FF2D2D]">Projetos</span> publicados</li>
+      </ul>
     </div>
   </div>
 
+  <div class="divider-white"></div>
 
   <!-- ═══════════════════════════════════════
        10. CTA FINAL — fullscreen call to action
   ═══════════════════════════════════════ -->
-  <section style="position:relative;overflow:hidden;min-height:60vh;display:flex;flex-direction:column;justify-content:center;">
+  <section class="relative flex min-h-[60vh] flex-col justify-center overflow-hidden">
 
-    <div style="position:relative;z-index:1;padding:6rem 2.5rem;text-align:center;">
-      <div class="eyebrow" style="margin-bottom:1.5rem;">FAÇA PARTE DA COMUNIDADE</div>
-      <h2 style="font-size:clamp(3.5rem,10vw,9rem);font-weight:900;letter-spacing:-.04em;line-height:.9;margin-bottom:2.5rem;">
+    <div class="relative z-[1] px-10 py-24 text-center">
+      <div class="eyebrow mb-6">FAÇA PARTE DA COMUNIDADE</div>
+      <h2 class="mb-10 text-[clamp(3.5rem,10vw,9rem)] font-black tracking-[-.04em] leading-[.9]">
         PRONTO PARA<br>
-        <span style="color:#FF2D2D;">COMEÇAR?</span>
+        <span class="text-[#FF2D2D]">COMEÇAR?</span>
       </h2>
-      <p style="font-size:1.15rem;color:#737373;max-width:38ch;margin:0 auto 3rem;line-height:1.65;">
-        Junte-se ao repositório central de robótica do IFPR e pare de perder conhecimento entre turmas.
+      <p class="mx-auto mb-12 max-w-[38ch] text-[1.15rem] leading-[1.65] text-zinc-500">
+        Junte-se ao repositório central de robótica e pare de perder conhecimento.
       </p>
-      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:1.25rem;">
-        <a href="#" class="btn-primary" style="font-size:1.1rem;padding:1.4rem 3rem;">
+      <div class="flex flex-wrap justify-center gap-5">
+        <a href="#" class="btn-primary px-12 py-5 text-[1.1rem]">
           CRIAR CONTA GRÁTIS
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
-        <a href="#" class="btn-ghost" style="font-size:1.1rem;padding:1.4rem 3rem;">JÁ TENHO CONTA</a>
+        <a href="#" class="btn-ghost px-12 py-5 text-[1.1rem]">JÁ TENHO CONTA</a>
       </div>
     </div>
 
@@ -687,4 +652,93 @@
 </body>
 </html>
 
+<script>
+  const marquees = document.querySelectorAll('.marquee--primary');
+
+  marquees.forEach((marquee) => {
+    const track = marquee.querySelector('.marquee__track');
+    const firstList = marquee.querySelector('.marquee__content');
+    const secondList = firstList ? firstList.nextElementSibling : null;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const speed = 100;
+
+    let direction = 1;
+    let offset = 0;
+    let lastTime = null;
+
+    const cloneListItems = (list) => {
+      if (!list) {
+        return [];
+      }
+
+      return Array.from(list.children).map((item) => item.cloneNode(true));
+    };
+
+    const ensureCoverage = () => {
+      if (!firstList || !secondList) {
+        return;
+      }
+
+      const templateItems = cloneListItems(firstList);
+
+      while (firstList.scrollWidth < window.innerWidth * 1.5) {
+        templateItems.forEach((item) => {
+          firstList.appendChild(item.cloneNode(true));
+          secondList.appendChild(item.cloneNode(true));
+        });
+      }
+    };
+
+    const setDirection = (reverse) => {
+      direction = reverse ? -1 : 1;
+    };
+
+    const animate = (time) => {
+      if (!track) {
+        return;
+      }
+
+      if (lastTime === null) {
+        lastTime = time;
+      }
+
+      const deltaSeconds = (time - lastTime) / 1000;
+      lastTime = time;
+
+      if (!prefersReducedMotion.matches) {
+        const loopWidth = track.scrollWidth / 2;
+
+        if (loopWidth > 0) {
+          offset = (offset + (direction * speed * deltaSeconds)) % loopWidth;
+
+          if (offset < 0) {
+            offset += loopWidth;
+          }
+
+          track.style.transform = `translate3d(${-offset}px, 0, 0)`;
+        }
+      }
+
+      requestAnimationFrame(animate);
+    };
+
+    ensureCoverage();
+    setDirection(false);
+
+    window.addEventListener('wheel', (event) => {
+      setDirection(event.deltaY > 0);
+    }, { passive: true });
+
+    window.addEventListener('resize', () => {
+      offset = 0;
+      lastTime = null;
+      if (track) {
+        track.style.transform = 'translate3d(0, 0, 0)';
+      }
+      ensureCoverage();
+    });
+
+    requestAnimationFrame(animate);
+  });
+</script>
 <script src="<?= JS_URL_BASE ?>/wallpaper.js"></script>
