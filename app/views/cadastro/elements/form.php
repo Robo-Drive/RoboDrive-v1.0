@@ -1,10 +1,22 @@
 <div class="space-y-6">
     <div class="relative">
         <label for="nome" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
+            Nome de usuário
+        </label>
+
+        <input type="text" name="nome" class="w-full h-10 bg-black/80 border border-white  px-4 text-white outline-none focus:border-[#FF1A1A] transition-all" value="<?= isset($usuario["nome"]) ? $usuario["nome"]: "" ?>">
+        <?php if(isset($erros)): ?>
+            <?php if(isset($erros["nome_usuario"])): ?>
+                <p class="text-[#FF1A1A] mt-3"><?= $erros["nome_usuario"] ?></p>
+            <?php endif;?>
+        <?php endif;?>
+    </div>
+    <div class="relative">
+        <label for="nome" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
             Nome
         </label>
 
-    <input type="text" name="nome" class="w-full h-10 bg-black/80 border border-white  px-4 text-white outline-none focus:border-[#FF1A1A] transition-all" value="<?= isset($usuario["nome"]) ? $usuario["nome"]: "" ?>">
+        <input type="text" name="nome" class="w-full h-10 bg-black/80 border border-white  px-4 text-white outline-none focus:border-[#FF1A1A] transition-all" value="<?= isset($usuario["nome"]) ? $usuario["nome"]: "" ?>">
         <?php if(isset($erros)): ?>
             <?php if(isset($erros["nome"])): ?>
                 <p class="text-[#FF1A1A] mt-3"><?= $erros["nome"] ?></p>

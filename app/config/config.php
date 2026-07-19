@@ -8,7 +8,7 @@ if(session_status() == PHP_SESSION_NONE)
 }
 
 
-if (DEV_ENVIRONMENT == true)
+if (DEV_ENVIRONMENT)
 {
     ini_set('display_errors', 1);
     ini_set('display_startup_errors', 1);

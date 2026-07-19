@@ -31,7 +31,8 @@ include_once(__DIR__."/../elements/header.php");
                 <a href="<?= URL_BASE ?>/projeto/cadastro" class="absolute right-5 top-1/2 -translate-y-1/2 text-white border px-4 py-1 hover:border-[#FF1A1A]">
                     Adicionar projeto
                 </a>
-            </div><div class="p-5 w-full text-white border border-zinc-700 flex flex-wrap gap-2">
+            </div>
+            <div class="p-5 w-full text-white border border-zinc-700 flex flex-wrap gap-2">
                 <?php if(isset($projetos)):?>
                     <?php foreach($projetos as $projeto):?>
                         <?php include(__DIR__."/elements/cardProjeto.php")?>

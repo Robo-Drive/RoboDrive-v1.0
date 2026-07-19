@@ -40,6 +40,7 @@ class ForumRepositorySql implements ForumRepositoryInterface
                     conteudo = :conteudo,
                     visibilidade = :visibilidade,
                     usuario_id = :usuario_id
+                    equipe_id = :equipe_id
                     WHERE id = :id";
     
             $stmt = $this->connection->prepare($sql);
@@ -47,6 +48,7 @@ class ForumRepositorySql implements ForumRepositoryInterface
             $stmt->bindValue(':conteudo', $forum->getConteudo());
             $stmt->bindValue(':visibilidade', $forum->getVisibilidade());
             $stmt->bindValue(':usuario_id', $_SESSION["usuario_logado"]->getId());
+            $stmt->bindValue(':equipe_id', $forum->getEquipe()->getId()??null);
             $stmt->bindValue(':id', $forum->getId(), PDO::PARAM_INT);
         
         if ($stmt->execute()) {
@@ -87,7 +89,9 @@ class ForumRepositorySql implements ForumRepositoryInterface
     }
     public function listarTodos(): array
     {
-        $sql = "SELECT * FROM postagem_forum";
+        $sql = "SELECT *, u.nome_usuario 
+        FROM postagem_forum f 
+        JOIN usuario u ON u.id = f.usuario_id WHERE f.visibilidade='publico'";
         $stmt = $this->connection->prepare($sql);
         $stmt->execute();
         return Forum::map($stmt->fetchAll());

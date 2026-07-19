@@ -1,5 +1,23 @@
 <div class="space-y-6">
 
+    <!-- Nome de usuário-->
+    <div class="relative">
+        <label for="nome_usuario" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
+            Nome de usuário
+        </label>
+
+        <input
+            type="text"
+            name="nome_usuario"
+            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all"
+            value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getNomeUsuario() : (isset($usuario['nome_usuario']) ? $usuario['nome_usuario'] : '')) : '' ?>"
+        >
+
+        <?php if (isset($erros['nome'])): ?>
+            <p class="text-[#FF1A1A] mt-3"><?= $erros['nome'] ?></p>
+        <?php endif; ?>
+    </div>
+    
     <!-- Nome -->
     <div class="relative">
         <label for="nome" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">

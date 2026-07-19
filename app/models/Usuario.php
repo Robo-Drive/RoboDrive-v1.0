@@ -8,6 +8,7 @@ class Usuario
 {
     private ?int $id;
     private ?string $nome;
+    private ?string $nomeUsuario;
     private ?string $email;
     private ?string $senha;
     private ?string $biografia;
@@ -142,6 +143,16 @@ class Usuario
     {
         $this->tipo = $tipo;
 
+        return $this;
+    }
+
+    public function getNomeUsuario(): ?string
+    {
+        return $this->nomeUsuario;
+    }
+    public function setNomeUsuario(?string $nomeUsuario): self
+    {
+        $this->nomeUsuario = $nomeUsuario;
         return $this;
     }
 }
