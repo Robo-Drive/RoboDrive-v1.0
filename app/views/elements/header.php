@@ -14,7 +14,7 @@
 </head>
 <body class="w-screen h-screen">
 <header>
-    <div class="w-full h-[10dvh] bg-black flex justify-center items-center">
+    <div class="relative z-[10] w-full h-[7dvh] bg-transparent flex justify-center items-center">
         <h1 class="text-3xl font-bold font-['Orbitron'] text-[#FF1A1A]">Robo</h1>
         <h1 class="text-3xl font-bold font-['Orbitron'] text-white">Drive</h1>
     </div>
