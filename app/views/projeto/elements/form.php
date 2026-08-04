@@ -86,9 +86,52 @@
                 Público
             </option>
         </select>
-
+        
         <?php if (isset($erros['visibilidade'])): ?>
             <p class="text-[#FF1A1A] mt-3"><?= $erros['visibilidade'] ?></p>
+        <?php endif; ?>
+    </div>
+
+    <div class="relative">
+        <label for="visibilidade" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
+            Arquivos de código
+        </label>
+        <button type="button" onclick="adicionarArquivos()" class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all">Adicionar arquivos</button>
+        
+        <input type="file" name="codigos[]" id="codigos" style="display:none;" multiple>
+        <ul id="listaCodigos"></ul>
+        
+        <?php if (isset($erros['codigo'])): ?>
+            <p class="text-[#FF1A1A] mt-3"><?= $erros['codigo'] ?></p>
+        <?php endif; ?>
+    </div>
+    
+    <div class="relative">
+        <label for="imagens" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
+            Imagens
+        </label>
+
+        <button
+            type="button"
+            onclick="adicionarImagens()"
+            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all"
+        >
+            Adicionar imagens
+        </button>
+
+        <input
+            type="file"
+            name="imagens[]"
+            id="imagens"
+            accept="image/*"
+            style="display:none;"
+            multiple
+        >
+
+        <ul id="listaImagens" class="space-y-2 mt-3"></ul>
+
+        <?php if (isset($erros['imagens'])): ?>
+            <p class="text-[#FF1A1A] mt-3"><?= $erros['imagens'] ?></p>
         <?php endif; ?>
     </div>
 

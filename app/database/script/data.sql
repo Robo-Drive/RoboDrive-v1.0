@@ -173,10 +173,44 @@ INSERT INTO equipe (nome, senha) VALUES
 ('Equipe Beta', '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2'),
 ('Equipe Gamma', '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2');
 
-INSERT INTO usuario (nome, nome_usuario, email, senha, imagem, regra, status) VALUES
-('Walmonn Eduardo Barbosa Ramalho da Silva', 'WalmonnEduardo', 'walmonn.eduardo.tds2023@gmail.com', '$2y$12$/E551s2RVpWQgvvUnbq4E.ZZvKoaE2V1cNwPp2aTJokiCd6lle3/a', 'https://example.com/sai-dr-stone.webp', 'admin', 1),
-('Guilherme Canever Wernke', 'guilherme', 'guilherme.wernke.tds2023@gmail.com', '$2y$12$pIqRCJLzv2Ia0jGlzk9VSOTAIK4YZk4/UB0Zs/3gjUerizr0DSTpW', 'https://example.com/thumb.jpg', 'admin', 1),
-('Petrus Mito de Souza', 'petrus', 'petrus.souza.tds2023@gmail.com', '$2y$12$ECX23EPvPazaiSUN2asdwOLf0carz.YsWft/4Y93ziODDBmoq08PW', 'https://example.com/thumb2.png', 'admin', 1),
+INSERT INTO usuario
+(nome, nome_usuario, email, senha, biografia, imagem, regra, status)
+VALUES
+('Walmonn Eduardo Barbosa Ramalho da Silva',
+ 'WalmonnEduardo',
+ 'walmonn.eduardo.tds2023@gmail.com',
+ '$2y$12$/E551s2RVpWQgvvUnbq4E.ZZvKoaE2V1cNwPp2aTJokiCd6lle3/a',
+ 'Desenvolvedor e entusiasta de robótica.',
+ 'https://example.com/sai-dr-stone.webp',
+ 'admin',
+ TRUE),
+
+('Guilherme Canever Wernke',
+ 'guilherme',
+ 'guilherme.wernke.tds2023@gmail.com',
+ '$2y$12$pIqRCJLzv2Ia0jGlzk9VSOTAIK4YZk4/UB0Zs/3gjUerizr0DSTpW',
+ 'Professor de robótica.',
+ 'https://example.com/thumb.jpg',
+ 'admin',
+ TRUE),
+
+('Petrus Mito de Souza',
+ 'petrus',
+ 'petrus.souza.tds2023@gmail.com',
+ '$2y$12$ECX23EPvPazaiSUN2asdwOLf0carz.YsWft/4Y93ziODDBmoq08PW',
+ 'Especialista em eletrônica.',
+ 'https://example.com/thumb2.png',
+ 'admin',
+ TRUE),
+
+('teste',
+ 'teste',
+ 'teste@gmail.com',
+ '$2y$12$twxVhhtHCFpYcOk8W02lq.PP/4hxFB9Urf9sV2lKPP4/JgF.Nkd16',
+ NULL,
+ NULL,
+ 'usuario',
+ TRUE);
 ('teste', 'teste', 'teste@gmail.com', '$2y$12$twxVhhtHCFpYcOk8W02lq.PP/4hxFB9Urf9sV2lKPP4/JgF.Nkd16', NULL, 'usuario', 1);
 
 INSERT INTO categoria (nome, usuario_id) VALUES
@@ -184,10 +218,29 @@ INSERT INTO categoria (nome, usuario_id) VALUES
 ('Mecânica', 2),
 ('Eletrônica', 3);
 
-INSERT INTO projeto (nome, descricao, visibilidade, usuario_id, categoria_id) VALUES
-('Robô Seguidor de Linha', 'Robô que segue uma linha usando sensores', 'publico', 1, 1),
-('Braço Robótico', 'Braço mecânico controlado por servo motores', 'publico', 2, 2),
-('Drone Arduino', 'Drone controlado por Arduino com sensores', 'privado', 3, 3);
+INSERT INTO projeto
+(nome, descricao, visibilidade, usuario_id, categoria_id, equipe_id)
+VALUES
+('Robô Seguidor de Linha',
+ 'Robô que segue uma linha usando sensores',
+ 'publico',
+ 1,
+ 1,
+ 1),
+
+('Braço Robótico',
+ 'Braço mecânico controlado por servo motores',
+ 'publico',
+ 2,
+ 2,
+ 2),
+
+('Drone Arduino',
+ 'Drone controlado por Arduino com sensores',
+ 'privado',
+ 3,
+ 3,
+ NULL);
 
 INSERT INTO componente (nome, descricao, imagem, usuario_id) VALUES
 ('Arduino Uno', 'Microcontrolador', 'https://upload.wikimedia.org/wikipedia/commons/3/38/Arduino_Uno_-_R3.jpg', 1),

@@ -4,19 +4,37 @@ namespace app\services;
 
 use app\models\Projeto;
 use app\repositories\ProjetoRepositorySql;
+
+use app\services\CodigoService;
+use app\services\ImagemService;
+
 use Exception;
 
 class ProjetoService
 {
+
+    private CodigoService $codigoService;
+    private ImagemService $imagemService;
     private ProjetoRepositorySql $repositorySql;
     
     public function __construct()
     {
         $this->repositorySql = new ProjetoRepositorySql();
+        $this->imagemService = new ImagemService();
+        $this->codigoService = new CodigoService();
     }
-    public function salvarProjeto(Projeto $projeto): bool
+    public function salvarProjeto(array $posts): bool
     {
-        $this->repositorySql->cadastrar($projeto);
+        $projeto = Projeto::map([$posts])[0];
+        //$this->repositorySql->cadastrar($projeto);
+        if(!empty($posts["codigos"]))
+        {
+            $this->codigoService->transformarObjetoArquivo($posts["codigos"],"/user-".$_SESSION["usuario_logado"]->getId()."/projects/projetc-1/code/");
+        }
+        if(!empty($posts["imagens"]))
+        {
+            $this->imagemService;
+        }
         return true;
     }
     public function editarProjeto(Projeto $projeto):bool

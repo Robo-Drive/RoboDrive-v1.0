@@ -50,8 +50,8 @@ class ProjetoController extends Controller
         $posts["nome"]   = trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
         $posts["descricao"]   = trim(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
         $posts["visibilidade"]  = trim(filter_input(INPUT_POST, 'visibilidade', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-        
-        $projeto = Projeto::map([$posts])[0];
+        $posts["codigos"] = $_FILES["codigos"];
+        $posts["imagens"] = $_FILES["imagens"];
         if($validador->temErros())
         {
             $data["projeto"] = $posts;
@@ -60,13 +60,13 @@ class ProjetoController extends Controller
         }
         else
         {
-            if ($this->service->salvarProjeto($projeto))
+            if ($this->service->salvarProjeto($posts))
             {
                 $this->redirect(URL_BASE . '/projeto/listar');
             } 
             else
             {
-                $data["projeto"] = $projeto;
+                $data["projeto"] = $posts;
                 $this->view('projeto/create',$data);
             }
         }

@@ -6,12 +6,15 @@
             alt="Foto de perfil"
             class="w-32 h-32 object-contain shadow-lg"
         >
-        <h1 class="font-bold text-white text-3xl"><?= $usuario->getNome() ?></h1>
-        <h1 class="text-white">Email: <?= $usuario->getEmail() ?></h1>
+        <h1 class="font-bold text-white text-3xl"><?= $usuario->getNomeUsuario() ?></h1>
+        <div>
+            <h1 class="text-white">Nome: <?= $usuario->getNome() ?></h1>
+            <h1 class="text-white">Email: <?= $usuario->getEmail() ?></h1>
+        </div>
     </div>
     <?php if($usuario->getBiografia() != null):?>
         <div class="col-span-6 row-span-12">
-            <p class="text-white text-justify"><b class="text-white">Bio:</b><?= $usuario->getBiografia() ?></p>
+            <p class="text-white text-justify"><b class="text-white">Bio: </b><?= $usuario->getBiografia() ?></p>
         </div>
     <?php endif;?>
 </div>

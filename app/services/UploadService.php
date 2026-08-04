@@ -66,7 +66,7 @@ class UploadService
     private string $uploadPath; 
     public function __construct(?string $path=null)
     {
-        $this->uploadPath = $path ?? STORE_PATH;
+        $this->uploadPath = STORE_PATH.$path ?? STORE_PATH;
         if(!is_dir($this->uploadPath))
         {
             mkdir($this->uploadPath,0777,true);
@@ -88,10 +88,22 @@ class UploadService
         $novaImagem = bin2hex(random_bytes(16)).".".$extensao;
 
         $destino = $this->uploadPath."/".$novaImagem;
+       
         if(move_uploaded_file($file["tmp_name"],$destino))
         {
             return $novaImagem;
         }
         return throw new Exception("Falha ao redirecionar a imagem");
     }
+
+    public function uploadArray(array $files)
+    {
+        foreach($files as $file)
+        {
+            $this->upload($file);
+        }
+
+    }
+
+    
 }

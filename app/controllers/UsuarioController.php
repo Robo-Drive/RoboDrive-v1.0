@@ -167,15 +167,16 @@ class UsuarioController extends Controller
             }
             else
             {
-                $this->view("usuario/list");    
+                $this->view("usuario/list");
             }
         }
         else
         {
-            $data["usuario"] = $_SESSION["usuario_logado"];
+            $usuario = new Usuario();
+            $usuario->setId($_SESSION["usuario_logado"]->getId());
+            $data["usuario"] = $this->repositorySql->buscarId($usuario);
             $data["projetos"] = $this->projetoRepositorySql->buscarUsuario($data["usuario"]);
             $data["equipes"] = $this->equipeRepositorySql->buscarUsuario($data["usuario"]);
-            
             $this->view("usuario/perfil",$data);
         }
 
