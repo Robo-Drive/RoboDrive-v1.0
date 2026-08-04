@@ -23,13 +23,14 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
         try
         {
             $sql = "INSERT INTO projeto (nome, visibilidade, descricao)
-                    VALUES (:nome, :visibilidade, :descricao)";
+                    VALUES (:nome, :visibilidade, :descricao, :categoria)";
     
             $stmt = $this->connection->prepare($sql);
     
             $stmt->bindValue(':nome', $projeto->getNome());
             $stmt->bindValue(':visibilidade', $projeto->getVisibilidade());
             $stmt->bindValue(':descricao', $projeto->getDescricao());
+            $stmt->bindValue(':categoria', $projeto->getCategoria()->getId());
             $stmt->execute();
             $projeto->setId($this->connection->lastInsertId());
             $sqlAssoc = "INSERT INTO projeto_usuario (projeto_id, usuario_id, tipo)

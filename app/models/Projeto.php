@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\models\Categoria;
+use app\models\Equipe;
 use DateTimeImmutable;
 
 class Projeto
@@ -10,6 +12,8 @@ class Projeto
     private ?string $nome;
     private ?string $descricao;
     private ?string $visibilidade;
+    private ?Categoria $categoria;
+    private ?Equipe $equipe;
     private ?DateTimeImmutable $criadoEm;
     private array $componentes;
     
@@ -25,6 +29,8 @@ class Projeto
             $projetoObj->setNome($projeto["nome"]??null);
             $projetoObj->setDescricao($projeto["descricao"]??null);
             $projetoObj->setVisibilidade($projeto["visibilidade"])??null;
+            $projetoObj->setCategoria(new Categoria()->setId($projeto["categoria_id"])->setNome($projeto["categoria_nome"])??null);
+            $projetoObj->setEquipe(new Equipe()->setId($projeto["equipe_id"])->setNome($projeto["equipe_nome"])??null);
             $projetoObj->setCriadoEm(isset($projeto["criado_em"])
                 ? new DateTimeImmutable($projeto["criado_em"])
                 : null);
@@ -90,6 +96,28 @@ class Projeto
     public function setComponentes(array $componentes): self
     {
         $this->componentes = $componentes;
+        return $this;
+    }
+
+    public function getCategoria(): ?Categoria
+    {
+        return $this->categoria;
+    }
+    public function setCategoria(?Categoria $categoria): self
+    {
+        $this->categoria = $categoria;
+
+        return $this;
+    }
+
+    public function getEquipe(): ?Equipe
+    {
+        return $this->equipe;
+    }
+    public function setEquipe(?Equipe $equipe): self
+    {
+        $this->equipe = $equipe;
+
         return $this;
     }
 }

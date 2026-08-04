@@ -26,14 +26,14 @@ class ProjetoService
     public function salvarProjeto(array $posts): bool
     {
         $projeto = Projeto::map([$posts])[0];
-        //$this->repositorySql->cadastrar($projeto);
+        $projeto = $this->repositorySql->cadastrar($projeto);
         if(!empty($posts["codigos"]))
         {
-            $this->codigoService->transformarObjetoArquivo($posts["codigos"],"/user-".$_SESSION["usuario_logado"]->getId()."/projects/projetc-1/code/");
+            $this->codigoService->transformarObjetoArquivo($posts["codigos"],$projeto);
         }
         if(!empty($posts["imagens"]))
         {
-            $this->imagemService;
+            $this->imagemService->transformarObjetoArquivo($posts["imagens"],$projeto);
         }
         return true;
     }
