@@ -21,6 +21,7 @@ class ForumController extends Controller
     {
         $this->loginRequired();
         $data['foruns'] = $this->repositorySql->listarTodos();
+    
         $this->view("forum/list",$data);
     }
     public function cadastrar()

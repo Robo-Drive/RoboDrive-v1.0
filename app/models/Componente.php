@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\models\Usuario;
+
 class Componente
 {
     private ?int $id;
@@ -9,6 +11,7 @@ class Componente
     private ?string $descricao;
     private ?string $imagem;
     private ?int $quantidade;
+    private ?Usuario $usuario;
 
     public static function map(?array $componentes): array
     {
@@ -78,6 +81,16 @@ class Componente
     public function setQuantidade(?int $quantidade): self
     {
         $this->quantidade = $quantidade;
+        return $this;
+    }
+
+    public function getUsuario(): ?Usuario
+    {
+        return $this->usuario;
+    }
+    public function setUsuario(?Usuario $usuario): self
+    {
+        $this->usuario = $usuario;
         return $this;
     }
 }

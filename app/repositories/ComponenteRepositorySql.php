@@ -17,14 +17,15 @@ class ComponenteRepositorySql implements ComponenteRepositoryInterface
     }
     public function cadastrar(Componente $componente): ?Componente
     {
-        $sql = "INSERT INTO componente (nome, descricao, imagem)
-                VALUES (:nome, :descricao, :imagem)";
+        $sql = "INSERT INTO componente (nome, descricao, imagem, usuario_id)
+                VALUES (:nome, :descricao, :imagem, :usuario_id)";
 
         $stmt = $this->connection->prepare($sql);
 
         $stmt->bindValue(':nome', $componente->getNome());
         $stmt->bindValue(':descricao', $componente->getDescricao());
         $stmt->bindValue(':imagem', $componente->getImagem());
+        $stmt->bindValue(':usuario_id', $componente->getUsuario()->getId());
         
         if ($stmt->execute()) {
             $componente->setId($this->connection->lastInsertId());
@@ -78,9 +79,9 @@ class ComponenteRepositorySql implements ComponenteRepositoryInterface
     {
         $sql = "SELECT c.*,pc.quantidade
                 FROM componente c
-                JOIN projeto_componente pc 
+                JOIN projeto_versao_componente pc 
                 ON pc.componente_id = c.id
-                WHERE pc.projeto_id = :id";
+                WHERE pc.projeto_versao_id = :id";
 
         $stmt = $this->connection->prepare($sql);
 

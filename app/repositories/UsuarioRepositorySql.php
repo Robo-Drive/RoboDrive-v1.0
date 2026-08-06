@@ -20,11 +20,13 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
     {
         try
         {
-            $sql = "INSERT INTO usuario (nome, email, senha, regra) VALUES(:nome, :email, :senha, :regra)";
+            $sql = "INSERT INTO usuario(nome, nome_usuario, email, senha, regra)
+            VALUES(:nome, :nome_usuario, :email, :senha, :regra)";
             
             $stmt = $this->connection->prepare($sql);
             
             $stmt->bindValue(':nome', $usuario->getNome());
+            $stmt->bindValue(':nome_usuario', $usuario->getNomeUsuario());
             $stmt->bindValue(':email', $usuario->getEmail());
             $stmt->bindValue(':senha', password_hash($usuario->getSenha(), PASSWORD_DEFAULT));
             $stmt->bindValue(':regra', 'usuario');
@@ -46,27 +48,34 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
             $bind = array();
             $itens = ["nome","email","senha","imagem","regra"];
             $sql = "UPDATE usuario SET ";
-            for($i = 0 ; $i < count($itens); $i++)
+            $itensNaoNulos = array();
+            foreach($itens as $i)
             {
-                $metodo = "get".ucfirst($itens[$i]);
+                $metodo = "get".ucfirst($i);
                 if($usuario->$metodo() != null)
                 {
-                    if($i != (count($itens)-2))
-                    {
-                        $sql .= "$itens[$i] = :$itens[$i], ";
-                        $bind[] = [
-                            "posicao" => ":".$itens[$i],
-                            "metodo" => $metodo
-                        ];
-                    }
-                    else
-                    {
-                        $sql .= "$itens[$i] = :$itens[$i] ";
-                        $bind[] = [
-                            "posicao" => ":".$itens[$i],
-                            "metodo" => $metodo
-                        ];
-                    }
+                    $itensNaoNulos[] = $i;
+                }
+            }
+            for($i = 0 ; $i < count($itensNaoNulos); $i++)
+            {
+                $metodo = "get".ucfirst($itensNaoNulos[$i]);
+                
+                if($i != (count($itensNaoNulos)-1))
+                {
+                    $sql .= "$itensNaoNulos[$i] = :$itensNaoNulos[$i], ";
+                    $bind[] = [
+                        "posicao" => ":".$itensNaoNulos[$i],
+                        "metodo" => $metodo
+                    ];
+                }
+                else
+                {
+                    $sql .= "$itensNaoNulos[$i] = :$itensNaoNulos[$i] ";
+                    $bind[] = [
+                        "posicao" => ":".$itensNaoNulos[$i],
+                        "metodo" => $metodo
+                    ];
                 }
             }
             $sql .= "WHERE id = :id";
@@ -78,7 +87,11 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
             }
             foreach($bind as $b)
             {
-                $stmt->bindValue($b["posicao"], $usuario->{$b["metodo"]}());    
+                if($b["posicao"] == ":senha")
+                {
+                    continue;
+                }
+                $stmt->bindValue($b["posicao"], $usuario->{$b["metodo"]}());
             }
             $stmt->bindValue(":id", $usuario->getId());    
 
@@ -89,7 +102,7 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
             print_r($e);
             die;
         }
-
+        
         return $usuario;
     }
     public function buscarId(Usuario $usuario): ?Usuario
@@ -110,7 +123,7 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
     }
     public function buscarProjeto(int $projetoId): array
     {
-        $sql = "SELECT u.*,pu.tipo
+        $sql = "SELECT u.*,pu.papel
                 FROM usuario u
                 JOIN projeto_usuario pu 
                 ON pu.usuario_id = u.id
@@ -124,7 +137,7 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
     {
         $sql = "SELECT * FROM usuario WHERE nome LIKE :nome";
         $stmt = $this->connection->prepare($sql);
-        $stmt->bindValue(':nome', $usuario->getNome());
+        $stmt->bindValue(':nome', "%".$usuario->getNome()."%");
         $stmt->execute();
         return Usuario::map($stmt->fetchAll());
     }

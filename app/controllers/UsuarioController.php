@@ -137,9 +137,11 @@ class UsuarioController extends Controller
         }
         else
         {
-            if ($this->service->editarUsuario($usuario))
+            $resposta = $this->service->editarUsuario($usuario);
+            if($resposta)
             {
-                $this->redirect(URL_BASE . '/usuario/listar');
+                $_SESSION["usuario_logado"] = $this->repositorySql->buscarId($_SESSION["usuario_logado"]);
+                $this->redirect(URL_BASE . '/usuario/perfil');
             } 
             else
             {
@@ -165,15 +167,16 @@ class UsuarioController extends Controller
             }
             else
             {
-                $this->view("usuario/list");    
+                $this->view("usuario/list");
             }
         }
         else
         {
-            $data["usuario"] = $_SESSION["usuario_logado"];
+            $usuario = new Usuario();
+            $usuario->setId($_SESSION["usuario_logado"]->getId());
+            $data["usuario"] = $this->repositorySql->buscarId($usuario);
             $data["projetos"] = $this->projetoRepositorySql->buscarUsuario($data["usuario"]);
             $data["equipes"] = $this->equipeRepositorySql->buscarUsuario($data["usuario"]);
-            
             $this->view("usuario/perfil",$data);
         }
 

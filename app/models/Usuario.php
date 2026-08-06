@@ -6,16 +6,17 @@ use DateTimeImmutable;
 
 class Usuario
 {
-    private ?int $id;
-    private ?string $nome;
-    private ?string $email;
-    private ?string $senha;
-    private ?string $biografia;
-    private ?string $imagem;
-    private ?string $regra;
-    private ?string $tipo;
-    private ?string $categoria;
-    private ?DateTimeImmutable $criadoEm;
+    private ?int $id = null;
+    private ?string $nome = null;
+    private ?string $nomeUsuario = null;
+    private ?string $email = null;
+    private ?string $senha = null;
+    private ?string $biografia = null;
+    private ?string $imagem = null;
+    private ?string $regra = null;
+    private ?string $tipo = null;
+    private ?string $categoria = null;
+    private ?DateTimeImmutable $criadoEm = null;
 
     public static function map(?array $usuarios): array
     {
@@ -27,6 +28,7 @@ class Usuario
             $usuarioObj = new Usuario();
             $usuarioObj->setId($usuario["id"] ?? null);
             $usuarioObj->setNome($usuario["nome"] ?? null);
+            $usuarioObj->setNomeUsuario($usuario["nome_usuario"] ?? null);
             $usuarioObj->setEmail($usuario["email"] ?? null);
             $usuarioObj->setSenha($usuario["senha"] ?? null);
             $usuarioObj->setBiografia($usuario["biografia"] ?? null);
@@ -142,6 +144,16 @@ class Usuario
     {
         $this->tipo = $tipo;
 
+        return $this;
+    }
+
+    public function getNomeUsuario(): ?string
+    {
+        return $this->nomeUsuario;
+    }
+    public function setNomeUsuario(?string $nomeUsuario): self
+    {
+        $this->nomeUsuario = $nomeUsuario;
         return $this;
     }
 }

@@ -3,13 +3,16 @@
 namespace app\models;
 
 use DateTimeImmutable;
+use app\models\Usuario;
+use app\models\Equipe;
 
 class Forum
 {
     private ?int $id;
     private ?string $conteudo;
     private ?string $visibilidade;
-    private ?int $usuarioId;
+    private ?Usuario $usuario;
+    private ?Equipe $equipe;
     private ?DateTimeImmutable $criadoEm;
 
     public static function map(?array $foruns): array
@@ -23,7 +26,8 @@ class Forum
             $forumObj->setId($forum["id"]??null);
             $forumObj->setConteudo($forum["conteudo"]??null);
             $forumObj->setVisibilidade($forum["visibilidade"]??null);
-            $forumObj->setUsuarioId($forum["usuario_id"]??null);
+            $forumObj->setUsuario((new Usuario)->setId($forum["usuario_id"]??null)->setNomeUsuario($forum["nome_usuario"]));
+            $forumObj->setEquipe(isset($forum["usuario_id"]) ? (new Equipe)->setId($forum["usuario_id"]??null)->setNome($forum["nome_equipe"]??null):null);
             $forumObj->setCriadoEm(isset($forum["criado_em"])
                 ? new DateTimeImmutable($forum["criado_em"]??null)
                 : null);
@@ -62,13 +66,13 @@ class Forum
         return $this;
     }
 
-    public function getUsuarioId(): ?int
+    public function getUsuario(): ?Usuario
     {
-        return $this->usuarioId;
+        return $this->usuario;
     }
-    public function setUsuarioId(?int $usuarioId): self
+    public function setUsuario(?Usuario $usuario): self
     {
-        $this->usuarioId = $usuarioId;
+        $this->usuario = $usuario;
         return $this;
     }
 
@@ -79,6 +83,16 @@ class Forum
     public function setCriadoEm(?DateTimeImmutable $criadoEm): self
     {
         $this->criadoEm = $criadoEm;
+        return $this;
+    }
+
+    public function getEquipe(): ?Equipe
+    {
+        return $this->equipe;
+    }
+    public function setEquipe(?Equipe $equipe): self
+    {
+        $this->equipe = $equipe;
         return $this;
     }
 }
