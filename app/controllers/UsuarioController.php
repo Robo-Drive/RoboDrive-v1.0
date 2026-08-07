@@ -40,12 +40,17 @@ class UsuarioController extends Controller
         $validador = new ValidadorHelper();
         
         $validador->obrigatorio('nome',   $_POST["nome"]);
+        $validador->obrigatorio('nome_usuario', $_POST["nome_usuario"], "O campo nome de usuario é obrigatório");
         $validador->obrigatorio('email',  $_POST["email"]);
         $validador->obrigatorio('senha',  $_POST["senha"]);
         $validador->obrigatorio('confirmarSenha',  $_POST["confirmarSenha"],"O campo de confirmação de senha é obrigatório");
         if(!isset($validador->getErros()["nome"]))
         {
             $validador->tamanho('nome', $_POST["nome"], 3,100);
+        }
+        if(!isset($validador->getErros()["nome_usuario"]))
+        {
+            $validador->tamanho('nome_usuario', $_POST["nome_usuario"], 3,100);
         }
         if(!isset($validador->getErros()["senha"]))
         {
@@ -62,6 +67,7 @@ class UsuarioController extends Controller
 
         
         $posts["nome"]   = filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $posts["nome_usuario"] = filter_input(INPUT_POST, 'nome_usuario', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $posts["email"]  = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
         $posts["senha"]  = $_POST["senha"];
         

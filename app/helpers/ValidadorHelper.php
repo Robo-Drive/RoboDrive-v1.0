@@ -10,16 +10,18 @@ class ValidadorHelper
     {
         if(empty($valor) && $valor !== '0')
         {
-            $this->erros[$campo] = $mensagem ?? "O campo {$campo} é obrigatório";
+            $nomeCampo = str_replace('_', ' ', $campo);
+            $this->erros[$campo] = $mensagem ?? "O campo {$nomeCampo} é obrigatório";
         }
         return $this;
     }
     public function tamanho(string $campo,mixed $valor,int $min,int $max)
     {
+        $nomeCampo = str_replace('_', ' ', $campo);
         if(strlen($valor) < $min)
-            $this->erros[$campo] = "O campo {$campo} pede no mínimo {$min} caracteres";
+            $this->erros[$campo] = "O campo {$nomeCampo} pede no mínimo {$min} caracteres";
         if(strlen($valor) > $max)
-            $this->erros[$campo] = "O campo {$campo} suporta no máximo {$max} caracteres";
+            $this->erros[$campo] = "O campo {$nomeCampo} suporta no máximo {$max} caracteres";
         return $this;
     }
     public function email(string $email)

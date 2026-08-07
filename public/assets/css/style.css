@@ -3,3 +3,15 @@
     border: 0;
     box-sizing: border-box;
 }
+
+.password-container:focus-within {
+    border-color: #FF2D2D !important;
+}
+
+.password-container:focus-within .password-divider {
+    border-color: #FF2D2D !important;
+}
+
+.password-container:focus-within img {
+    filter: invert(27%) sepia(91%) saturate(6376%) hue-rotate(352deg) brightness(104%) contrast(106%) !important;
+}

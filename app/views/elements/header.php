@@ -12,11 +12,10 @@
     <title><?= $titulo ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="w-screen h-screen">
-<header>
-    <div class="relative z-[10] w-full h-[7dvh] bg-transparent flex justify-center items-center">
-        <h1 class="text-3xl font-bold font-['Orbitron'] text-[#FF1A1A]">Robo</h1>
-        <h1 class="text-3xl font-bold font-['Orbitron'] text-white">Drive</h1>
+<body class="min-h-screen w-full bg-black font-['Space_Grotesk'] text-white overflow-x-hidden flex flex-col">
+<header class="w-full">
+    <div class="relative z-[10] w-full min-h-[50px] py-3 bg-transparent flex justify-center items-center">
+        <h1 class="text-2xl sm:text-3xl font-bold font-['Orbitron'] text-[#FF1A1A]">Robo</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold font-['Orbitron'] text-white">Drive</h1>
     </div>
-    
 </header>
