@@ -29,8 +29,8 @@ class Projeto
             $projetoObj->setNome($projeto["nome"]??null);
             $projetoObj->setDescricao($projeto["descricao"]??null);
             $projetoObj->setVisibilidade($projeto["visibilidade"])??null;
-            $projetoObj->setCategoria(new Categoria()->setId($projeto["categoria_id"])->setNome($projeto["categoria_nome"])??null);
-            $projetoObj->setEquipe(new Equipe()->setId($projeto["equipe_id"])->setNome($projeto["equipe_nome"])??null);
+            //$projetoObj->setCategoria(new Categoria()->setId($projeto["categoria_id"])->setNome($projeto["categoria_nome"])??null);
+            //$projetoObj->setEquipe(new Equipe()->setId($projeto["equipe_id"])->setNome($projeto["equipe_nome"])??null);
             $projetoObj->setCriadoEm(isset($projeto["criado_em"])
                 ? new DateTimeImmutable($projeto["criado_em"])
                 : null);

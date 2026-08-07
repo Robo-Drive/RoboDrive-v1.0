@@ -141,6 +141,14 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
         $stmt->execute();
         return Usuario::map($stmt->fetchAll());
     }
+    public function buscarNomeUsuario(Usuario $usuario): ?array
+    {
+        $sql = "SELECT * FROM usuario WHERE nome_usuario = :nome_usuario;";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':nome_usuario', $usuario->getNomeUsuario());
+        $stmt->execute();
+        return Usuario::map($stmt->fetchAll());
+    }
     public function listarTodos(): array
     {
         $sql = "SELECT * FROM usuario";

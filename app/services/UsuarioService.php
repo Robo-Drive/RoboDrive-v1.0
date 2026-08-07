@@ -14,15 +14,26 @@ class UsuarioService
     {
         $this->repositorySql = new UsuarioRepositorySql;
     }
-    public function salvarUsuario(Usuario $usuario): bool
+    public function salvarUsuario(Usuario $usuario): bool | array
     {
-        $resposta = $this->repositorySql->buscarEmail($usuario);
-        if(empty($resposta))
+        $mensages = array();
+        $emailResposta = $this->repositorySql->buscarEmail($usuario);
+        $nomeUsuarioResposta = $this->repositorySql->buscarNomeUsuario($usuario);
+        if(empty($emailResposta) && empty($nomeUsuarioResposta))
         {
             $this->repositorySql->cadastrar($usuario);
             return true;
         }
-        return false;
+        
+        if(!empty($emailResposta))
+        {
+            $mensages["email"] = "Erro: Este e-mail já está cadastrado!";
+        }
+        if(!empty($nomeUsuarioResposta))
+        {
+            $mensages["nome_usuario"] = "Erro: Este nome de usuário já está cadastrado!";
+        }
+        return $mensages;
     }
     public function editarUsuario(Usuario $usuario)
     {

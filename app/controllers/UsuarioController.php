@@ -39,10 +39,17 @@ class UsuarioController extends Controller
     {
         $validador = new ValidadorHelper();
         
+        $validador->obrigatorio('nome_usuario',   $_POST["nome_usuario"],"O campo de nome de usuário é obrigatório");
         $validador->obrigatorio('nome',   $_POST["nome"]);
         $validador->obrigatorio('email',  $_POST["email"]);
         $validador->obrigatorio('senha',  $_POST["senha"]);
-        $validador->obrigatorio('confirmarSenha',  $_POST["confirmarSenha"],"O campo de confirmação de senha é obrigatório");
+        $validador->obrigatorio('confirmar_senha',  $_POST["confirmar_senha"],"O campo de confirmação de senha é obrigatório");
+        
+        
+        if(!isset($validador->getErros()["nome_usuario"]))
+        {
+            $validador->tamanho('nome_usuario', $_POST["nome_usuario"], 3,100,"nome de usuario");
+        }
         if(!isset($validador->getErros()["nome"]))
         {
             $validador->tamanho('nome', $_POST["nome"], 3,100);
@@ -51,9 +58,9 @@ class UsuarioController extends Controller
         {
             $validador->tamanho('senha',$_POST["senha"],8,100);
         }
-        if(!isset($validador->getErros()["senha"]) && !isset($validador->getErros()["confirmarSenha"]))
+        if(!isset($validador->getErros()["senha"]) && !isset($validador->getErros()["confirmar_senha"]))
         {
-            $validador->confirmarValor($_POST["senha"],$_POST["confirmarSenha"],"confirmarSenha","A senha digitada é diferente da do campo senha");
+            $validador->confirmarValor($_POST["senha"],$_POST["confirmar_senha"],"confirmar_senha","A senha digitada é diferente da do campo senha");
         }
         if(!isset($validador->getErros()["email"]))
         {
@@ -61,6 +68,7 @@ class UsuarioController extends Controller
         }
 
         
+        $posts["nome_usuario"]   = filter_input(INPUT_POST, 'nome_usuario', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $posts["nome"]   = filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $posts["email"]  = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
         $posts["senha"]  = $_POST["senha"];
@@ -74,14 +82,16 @@ class UsuarioController extends Controller
         }
         else
         {
-            if ($this->service->salvarUsuario($usuario))
+            $resposta = $this->service->salvarUsuario($usuario);
+            if (!is_array($resposta))
             {
                 (new AutenticacaoController())->logar();
             } 
             else
             {
                 $data["usuario"] = $posts;
-                $data["erros"]["email"] = "Erro: Este e-mail já está cadastrado!";
+                $data["erros"]["email"] = $resposta["email"];
+                $data["erros"]["nome_usuario"] = $resposta["nome_usuario"];
                 $this->view('cadastro/cadastro',$data);
             }
         }

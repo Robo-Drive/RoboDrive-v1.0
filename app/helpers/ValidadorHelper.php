@@ -14,12 +14,13 @@ class ValidadorHelper
         }
         return $this;
     }
-    public function tamanho(string $campo,mixed $valor,int $min,int $max)
+    public function tamanho(string $campo,mixed $valor,int $min,int $max,?string $campo_mensgem=null)
     {
+        $msg = $campo_mensgem ?? $campo;
         if(strlen($valor) < $min)
-            $this->erros[$campo] = "O campo {$campo} pede no mínimo {$min} caracteres";
+            $this->erros[$campo] = $mensagem ?? "O campo {$msg} pede no mínimo {$min} caracteres";
         if(strlen($valor) > $max)
-            $this->erros[$campo] = "O campo {$campo} suporta no máximo {$max} caracteres";
+            $this->erros[$campo] = $mensagem ?? "O campo {$msg} suporta no máximo {$max} caracteres";
         return $this;
     }
     public function email(string $email)

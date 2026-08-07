@@ -1,10 +1,10 @@
 <div class="space-y-6">
     <div class="relative">
-        <label for="nome" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
+        <label for="nome_usuario" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
             Nome de usuário
         </label>
 
-        <input type="text" name="nome" class="w-full h-10 bg-black/80 border border-white  px-4 text-white outline-none focus:border-[#FF1A1A] transition-all" value="<?= isset($usuario["nome"]) ? $usuario["nome"]: "" ?>">
+        <input type="text" name="nome_usuario" class="w-full h-10 bg-black/80 border border-white  px-4 text-white outline-none focus:border-[#FF1A1A] transition-all" value="<?= isset($usuario["nome_usuario"]) ? $usuario["nome_usuario"]: "" ?>">
         <?php if(isset($erros)): ?>
             <?php if(isset($erros["nome_usuario"])): ?>
                 <p class="text-[#FF1A1A] mt-3"><?= $erros["nome_usuario"] ?></p>
@@ -55,12 +55,12 @@
         <?php endif;?>
     </div>
     <div class="relative">
-        <label for="confirmarSenha" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
+        <label for="confirmar_senha" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
             Confirmar senha
         </label>
 
         <div class="flex w-full">
-            <input type="password" name="confirmarSenha" class="confirmarPassword flex-1 h-12 bg-black/80 border border-r-0 border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all">
+            <input type="password" name="confirmar_senha" class="confirmarPassword flex-1 h-12 bg-black/80 border border-r-0 border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all">
 
             <button type="button" onclick="confirmarPassowrdChange()"class="h-12 px-4 bg-black/80 border border-white border-l-0 text-white hover:text-[#FF1A1A] transition-all flex items-center justify-center">
                 <img  class="confirmarPasswordButton" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
@@ -68,8 +68,8 @@
         </div>
         <p class="confirmarErro text-[#FF1A1A] mt-3">
             <?php if(isset($erros)): ?>
-                <?php if(isset($erros["confirmarSenha"])): ?>
-                    <?= $erros["confirmarSenha"] ?>
+                <?php if(isset($erros["confirmar_senha"])): ?>
+                    <?= $erros["confirmar_senha"] ?>
                 <?php endif;?>
             <?php endif;?>
         </p>
