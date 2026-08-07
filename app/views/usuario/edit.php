@@ -12,9 +12,8 @@ include_once(__DIR__."/../elements/header.php");
                 <h1 class="text-3xl font-bold text-[#FF1A1A]">EDITAR</h1>
                 <h1 class="text-3xl font-bold text-white">PERFIL</h1>
             </div>
-            <div class="flex flex-col items-center">
-                <form action="<?= URL_BASE?>/usuario/atualizar" method="post"">
-                    <?php include_once(__DIR__."/elements/form.php")?>
+                <form action="<?= URL_BASE ?>/usuario/atualizar>" method="post">
+                    <?php include_once(__DIR__."/elements/form.php") ?>
                 </form>
             </div>
         </div>
@@ -22,5 +21,6 @@ include_once(__DIR__."/../elements/header.php");
 </div>
 
 <script src="<?= JS_URL_BASE ?>/password.js"></script>
+<script src="<?= JS_URL_BASE ?>/images.js"></script>
 <?php
 include_once(__DIR__."/../elements/footer.php");

@@ -133,10 +133,7 @@ class UsuarioController extends Controller
             $posts["regra"]  = filter_input(INPUT_POST, 'regra', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         }
         $posts["senha"]  = isset($_POST["senha"]) ? ($_POST["senha"] == "" ? null : $_POST["senha"] ): null;
-        if(isset($_POST["imagem"]))    
-        {
-            $posts["imagem"] = filter_input(INPUT_POST, 'imagem', FILTER_SANITIZE_URL);
-        }
+        $posts["imagem"] = $_FILES["imagem"];
 
         $usuario = Usuario::map([$posts])[0];
         if($validador->temErros())

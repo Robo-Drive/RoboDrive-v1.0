@@ -110,18 +110,29 @@
     <!-- Imagem -->
     <div class="relative">
         <label for="imagem" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
-            Imagem de perfil
+            Imagem
         </label>
 
-        <input
-            type="text"
-            name="imagem"
+        <button
+            type="button"
+            onclick="adicionarImagens()"
             class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all"
-            value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getImagem() : (isset($usuario['imagem']) ? $usuario['imagem'] : '')) : '' ?>"
+        >
+            Adicionar imagens
+        </button>
+
+        <input
+            type="file"
+            name="imagem"
+            id="imagens"
+            accept="image/*"
+            style="display:none;"
         >
 
-        <?php if (isset($erros['imagem'])): ?>
-            <p class="text-[#FF1A1A] mt-3"><?= $erros['imagem'] ?></p>
+        <ul id="listaImagens" class="space-y-2 mt-3"></ul>
+
+        <?php if (isset($erros['imagens'])): ?>
+            <p class="text-[#FF1A1A] mt-3"><?= $erros['imagens'] ?></p>
         <?php endif; ?>
     </div>
 

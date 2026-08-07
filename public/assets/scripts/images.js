@@ -3,16 +3,22 @@ const listaImagens = document.getElementById("listaImagens");
 
 const imagens = [];
 
-function adicionarImagens() {
+function adicionarImagens()
+{
     inputImagens.click();
 }
 
 inputImagens.addEventListener("change", () => {
 
-    for (const imagem of inputImagens.files) {
+    if (!inputImagens.multiple)
+    {
+        imagens.length = 0;
+    }
+    for (const imagem of inputImagens.files)
+    {
 
-        // Aceita apenas imagens
-        if (!imagem.type.startsWith("image/")) {
+        if (!imagem.type.startsWith("image/"))
+        {
             continue;
         }
 
@@ -22,7 +28,8 @@ inputImagens.addEventListener("change", () => {
             item.lastModified === imagem.lastModified
         );
 
-        if (!existe) {
+        if (!existe)
+        {
             imagens.push(imagem);
         }
     }
@@ -32,7 +39,8 @@ inputImagens.addEventListener("change", () => {
 
 });
 
-function atualizarListaImagens() {
+function atualizarListaImagens()
+{
 
     listaImagens.innerHTML = "";
 
@@ -91,7 +99,8 @@ function atualizarListaImagens() {
     atualizarInputImagens();
 }
 
-function atualizarInputImagens() {
+function atualizarInputImagens()
+{
 
     const dataTransfer = new DataTransfer();
 
@@ -102,7 +111,8 @@ function atualizarInputImagens() {
     inputImagens.files = dataTransfer.files;
 }
 
-function removerImagem(indice) {
+function removerImagem(indice)
+{
 
     imagens.splice(indice, 1);
 
