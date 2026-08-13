@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ROBODRIVE</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Orbitron:wght@700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="relative overflow-x-hidden bg-black font-['Space_Grotesk'] text-white [&::-webkit-scrollbar]:hidden">
+<body class="relative overflow-x-hidden font-['Space_Grotesk'] bg-[#000505] text-[#F2FEFE] selection:bg-[rgba(19,243,247,.32)] selection:text-[#000505] before:content-[''] before:fixed before:inset-0 before:pointer-events-none before:-z-10 before:bg-[radial-gradient(circle_at_top_left,rgba(19,243,247,.14),transparent_34%),radial-gradient(circle_at_top_right,rgba(240,237,6,.08),transparent_26%),linear-gradient(180deg,#000505_0%,#06141C_100%)] after:content-[''] after:fixed after:inset-0 after:pointer-events-none after:-z-10 after:bg-[linear-gradient(180deg,rgba(0,5,5,.12),rgba(0,5,5,.5)_42%,rgba(0,5,5,.78))] [&::-webkit-scrollbar]:hidden [&_.bg-black]:!bg-[#000505] [&_.bg-black\/80]:!bg-[#06141C] [&_.bg-black\/90]:!bg-[#06141C] [&_.bg-white]:!bg-[#F2FEFE] [&_.bg-blue-500]:!bg-[#13F3F7] [&_.bg-blue-600]:!bg-[#0795A5] [&_.bg-red-500]:!bg-[#13F3F7] [&_.text-white]:!text-[#F2FEFE] [&_.text-black]:!text-[#000505] [&_.text-zinc-400]:!text-[#91B5BD] [&_.text-zinc-500]:!text-[#6E8B92] [&_.text-zinc-600]:!text-[#4E6B72] [&_.text-red-500]:!text-[#13F3F7] [&_.border-white]:!border-[#13F3F7]/42 [&_.border-black]:!border-[#000505] [&_.border-blue-500]:!border-[#13F3F7] [&_.border-blue-600]:!border-[#0795A5] [&_.border-red-500]:!border-[#13F3F7] [&_[class*='text-[#FF2D2D]']]:!text-[#13F3F7] [&_[class*='bg-[#FF2D2D]']]:!bg-[#13F3F7] [&_[class*='border-[#FF2D2D]']]:!border-[#13F3F7] [&_[class*='decoration-[#FF2D2D]']]:!decoration-[#13F3F7] [&_[class*='text-[#FF1A1A]']]:!text-[#13F3F7] [&_[class*='bg-[#FF1A1A]']]:!bg-[#13F3F7] [&_[class*='border-[#FF1A1A]']]:!border-[#13F3F7] [&_[class*='decoration-[#FF1A1A]']]:!decoration-[#13F3F7] [&_[class*='border-[#404040]']]:!border-[#07556A] [&_[class*='bg-[#404040]']]:!bg-[#07556A] [&_[class*='text-[#404040]']]:!text-[#91B5BD] [&_[class*='border-[#1a1a1a]']]:!border-[#07556A] [&_[class*='bg-[rgba(255,45,45,.15)]']]:!bg-[rgba(19,243,247,.12)] [&_[class*='bg-[rgba(255,26,26,.15)]']]:!bg-[rgba(19,243,247,.12)] [&_[class*='border-[rgba(255,45,45,.15)]']]:!border-[rgba(19,243,247,.18)]">
 
   <!-- ═══════════════════════════════════════
        0. WALLPAPER — plano de fudo animado
@@ -19,7 +19,7 @@
       <canvas id="myCanvas" class="h-100 w-100"></canvas>
     </div>
 
-    <div class="fixed inset-0 z-[1] pointer-events-none [background:linear-gradient(180deg,rgba(0,0,0,0.18)_0%,rgba(0,0,0,0.48)_45%,rgba(0,0,0,0.72)_100%),radial-gradient(circle_at_top_right,rgba(255,45,45,0.12),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(255,45,45,0.08),transparent_28%)]" aria-hidden="true"></div>
+    <div class="fixed inset-0 z-[1] pointer-events-none [background:linear-gradient(180deg,rgba(0,0,0,0.18)_0%,rgba(0,0,0,0.48)_45%,rgba(0,0,0,0.72)_100%),radial-gradient(circle_at_top_right,rgba(19,243,247,0.12),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(0,214,181,0.08),transparent_28%)]" aria-hidden="true"></div>
   </section>
 
   <div class="relative z-[2]">
@@ -216,7 +216,7 @@
   ═══════════════════════════════════════ -->
   <section class="border-b-[3px] border-white bg-transparent">
 
-    <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 sm:gap-8 border-b-[3px] border-[#404040] px-4 sm:px-8 lg:px-10 pb-6 sm:pb-10 pt-10 sm:pt-16">
+    <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 sm:gap-8 border-b-[3px] bg-[rgba(64, 64, 64, 0.25)] px-4 sm:px-8 lg:px-10 pb-6 sm:pb-10 pt-10 sm:pt-16">
       <div>
         <div class="mb-2 sm:mb-3 text-[.6rem] sm:text-[.65rem] font-bold uppercase tracking-[.25em] text-[#a3a3a3]">PROJETOS RECENTES</div>
         <h2 class="text-[clamp(2rem,5vw,5rem)] font-black tracking-[-.04em] leading-[.95]">

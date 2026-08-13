@@ -1,5 +1,12 @@
 (function()
 {
+    const COLORS = {
+        backgroundStart: '#000505',
+        backgroundEnd: '#06141c',
+        glowCore: 'rgba(19,243,247,0.92)',
+        glowMid: 'rgba(19,243,247,0.55)',
+        glowOuter: 'rgba(0,214,181,0.18)'
+    };
     
     let canvas = document.getElementById('myCanvas');
     if (!canvas) 
@@ -52,7 +59,7 @@
             vy: Math.sin(angle)*speed/60,
             phase: rand(0,Math.PI*2),
             wobble: rand(0.5,2.0),
-            color: `rgba(255,45,45,0.9)`
+            color: COLORS.glowCore
         };
     }
     
@@ -67,8 +74,8 @@
     function drawBackground()
     {
         const g = ctx.createLinearGradient(0,0,width,height);
-        g.addColorStop(0,'#000');
-        g.addColorStop(1,'#050000');
+        g.addColorStop(0,COLORS.backgroundStart);
+        g.addColorStop(1,COLORS.backgroundEnd);
         ctx.fillStyle = g;
         ctx.fillRect(0,0,width,height);
     }
@@ -85,8 +92,9 @@
             const y = b.y + gy;
             const grad = ctx.createRadialGradient(x,y,b.r*0.15,x,y,b.r);
             
-            grad.addColorStop(0,'rgba(204,64,64,0.76)');
-            grad.addColorStop(0.4,'rgba(204,32,32,0.56)');
+            grad.addColorStop(0,COLORS.glowCore);
+            grad.addColorStop(0.42,COLORS.glowMid);
+            grad.addColorStop(0.72,COLORS.glowOuter);
             grad.addColorStop(1,'rgba(0,0,0,0)');
             
             ctx.fillStyle = grad;

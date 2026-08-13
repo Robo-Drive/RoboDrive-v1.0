@@ -1,6 +1,16 @@
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 
+const palette = {
+	backgroundStart: "#000505",
+	backgroundMid: "#06141c",
+	backgroundEnd: "#082b3a",
+	cyan: "rgba(19, 243, 247, 0.9)",
+	cyanSoft: "rgba(19, 243, 247, 0.35)",
+	aqua: "rgba(0, 214, 181, 0.55)",
+	yellow: "rgba(240, 237, 6, 0.32)"
+};
+
 const tipos = ["triangulo", "quadrado", "retangulo", "losango", "pentagono", "hexagono"];
 let formas = [];
 let largura = 0;
@@ -23,13 +33,14 @@ function escolherTipo()
 	return tipos[inteiroAleatorio(0, tipos.length - 1)];
 }
 
-function corVermelhoCinza()
+function corRoboDrive()
 {
-	const saturacao = Math.floor(aleatorio(0, 100));
-	const luminosidade = Math.floor(aleatorio(12, 62));
-	const alpha = aleatorio(0.35, 0.95).toFixed(2);
+	const baseHue = aleatorio(175, 188);
+	const saturacao = Math.floor(aleatorio(68, 100));
+	const luminosidade = Math.floor(aleatorio(38, 68));
+	const alpha = aleatorio(0.42, 0.92).toFixed(2);
 
-	return `hsla(0, ${saturacao}%, ${luminosidade}%, ${alpha})`;
+	return `hsla(${baseHue}, ${saturacao}%, ${luminosidade}%, ${alpha})`;
 }
 
 function criarForma(index)
@@ -88,7 +99,7 @@ function criarForma(index)
 		velocidadeRotacao: aleatorio(-0.0009, 0.0009),
 		vx,
 		vy,
-		cor: corVermelhoCinza(),
+		cor: corRoboDrive(),
 		espessura: aleatorio(1.4, 4.5)
 	};
 }
@@ -120,9 +131,9 @@ function redimensionarCanvas()
 function desenharGradeDeFundo()
 {
 	const gradiente = ctx.createLinearGradient(0, 0, largura, altura);
-	gradiente.addColorStop(0, "#000000");
-	gradiente.addColorStop(0.55, "#0b0505");
-	gradiente.addColorStop(1, "#1d0505");
+	gradiente.addColorStop(0, palette.backgroundStart);
+	gradiente.addColorStop(0.55, palette.backgroundMid);
+	gradiente.addColorStop(1, palette.backgroundEnd);
 
 	ctx.fillStyle = gradiente;
 	ctx.fillRect(0, 0, largura, altura);
