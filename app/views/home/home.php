@@ -204,7 +204,7 @@
   ═══════════════════════════════════════ -->
   <section class="border-b-[3px] border-[#07556A] bg-transparent">
 
-    <div class="flex flex-col items-start justify-between gap-4 border-b-[3px] border-[#07556A] bg-[#082B3A] px-4 pb-6 pt-10 sm:flex-row sm:items-end sm:gap-8 sm:px-8 sm:pb-10 sm:pt-16 lg:px-10">
+    <div class="flex flex-col items-start justify-between gap-4 border-b-[3px] border-[#07556A] bg-[rgba(8,43,58,.25)] px-4 pb-6 pt-10 sm:flex-row sm:items-end sm:gap-8 sm:px-8 sm:pb-10 sm:pt-16 lg:px-10">
       <div>
         <div class="mb-2 text-[.6rem] font-bold uppercase tracking-[.25em] text-[#91B5BD] sm:mb-3 sm:text-[.65rem]">PROJETOS RECENTES</div>
         <h2 class="text-[clamp(2rem,5vw,5rem)] font-black tracking-[-.04em] leading-[.95]">
