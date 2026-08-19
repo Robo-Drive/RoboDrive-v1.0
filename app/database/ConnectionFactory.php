@@ -48,19 +48,27 @@ class ConnectionFactory
         $stmt->execute();
         $usuarios = Usuario::map($stmt->fetchAll());
 
+        if(!file_exists(STORE_PATH."/components"))
+        {
+            mkdir(STORE_PATH."/components",0777,true);
+        }
+        if(!file_exists(STORE_PATH."/users"))
+        {
+            mkdir(STORE_PATH."/users",0777,true);
+        }
         foreach($usuarios as $u)
         {
-            if(!file_exists(STORE_PATH."/user-".$u->getId()))
+            if(!file_exists(STORE_PATH."/users/user-".$u->getId()))
             {
-                mkdir(STORE_PATH."/user-".$u->getId(),0777,true);
+                mkdir(STORE_PATH."/users/user-".$u->getId(),0777,true);
             }
-            if(!file_exists(STORE_PATH."/user-".$u->getId()."/img"))
+            if(!file_exists(STORE_PATH."/users/user-".$u->getId()."/img"))
             {
-                mkdir(STORE_PATH."/user-".$u->getId()."/img",0777,true);
+                mkdir(STORE_PATH."/users/user-".$u->getId()."/img",0777,true);
             }
-            if(!file_exists(STORE_PATH."/user-".$u->getId()."/projects"))
+            if(!file_exists(STORE_PATH."/users/user-".$u->getId()."/projects"))
             {
-                mkdir(STORE_PATH."/user-".$u->getId()."/projects",0777,true);
+                mkdir(STORE_PATH."/users/user-".$u->getId()."/projects",0777,true);
             }
         }
     }

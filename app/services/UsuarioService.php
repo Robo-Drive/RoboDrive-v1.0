@@ -47,4 +47,8 @@ class UsuarioService
         }
         return true;
     }
+    public function deletar(Usuario $usuario)
+    {
+        $this->repositorySql->deletar($usuario);
+    }
 }

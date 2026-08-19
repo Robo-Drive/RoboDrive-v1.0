@@ -34,7 +34,7 @@ function atualizarLista() {
     arquivos.forEach((arquivo, indice) => {
 
         const li = document.createElement("li");
-        li.className = "w-full h-12 bg-black/80 border border-white px-4 text-white hover:border-[#FF1A1A] transition-all flex justify-between items-center";
+        li.className = "w-full h-12 bg-black/80 border border-white px-4 text-white hover:border-[#00F5F5] transition-all flex justify-between items-center";
 
         const span = document.createElement("span");
         span.textContent = `${arquivo.name} (${(arquivo.size / 1024).toFixed(0)} KB)`;

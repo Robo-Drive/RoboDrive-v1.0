@@ -45,53 +45,70 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
     {
         try
         {
-            $bind = array();
-            $itens = ["nome","email","senha","imagem","regra"];
             $sql = "UPDATE usuario SET ";
-            $itensNaoNulos = array();
-            foreach($itens as $i)
+            if(null != $usuario->getNome())
             {
-                $metodo = "get".ucfirst($i);
-                if($usuario->$metodo() != null)
-                {
-                    $itensNaoNulos[] = $i;
-                }
+                $sql .= "nome = :nome";
             }
-            for($i = 0 ; $i < count($itensNaoNulos); $i++)
+            if(null != $usuario->getNomeUsuario())
             {
-                $metodo = "get".ucfirst($itensNaoNulos[$i]);
-                
-                if($i != (count($itensNaoNulos)-1))
-                {
-                    $sql .= "$itensNaoNulos[$i] = :$itensNaoNulos[$i], ";
-                    $bind[] = [
-                        "posicao" => ":".$itensNaoNulos[$i],
-                        "metodo" => $metodo
-                    ];
-                }
-                else
-                {
-                    $sql .= "$itensNaoNulos[$i] = :$itensNaoNulos[$i] ";
-                    $bind[] = [
-                        "posicao" => ":".$itensNaoNulos[$i],
-                        "metodo" => $metodo
-                    ];
-                }
+                $sql .= ",nome_usuario = :nome_usuario";
             }
+            if(null != $usuario->getSenha())
+            {
+                $sql .= ",senha = :senha";
+            }
+            if(null !== $usuario->getBiografia())
+            {
+                $sql .= ",biografia = :biografia";
+            }
+            if(null != $usuario->getImagem())
+            {
+                $sql .= ",imagem = :imagem";
+            }
+            if(null != $usuario->getEmail())
+            {
+                $sql .= ",email = :email";
+            }
+            if(null != $usuario->getRegra())
+            {
+                $sql .= ",regra = :regra ";
+            }
+
             $sql .= "WHERE id = :id";
+
+            //print_r($sql);
+            //die;
+
             $stmt = $this->connection->prepare($sql);
-            if($usuario->getSenha() != null)
+
+            if(null != $usuario->getNome())
             {
-                $stmt->bindValue(':senha',password_hash($usuario->getSenha(), PASSWORD_DEFAULT));
-            
+                $stmt->bindValue(":nome", $usuario->getNome());  
             }
-            foreach($bind as $b)
+            if(null != $usuario->getNomeUsuario());
             {
-                if($b["posicao"] == ":senha")
-                {
-                    continue;
-                }
-                $stmt->bindValue($b["posicao"], $usuario->{$b["metodo"]}());
+                $stmt->bindValue(":nome_usuario", $usuario->getNomeUsuario());  
+            }
+            if(null != $usuario->getSenha())
+            {
+                $stmt->bindValue(":senha", $usuario->getSenha());  
+            }
+            if(null !== $usuario->getBiografia())
+            {
+                $stmt->bindValue(":biografia", $usuario->getBiografia());  
+            }
+            if(null != $usuario->getImagem())
+            {
+                $stmt->bindValue(":imagem", $usuario->getImagem());  
+            }
+            if(null != $usuario->getEmail())
+            {
+                $stmt->bindValue(":email", $usuario->getEmail());  
+            }
+            if(null != $usuario->getRegra())
+            {
+                $stmt->bindValue(":regra", $usuario->getRegra());  
             }
             $stmt->bindValue(":id", $usuario->getId());    
 
@@ -158,7 +175,10 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
     }
     public function deletar(Usuario $usuario): bool
     {
-        $sql = "DELETE FROM usuario WHERE id = :id";
+        $sql = "UPDATE usuario
+                SET 
+                status = false
+                WHERE id = :id";
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':id', $usuario->getId());
         $stmt->execute();

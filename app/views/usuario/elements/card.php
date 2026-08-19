@@ -2,7 +2,7 @@
 <div class="shadow-2xl grid grid-cols-12 grid-rows-12 h-full p-8 w-full border border-zinc-700">
     <div class="<?= $usuario->getBiografia() != null ? "col-span-3" : "col-span-12" ?> row-span-12 flex flex-col items-center gap-3">
         <img 
-            src="<?= $usuario->getImagem()??IMG_URL_BASE."/perfil.png" ?>" 
+            src="<?= $usuario->getImagem() ? URL_BASE."/arquivo?arquivo=".$usuario->getImagem() : IMG_URL_BASE."/perfil.png" ?>" 
             alt="Foto de perfil"
             class="w-32 h-32 object-contain shadow-lg"
         >
@@ -18,4 +18,4 @@
         </div>
     <?php endif;?>
 </div>
-<?php endif;?>
+<?php endif;?>src="<?= (URL_BASE."/arquivo?arquivo=".$usuario->getImagem()) ?? (IMG_URL_BASE."/perfil.png") ?>"

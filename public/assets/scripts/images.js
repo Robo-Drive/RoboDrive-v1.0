@@ -47,7 +47,7 @@ function atualizarListaImagens()
     imagens.forEach((imagem, indice) => {
 
         const li = document.createElement("li");
-        li.className = "w-full bg-black/80 border border-white p-3 text-white hover:border-[#FF1A1A] transition-all flex justify-between items-center";
+        li.className = "w-full bg-black/80 border border-white p-3 text-white hover:border-[#00F5F5] transition-all flex justify-between items-center";
 
         const esquerda = document.createElement("div");
         esquerda.className = "flex items-center gap-3";

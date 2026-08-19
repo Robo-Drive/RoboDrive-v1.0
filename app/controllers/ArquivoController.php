@@ -10,8 +10,7 @@ class ArquivoController extends Controller
     {
         $this->loginRequired();
 
-        if (!isset($_GET['arquivo']) || empty($_GET['arquivo']))
-        {
+        if (!isset($_GET['arquivo']) || empty($_GET['arquivo'])) {
             http_response_code(400);
             echo "Arquivo não especificado.";
             return;
@@ -19,20 +18,19 @@ class ArquivoController extends Controller
 
         $arquivo = $_GET['arquivo'];
         $storagePath = realpath(STORE_PATH);
-        
+
         // Constrói o caminho completo e resolve o caminho real do arquivo
-        $caminhoCompleto = realpath($storagePath . '/' . $arquivo);
+        $caminhoCompleto = realpath($arquivo);
 
         // Verifica se o arquivo existe e se está dentro do diretório de storage permitido (evita Directory Traversal)
-        if ($caminhoCompleto && is_file($caminhoCompleto) && strpos($caminhoCompleto, $storagePath) === 0)
-        {
+        if ($caminhoCompleto && is_file($caminhoCompleto) && strpos($caminhoCompleto, $storagePath) === 0) {
             // Obtém o tipo do arquivo (MIME type)
             $mimeType = mime_content_type($caminhoCompleto);
-            
+
             // Define os cabeçalhos para exibir a imagem corretamente
             header('Content-Type: ' . $mimeType);
             header('Content-Length: ' . filesize($caminhoCompleto));
-            
+
             // Lê e envia o conteúdo do arquivo para o navegador
             readfile($caminhoCompleto);
             exit;

@@ -7,14 +7,17 @@ use app\helpers\ValidadorHelper;
 use app\models\Componente;
 use app\repositories\ComponenteRepositorySql;
 use app\services\ComponenteService;
+use app\services\UploadService;
 
 class ComponenteController extends Controller
 {
     private ComponenteRepositorySql $repositorySql;
     private ComponenteService $service;
+    private UploadService $uploadService;
     public function __construct()
     {
         $this->service = new ComponenteService();
+        $this->uploadService = new UploadService("/components"); 
         $this->repositorySql = new ComponenteRepositorySql();
     }
     public function listar()
@@ -35,14 +38,13 @@ class ComponenteController extends Controller
         
         $validador->obrigatorio('nome',   trim($_POST["nome"]));
         $validador->obrigatorio('descricao',  trim($_POST["descricao"]));
-        $validador->obrigatorio('imagem',  trim($_POST["imagem"]));
         $validador->tamanho('nome', trim($_POST["nome"]), 3,100);
         $validador->tamanho('descricao', trim($_POST["descricao"]), 3,100);
         
         $posts["nome"]   = trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
         $posts["descricao"]   = trim(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-        $posts["imagem"] = filter_input(INPUT_POST, 'imagem', FILTER_SANITIZE_URL);
-    
+        $posts["imagem"] = $this->uploadService->upload($_FILES["imagem"]);
+        
         $componente = Componente::map([$posts])[0];
         if($validador->temErros())
         {
@@ -54,7 +56,7 @@ class ComponenteController extends Controller
         {
             if ($this->service->salvarComponente($componente))
             {
-                $this->redirect(URL_BASE . '/componente/listar');
+                $this->redirect(URL_BASE . '/componente');
             } 
             else
             {
@@ -86,13 +88,16 @@ class ComponenteController extends Controller
         
         $validador->obrigatorio('nome',   trim($_POST["nome"]));
         $validador->obrigatorio('descricao',   trim($_POST["descricao"]));
-        $validador->obrigatorio('imagem',   trim($_POST["imagem"]));
         $validador->tamanho('nome', trim($_POST["nome"]), 3,100);
         
         $posts["id"]  = $_POST["id"];
         $posts["nome"]   = trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
         $posts["descricao"]  =  trim(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-        $posts["imagem"] = filter_input(INPUT_POST, 'imagem', FILTER_SANITIZE_URL);
+        
+        if($_FILES["imagem"]["error"] != 4)
+        {
+            $posts["imagem"] = $this->uploadService->upload($_FILES["imagem"]);
+        }
         
         $componente = Componente::map([$posts])[0];
         if($validador->temErros())
@@ -105,7 +110,7 @@ class ComponenteController extends Controller
         {
             if ($this->service->editarComponente($componente))
             {
-                $this->redirect(URL_BASE . '/componente/listar');
+                $this->redirect(URL_BASE . '/componente');
             } 
             else
             {

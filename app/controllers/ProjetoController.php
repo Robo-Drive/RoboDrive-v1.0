@@ -9,7 +9,6 @@ use app\repositories\ProjetoRepositorySql;
 use app\repositories\ComponenteRepositorySql;
 use app\repositories\UsuarioRepositorySql;
 use app\services\ProjetoService;
-
 class ProjetoController extends Controller
 {
     private ProjetoService $service;
@@ -50,8 +49,17 @@ class ProjetoController extends Controller
         $posts["nome"]   = trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
         $posts["descricao"]   = trim(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
         $posts["visibilidade"]  = trim(filter_input(INPUT_POST, 'visibilidade', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-        $posts["codigos"] = $_FILES["codigos"];
-        $posts["imagens"] = $_FILES["imagens"];
+        
+
+        if(isset($_FILES["imagens"]))
+        {
+            $posts["imagens"] = $_FILES["imagens"];
+        }
+        if(isset($_FILES["codigos"]))
+        {
+            $posts["codigos"] = $_FILES["codigos"];
+        }
+
         if($validador->temErros())
         {
             $data["projeto"] = $posts;

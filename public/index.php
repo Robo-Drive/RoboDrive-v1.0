@@ -12,7 +12,9 @@ $router->get('/login', 'AutenticacaoController@login');
 $router->post('/logar', 'AutenticacaoController@logar');
 $router->get('/cadastro', 'AutenticacaoController@cadastro');
 $router->post('/logout', 'AutenticacaoController@logout');
+$router->get('/arquivo', 'ArquivoController@visualizar');
 $router->get('/', 'HomeController@home');
+
 
 $crudsPrincipais = ["usuario","equipe","projeto","componente","forum"];
 

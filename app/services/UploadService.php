@@ -88,10 +88,9 @@ class UploadService
         $novaImagem = bin2hex(random_bytes(16)).".".$extensao;
 
         $destino = $this->uploadPath."/".$novaImagem;
-       
         if(move_uploaded_file($file["tmp_name"],$destino))
         {
-            return $novaImagem;
+            return $destino;
         }
         return throw new Exception("Falha ao redirecionar a imagem");
     }

@@ -9,12 +9,12 @@
         <input
             type="text"
             name="nome_usuario"
-            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all"
+            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
             value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getNomeUsuario() : (isset($usuario['nome_usuario']) ? $usuario['nome_usuario'] : '')) : '' ?>"
         >
 
         <?php if (isset($erros['nome'])): ?>
-            <p class="text-[#FF1A1A] mt-3"><?= $erros['nome'] ?></p>
+            <p class="text-[#00F5F5] mt-3"><?= $erros['nome'] ?></p>
         <?php endif; ?>
     </div>
     
@@ -27,12 +27,41 @@
         <input
             type="text"
             name="nome"
-            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all"
+            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
             value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getNome() : (isset($usuario['nome']) ? $usuario['nome'] : '')) : '' ?>"
         >
 
         <?php if (isset($erros['nome'])): ?>
-            <p class="text-[#FF1A1A] mt-3"><?= $erros['nome'] ?></p>
+            <p class="text-[#00F5F5] mt-3"><?= $erros['nome'] ?></p>
+        <?php endif; ?>
+    </div>
+
+    <!-- Bio -->
+    <div class="relative">
+        <label
+            for="biografia"
+            class="absolute -top-3 left-3 bg-black px-2 text-white font-bold z-10"
+        >
+            Biografia
+        </label>
+
+        <textarea
+            name="biografia"
+            id="biografia"
+            rows="5"
+            maxlength="500"
+            placeholder="Conte um pouco sobre você..."
+            class="w-full min-h-[140px] bg-black/80 border border-white px-4 py-3 text-white placeholder-white/40 outline-none focus:border-[#00F5F5] transition-all resize-y leading-relaxed"
+        ><?= isset($usuario)
+            ? (is_object($usuario)
+                ? $usuario->getBiografia()
+                : (isset($usuario['biografia']) ? $usuario['biografia'] : ''))
+            : '' ?></textarea>
+
+        <?php if (isset($erros['biografia'])): ?>
+            <p class="text-[#00F5F5] mt-3">
+                <?= $erros['biografia'] ?>
+            </p>
         <?php endif; ?>
     </div>
 
@@ -45,12 +74,12 @@
         <input
             type="text"
             name="email"
-            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all"
+            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
             value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getEmail() : (isset($usuario['email']) ? $usuario['email'] : '')) : '' ?>"
         >
 
         <?php if (isset($erros['email'])): ?>
-            <p class="text-[#FF1A1A] mt-3"><?= $erros['email'] ?></p>
+            <p class="text-[#00F5F5] mt-3"><?= $erros['email'] ?></p>
         <?php endif; ?>
     </div>
 
@@ -64,14 +93,14 @@
             <input
                 type="password"
                 name="senha"
-                class="password flex-1 h-12 bg-black/80 border border-r-0 border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all"
+                class="password flex-1 h-12 bg-black/80 border border-r-0 border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
                 value="<?= isset($usuario) ? (is_object($usuario) ? '' : (isset($usuario['senha']) ? $usuario['senha'] : '')) : '' ?>"
             >
 
             <button
                 type="button"
                 onclick="passowrdChange()"
-                class="h-12 px-4 bg-black/80 border border-white border-l-0 text-white hover:text-[#FF1A1A] transition-all flex items-center justify-center"
+                class="h-12 px-4 bg-black/80 border border-white border-l-0 text-white hover:text-[#00F5F5] transition-all flex items-center justify-center"
             >
                 <img
                     class="passwordButton"
@@ -82,25 +111,25 @@
         </div>
 
         <?php if (isset($erros['senha'])): ?>
-            <p class="text-[#FF1A1A] mt-3"><?= $erros['senha'] ?></p>
+            <p class="text-[#00F5F5] mt-3"><?= $erros['senha'] ?></p>
         <?php endif; ?>
     </div>
     <div class="relative">
-        <label for="confirmarSenha" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
+        <label for="confirmar_senha" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
             Confirmar senha
         </label>
 
         <div class="flex w-full">
-            <input type="password" name="confirmarSenha" class="confirmarPassword flex-1 h-12 bg-black/80 border border-r-0 border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all">
+            <input type="password" name="confirmar_senha" class="confirmarPassword flex-1 h-12 bg-black/80 border border-r-0 border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all">
 
-            <button type="button" onclick="confirmarPassowrdChange()"class="h-12 px-4 bg-black/80 border border-white border-l-0 text-white hover:text-[#FF1A1A] transition-all flex items-center justify-center">
+            <button type="button" onclick="confirmarPassowrdChange()"class="h-12 px-4 bg-black/80 border border-white border-l-0 text-white hover:text-[#00F5F5] transition-all flex items-center justify-center">
                 <img  class="confirmarPasswordButton" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
             </button>
         </div>
-        <p class="confirmarErro text-[#FF1A1A] mt-3">
+        <p class="confirmarErro text-[#00F5F5] mt-3">
             <?php if(isset($erros)): ?>
-                <?php if(isset($erros["confirmarSenha"])): ?>
-                    <?= $erros["confirmarSenha"] ?>
+                <?php if(isset($erros["confirmar_senha"])): ?>
+                    <?= $erros["confirmar_senha"] ?>
                 <?php endif;?>
             <?php endif;?>
         </p>
@@ -116,7 +145,7 @@
         <button
             type="button"
             onclick="adicionarImagens()"
-            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all"
+            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
         >
             Adicionar imagens
         </button>
@@ -132,7 +161,7 @@
         <ul id="listaImagens" class="space-y-2 mt-3"></ul>
 
         <?php if (isset($erros['imagens'])): ?>
-            <p class="text-[#FF1A1A] mt-3"><?= $erros['imagens'] ?></p>
+            <p class="text-[#00F5F5] mt-3"><?= $erros['imagens'] ?></p>
         <?php endif; ?>
     </div>
 
@@ -145,7 +174,7 @@
 
             <select
                 name="regra"
-                class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all"
+                class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
             >
                 <option value="">Selecione</option>
 
@@ -177,7 +206,7 @@
             </select>
 
             <?php if (isset($erros['regra'])): ?>
-                <p class="text-[#FF1A1A] mt-3"><?= $erros['regra'] ?></p>
+                <p class="text-[#00F5F5] mt-3"><?= $erros['regra'] ?></p>
             <?php endif; ?>
         </div>
     <?php endif; ?>
@@ -203,7 +232,7 @@
 <div class="flex justify-center items-center p-4">
     <button
         type="submit"
-        class="text-white px-5 py-2 border border-white hover:border-[#FF1A1A] hover:text-[#FF1A1A] transition-all"
+        class="text-white px-5 py-2 border border-white hover:border-[#00F5F5] hover:text-[#00F5F5] transition-all"
     >
         Enviar
     </button>

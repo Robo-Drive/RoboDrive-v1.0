@@ -5,10 +5,10 @@
             Email
         </label>
 
-    <input type="text" name="email" class="w-full h-10 bg-black/80 border border-white  px-4 text-white outline-none focus:border-[#FF1A1A] transition-all" value="<?= isset($usuario["email"]) ? $usuario["email"]: "" ?>">
+    <input type="text" name="email" class="w-full h-10 bg-black/80 border border-white  px-4 text-white outline-none focus:border-[#00F5F5] transition-all" value="<?= isset($usuario["email"]) ? $usuario["email"]: "" ?>">
         <?php if(isset($erros)): ?>
             <?php if(isset($erros["email"])): ?>
-                <p class="text-[#FF1A1A] mt-3"><?= $erros["email"] ?></p>
+                <p class="text-[#00F5F5] mt-3"><?= $erros["email"] ?></p>
             <?php endif;?>
         <?php endif;?>
     </div>
@@ -19,20 +19,20 @@
         </label>
 
         <div class="flex w-full">
-            <input type="password" name="senha" class="password flex-1 h-12 bg-black/80 border border-r-0 border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all">
+            <input type="password" name="senha" class="password flex-1 h-12 bg-black/80 border border-r-0 border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all">
 
-            <button type="button" onclick="passowrdChange()"class="h-12 px-4 bg-black/80 border border-white border-l-0 text-white hover:text-[#FF1A1A] transition-all flex items-center justify-center">
+            <button type="button" onclick="passowrdChange()"class="h-12 px-4 bg-black/80 border border-white border-l-0 text-white hover:text-[#00F5F5] transition-all flex items-center justify-center">
                 <img  class="passwordButton" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
             </button>
         </div>
         <?php if(isset($erros)): ?>
             <?php if(isset($erros["senha"])): ?>
-                <p class="text-[#FF1A1A] mt-3"><?= $erros["senha"] ?></p>
+                <p class="text-[#00F5F5] mt-3"><?= $erros["senha"] ?></p>
             <?php endif;?>
         <?php endif;?>
     </div>
     <?php if(isset($erros["login"])): ?>
-        <p class="text-[#FF1A1A] mt-3"><?= $erros["login"] ?></p>
+        <p class="text-[#00F5F5] mt-3"><?= $erros["login"] ?></p>
     <?php endif;?>    
 </div>
 

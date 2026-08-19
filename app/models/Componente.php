@@ -28,6 +28,7 @@ class Componente
             $componenteObj->setDescricao($componente["descricao"]??null);
             $componenteObj->setImagem($componente["imagem"]??null);
             $componenteObj->setQuantidade($componente["quantidade"]??null);
+            $componenteObj->setUsuario(new Usuario()->setId($componente["usuario_id"]??null)->setNomeUsuario($componente["nome_usuario"]??null));
             $ComponentesObj[] = $componenteObj;
         }
         return $ComponentesObj;

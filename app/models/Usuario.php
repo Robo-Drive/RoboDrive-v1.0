@@ -7,6 +7,7 @@ use DateTimeImmutable;
 class Usuario
 {
     private ?int $id = null;
+    private ?bool $status = null;
     private ?string $nome = null;
     private ?string $nomeUsuario = null;
     private ?string $email = null;
@@ -28,6 +29,7 @@ class Usuario
             $usuarioObj = new Usuario();
             $usuarioObj->setId($usuario["id"] ?? null);
             $usuarioObj->setNome($usuario["nome"] ?? null);
+            $usuarioObj->setStatus($usuario["status"] ?? null);
             $usuarioObj->setNomeUsuario($usuario["nome_usuario"] ?? null);
             $usuarioObj->setEmail($usuario["email"] ?? null);
             $usuarioObj->setSenha($usuario["senha"] ?? null);
@@ -154,6 +156,16 @@ class Usuario
     public function setNomeUsuario(?string $nomeUsuario): self
     {
         $this->nomeUsuario = $nomeUsuario;
+        return $this;
+    }
+
+    public function isStatus(): ?bool
+    {
+        return $this->status;
+    }
+    public function setStatus(?bool $status): self
+    {
+        $this->status = $status;
         return $this;
     }
 }

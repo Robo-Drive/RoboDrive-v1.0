@@ -8,17 +8,25 @@ use app\models\Usuario;
 use app\repositories\EquipeRepositorySql;
 use app\repositories\ProjetoRepositorySql;
 use app\repositories\UsuarioRepositorySql;
+use app\services\UploadService;
 use app\services\UsuarioService;
+use app\controllers\AutenticacaoController;
+
 class UsuarioController extends Controller
 {
     private UsuarioService $service;
     private UsuarioRepositorySql $repositorySql;
     private EquipeRepositorySql $equipeRepositorySql;
     private ProjetoRepositorySql $projetoRepositorySql;
+    private UploadService $uploadService;
 
     public function __construct()
     {
         $this->service = new UsuarioService();
+        if(isset($_SESSION["usuario_logado"]))
+        {
+            $this->uploadService = new UploadService("/users/user-".$_SESSION["usuario_logado"]->getId()."/img");
+        }
         $this->repositorySql = new UsuarioRepositorySql();
         $this->equipeRepositorySql = new EquipeRepositorySql();
         $this->projetoRepositorySql = new ProjetoRepositorySql();
@@ -67,7 +75,6 @@ class UsuarioController extends Controller
             $validador->email($_POST["email"]);
         }
 
-        
         $posts["nome_usuario"]   = filter_input(INPUT_POST, 'nome_usuario', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $posts["nome"]   = filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $posts["email"]  = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
@@ -118,22 +125,36 @@ class UsuarioController extends Controller
         
         $validador->obrigatorio('id',   $_POST["id"]);
         $validador->obrigatorio('nome',   $_POST["nome"]);
+        $validador->obrigatorio('nome_usuario',   $_POST["nome_usuario"]);
         $validador->obrigatorio('email',  $_POST["email"]);
         $validador->tamanho('nome', $_POST["nome"], 3,100);
         if(isset($_POST["senha"]) && ($_POST["senha"] != "" && $_POST["senha"] != null))
         {
             $validador->tamanho('senha',$_POST["senha"],8,100);
+            $validador->obrigatorio('confirmar_senha',  $_POST["confirmar_senha"],"O campo de confirmação de senha é obrigatório");
+            if(!isset($validador->getErros()["senha"]) && !isset($validador->getErros()["confirmar_senha"]))
+            {
+                $validador->confirmarValor($_POST["senha"],$_POST["confirmar_senha"],"confirmar_senha","A senha digitada é diferente da do campo senha");
+            }
         }
         $validador->email($_POST["email"]);
         $posts["id"] = $_POST["id"];
         $posts["nome"]   = filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $posts["nome_usuario"]   = filter_input(INPUT_POST, 'nome_usuario', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $posts["email"]  = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+        $posts["biografia"]   = filter_input(INPUT_POST, 'biografia', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        
         if(isset($_POST["regra"]))
         {
             $posts["regra"]  = filter_input(INPUT_POST, 'regra', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         }
+        
         $posts["senha"]  = isset($_POST["senha"]) ? ($_POST["senha"] == "" ? null : $_POST["senha"] ): null;
-        $posts["imagem"] = $_FILES["imagem"];
+        if($_FILES["imagem"]["error"] != 4)
+        {
+            $posts["imagem"] = $this->uploadService->upload($_FILES["imagem"]);
+        }
+        
 
         $usuario = Usuario::map([$posts])[0];
         if($validador->temErros())
@@ -193,7 +214,7 @@ class UsuarioController extends Controller
         $this->loginRequired();
         $usuario = new Usuario();
         $usuario->setId($_POST["id"]);
-        $this->repositorySql->deletar($usuario);
-        $this->listar();
+        $this->service->deletar($usuario);
+        (new AutenticacaoController)->logout();
     }
 }

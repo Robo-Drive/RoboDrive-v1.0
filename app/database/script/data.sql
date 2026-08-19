@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS comentario_projeto (
 CREATE TABLE IF NOT EXISTS componente (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
-  descricao VARCHAR(255),
+  descricao VARCHAR(255) NOT NULL,
   imagem TEXT,
   usuario_id INT NOT NULL,
   status BOOLEAN NOT NULL DEFAULT TRUE,
@@ -168,11 +168,6 @@ CREATE TABLE IF NOT EXISTS equipe_usuario (
 -- DADOS DE TESTE
 -- --------------------------------------------------
 
-INSERT INTO equipe (nome, senha) VALUES
-('Equipe Alpha', '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2'),
-('Equipe Beta', '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2'),
-('Equipe Gamma', '$2y$12$wRcrAEgHHM9t0SeZr4lmguQXNiVBbuuc6Pr.lGxCf/mVQSDdHYZD2');
-
 INSERT INTO usuario
 (nome, nome_usuario, email, senha, biografia, imagem, regra, status)
 VALUES
@@ -201,102 +196,9 @@ VALUES
  'Especialista em eletrônica.',
  'https://example.com/thumb2.png',
  'admin',
- TRUE),
-
-('teste',
- 'teste',
- 'teste@gmail.com',
- '$2y$12$twxVhhtHCFpYcOk8W02lq.PP/4hxFB9Urf9sV2lKPP4/JgF.Nkd16',
- NULL,
- NULL,
- 'usuario',
  TRUE);
-('teste', 'teste', 'teste@gmail.com', '$2y$12$twxVhhtHCFpYcOk8W02lq.PP/4hxFB9Urf9sV2lKPP4/JgF.Nkd16', NULL, 'usuario', 1);
 
 INSERT INTO categoria (nome, usuario_id) VALUES
-('Arduino', 1),
-('Mecânica', 2),
-('Eletrônica', 3);
-
-INSERT INTO projeto
-(nome, descricao, visibilidade, usuario_id, categoria_id, equipe_id)
-VALUES
-('Robô Seguidor de Linha',
- 'Robô que segue uma linha usando sensores',
- 'publico',
- 1,
- 1,
- 1),
-
-('Braço Robótico',
- 'Braço mecânico controlado por servo motores',
- 'publico',
- 2,
- 2,
- 2),
-
-('Drone Arduino',
- 'Drone controlado por Arduino com sensores',
- 'privado',
- 3,
- 3,
- NULL);
-
-INSERT INTO componente (nome, descricao, imagem, usuario_id) VALUES
-('Arduino Uno', 'Microcontrolador', 'https://upload.wikimedia.org/wikipedia/commons/3/38/Arduino_Uno_-_R3.jpg', 1),
-('Sensor Ultrassônico', 'Mede distância', 'https://example.com/sensor.jpg', 1),
-('Servo Motor', 'Movimento angular', 'https://example.com/servo.jpg', 1);
-
-INSERT INTO postagem_forum (conteudo, visibilidade, usuario_id, equipe_id) VALUES
-('Como melhorar PID no robô?', 'publico', 1, NULL),
-('Alguém tem código para servo?', 'equipe', 2, NULL);
-
-INSERT INTO comentario_postagem_forum (conteudo, postagem_forum_id, usuario_id) VALUES
-('Tenta ajustar o Kp primeiro', 1, 2),
-('Tenho sim, depois te mando', 2, 3);
-
-INSERT INTO comentario_projeto (conteudo, projeto_id, usuario_id) VALUES
-('Projeto muito bom!', 1, 2),
-('Precisa melhorar a estrutura', 2, 3);
-
-INSERT INTO imagem_projeto (caminho, projeto_id) VALUES
-('linha1.png', 1),
-('braco1.png', 2);
-
--- Componentes e códigos da versão em andamento do "Robô Seguidor de Linha" (projeto_id = 1)
-INSERT INTO codigo (caminho, descricao) VALUES
-('codigo_atual_v2.ino', 'Controle com PID ajustado');
-
-INSERT INTO projeto_componente (quantidade, projeto_id, componente_id) VALUES
-(1, 1, 1), -- 1 Arduino Uno
-(2, 1, 2); -- 2 Sensores Ultrassônicos (Mudou na versão atual)
-
--- --------------------------------------------------
--- EXEMPLO DE POPULAÇÃO DO VERSIONAMENTO (BACKUP DA V1.0)
--- --------------------------------------------------
-
--- 1. Criamos o registro da versão antiga v1.0.0 do projeto 1 (versão = 1)
-INSERT INTO projeto_versao (projeto_id, usuario_id, versao, descricao_alteracao) VALUES
-(1, 1, 1, 'Primeira versão funcional usando apenas 1 sensor ultrassônico e lógica simples');
-
--- 2. Salvamos o código que pertencia à v1.0.0
-INSERT INTO codigo (caminho, descricao) VALUES
-('codigo_antigo_v1.ino', 'Código inicial sem PID');
-
--- 3. Vinculamos o código (id = 2) com a versão do projeto (projeto_versao_id = 1)
-INSERT INTO codigo_versao (codigo_id, projeto_versao_id) VALUES
-(2, 1);
-
--- 4. Salvamos os componentes que eram usados na v1.0.0 (projeto_versao_id = 1)
-INSERT INTO projeto_versao_componente (quantidade, componente_id, projeto_versao_id) VALUES
-(1, 1, 1), -- Usava 1 Arduino Uno
-(1, 2, 1); -- Usava apenas 1 Sensor Ultrassônico (no atual usa 2)
-
--- Vinculando usuários finais
-INSERT INTO projeto_usuario (projeto_id, usuario_id, papel) VALUES
-(1, 1, 'coordenador'),
-(1, 2, 'participante');
-
-INSERT INTO equipe_usuario (equipe_id, usuario_id, papel) VALUES
-(1, 1, 'coordenador'),
-(1, 2, 'participante');
+('Meus projetos', 1),
+('Meus projetos', 2),
+('Meus projetos', 3);
