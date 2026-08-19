@@ -29,23 +29,23 @@ A referência estética geral é uma combinação da identidade da logo do RoboD
 
 ## Cores principais
 
-| Nome | Hexadecimal | Função |
-|---|---|---|
-| Preto Tecnológico | `#000505` | Background absoluto |
-| Azul-Preto | `#06141C` | Background principal / seções |
-| Azul Profundo | `#082B3A` | Cards e áreas elevadas |
-| Azul Cyber | `#07556A` | Bordas e elementos secundários |
-| Azul-Ciano | `#0795A5` | Elementos intermediários |
-| **Ciano RoboDrive** | **`#13F3F7`** | Cor principal da identidade |
-| Neon Cyan | `#54FBFE` | Hover, highlights e brilho |
-| Aqua | `#00D6B5` | Status, indicadores e elementos funcionais |
-| Aqua Neon | `#39F5D0` | Highlights e animações |
-| **Cyber Yellow** | **`#F0ED06`** | Seções e destaques especiais |
-| Yellow Dark | `#D8D400` | Variações e hover do amarelo |
-| Amber | `#F2A058` | Detalhes quentes secundários |
-| Branco Frio | `#F2FEFE` | Texto principal |
-| Cinza Azul | `#91B5BD` | Texto secundário |
-| Cinza Desabilitado | `#4E6B72` | Texto/elementos desabilitados |
+| Nome               | Hex       | Função                                     |
+|--------------------|-----------|--------------------------------------------|
+| Preto Tecnológico  | `#000505` | Background absoluto                        |
+| Azul-Preto         | `#06141C` | Background principal / seções              |
+| Azul Profundo      | `#082B3A` | Cards e áreas elevadas                     |
+| Azul Cyber         | `#07556A` | Bordas e elementos secundários             |
+| Azul-Ciano         | `#0795A5` | Elementos intermediários                   |
+| Ciano RoboDrive    | `#13F3F7` | Cor principal da identidade                |
+| Neon Cyan          | `#54FBFE` | Hover, highlights e brilho                 |
+| Aqua               | `#00D6B5` | Status, indicadores e elementos funcionais |
+| Aqua Neon          | `#39F5D0` | Highlights e animações                     |
+| Cyber Yellow       | `#F0ED06` | Seções e destaques especiais               |
+| Yellow Dark        | `#D8D400` | Variações e hover do amarelo               |
+| Amber              | `#F2A058` | Detalhes quentes secundários               |
+| Branco Frio        | `#F2FEFE` | Texto principal                            |
+| Cinza Azul         | `#91B5BD` | Texto secundário                           |
+| Cinza Desabilitado | `#4E6B72` | Texto/elementos desabilitados              |
 
 ---
 
