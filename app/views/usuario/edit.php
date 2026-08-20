@@ -19,7 +19,7 @@ include_once(__DIR__."/../elements/header.php");
             <form action="<?= URL_BASE ?>/usuario/excluir" method="post"
                 class="absolute right-5 bottom-5 text-white border px-4 py-1 hover:border-[#FF0000]">
                 <button type="submit">Excluir usuario</button>
-                <input type="hidden" name="id" value="<?= $usuario->getId() ?>">
+                <input type="hidden" name="id" value="<?= is_object($usuario) ? $usuario->getId() : ($usuario['id'] ?? '') ?>">
             </form>
         </div>
     </div>

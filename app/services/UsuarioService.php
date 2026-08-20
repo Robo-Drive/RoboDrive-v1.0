@@ -35,18 +35,36 @@ class UsuarioService
         }
         return $mensages;
     }
-    public function editarUsuario(Usuario $usuario)
+    public function editarUsuario(Usuario $usuario): bool | array
     {
+        $mensagens = array();
+        
+        $emailResposta = $this->repositorySql->buscarEmailDiferenteId($usuario);
+        $nomeUsuarioResposta = $this->repositorySql->buscarNomeUsuarioDiferenteId($usuario);
+        
+        if(!empty($emailResposta))
+        {
+            $mensagens["email"] = "Erro: Este e-mail já está sendo usado por outro usuário!";
+        }
+        if(!empty($nomeUsuarioResposta))
+        {
+            $mensagens["nome_usuario"] = "Erro: Este nome de usuário já está sendo usado por outro usuário!";
+        }
+        
+        if(!empty($mensagens))
+        {
+            return $mensagens;
+        }
+        
         try
         {
             $this->repositorySql->editar($usuario);
-        }
-        catch(Exception $e)
-        {
+            return true;
+        } catch (Exception $e) {
             return false;
         }
-        return true;
     }
+
     public function deletar(Usuario $usuario)
     {
         $this->repositorySql->deletar($usuario);

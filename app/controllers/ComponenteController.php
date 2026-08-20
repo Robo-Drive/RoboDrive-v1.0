@@ -35,7 +35,6 @@ class ComponenteController extends Controller
     {
         $this->loginRequired();
         $validador = new ValidadorHelper();
-        
         $validador->obrigatorio('nome',   trim($_POST["nome"]));
         $validador->obrigatorio('descricao',  trim($_POST["descricao"]));
         $validador->tamanho('nome', trim($_POST["nome"]), 3,100);
@@ -43,8 +42,19 @@ class ComponenteController extends Controller
         
         $posts["nome"]   = trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
         $posts["descricao"]   = trim(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-        $posts["imagem"] = $this->uploadService->upload($_FILES["imagem"]);
-        
+        $respostaImagem = $validador->temImagem($_FILES);
+        if($respostaImagem["status"])
+        {
+            $resposta = $this->uploadService->upload($_FILES["imagem"]);
+            if($resposta["status"])
+            {
+                $posts["imagem"] = $resposta["mensagem"];
+            }
+            else
+            {
+                $validador->setErroImagem($resposta["mensagem"]);
+            }
+        }
         $componente = Componente::map([$posts])[0];
         if($validador->temErros())
         {
@@ -94,9 +104,21 @@ class ComponenteController extends Controller
         $posts["nome"]   = trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
         $posts["descricao"]  =  trim(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
         
-        if($_FILES["imagem"]["error"] != 4)
+        $respostaImagem = $validador->temImagem($_FILES,false);
+        
+        if($respostaImagem["status"])
         {
-            $posts["imagem"] = $this->uploadService->upload($_FILES["imagem"]);
+
+            $resposta = $this->uploadService->upload($_FILES["imagem"]);
+            if($resposta["status"])
+            {
+                $posts["imagem"] = $resposta["mensagem"];
+            }
+            else
+            {
+                $validador->setErroImagem($resposta["mensagem"]);
+            }
+            
         }
         
         $componente = Componente::map([$posts])[0];

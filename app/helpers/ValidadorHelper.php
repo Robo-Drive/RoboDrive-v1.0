@@ -6,7 +6,7 @@ class ValidadorHelper
 {
     private array $erros = [];
 
-    public function obrigatorio(string $campo,mixed $valor,?string $mensagem=null)
+    public function obrigatorio(string $campo, mixed $valor, ?string $mensagem = null)
     {
         if(empty($valor) && $valor !== '0')
         {
@@ -14,12 +14,12 @@ class ValidadorHelper
         }
         return $this;
     }
-    public function tamanho(string $campo,mixed $valor,int $min,int $max,?string $campo_mensgem=null)
+    public function tamanho(string $campo, mixed $valor, int $min, int $max, ?string $campo_mensgem = null)
     {
         $msg = $campo_mensgem ?? $campo;
-        if(strlen($valor) < $min)
+        if (strlen($valor) < $min)
             $this->erros[$campo] = $mensagem ?? "O campo {$msg} pede no mínimo {$min} caracteres";
-        if(strlen($valor) > $max)
+        if (strlen($valor) > $max)
             $this->erros[$campo] = $mensagem ?? "O campo {$msg} suporta no máximo {$max} caracteres";
         return $this;
     }
@@ -30,14 +30,35 @@ class ValidadorHelper
             $this->erros["email"] = "Email inválido";
         }
     }
-    public function confirmarValor(string $valorInicial,string $valorConfirmado,string $campo,?string $mensagem=null)
+    public function confirmarValor(string $valorInicial, string $valorConfirmado, string $campo, ?string $mensagem = null)
     {
         if($valorInicial != $valorConfirmado)
         {
             $this->erros[$campo] = $mensagem;
         }
     }
-    public function temErros() :bool 
+    public function temImagem(array $imagem,bool $erro=true)
+    {
+        if($imagem["imagem"]["error"] != 4)
+        {
+            return [
+                "status" => true,
+                "arquivo" => $imagem["imagem"],
+            ];
+        }
+        if($erro)
+        {
+            $this->setErroImagem("Você deve adicionar uma imagem!");
+        }
+        return [
+            "status" => false,
+        ]; 
+    }
+    public function setErroImagem(string $mensagem)
+    {
+        $this->erros["imagem"] = $mensagem;
+    }
+    public function temErros(): bool
     {
         return !empty($this->erros);
     }
