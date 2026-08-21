@@ -38,7 +38,7 @@ class ComponenteController extends Controller
         $validador->obrigatorio('nome',   trim($_POST["nome"]));
         $validador->obrigatorio('descricao',  trim($_POST["descricao"]));
         $validador->tamanho('nome', trim($_POST["nome"]), 3,100);
-        $validador->tamanho('descricao', trim($_POST["descricao"]), 3,100);
+        $validador->tamanho('descricao', trim($_POST["descricao"]), 3,2000);
         
         $posts["nome"]   = trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
         $posts["descricao"]   = trim(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
