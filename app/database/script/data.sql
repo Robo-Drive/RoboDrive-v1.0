@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS usuario (
   nome_usuario VARCHAR(100) NOT NULL UNIQUE,
   email VARCHAR(100) NOT NULL UNIQUE,
   senha VARCHAR(1000) NOT NULL,
-  biografia VARCHAR(100),
+  biografia VARCHAR(2000),
   imagem VARCHAR(1000),
   regra ENUM('admin','usuario') NOT NULL,
   status BOOLEAN NOT NULL DEFAULT TRUE,
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS categoria (
 CREATE TABLE IF NOT EXISTS projeto (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
-  descricao VARCHAR(255) NOT NULL,
+  descricao VARCHAR(2000) NOT NULL,
   visibilidade ENUM('privado','equipe','publico') DEFAULT 'privado',
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   usuario_id INT NOT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS comentario_projeto (
 CREATE TABLE IF NOT EXISTS componente (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
-  descricao VARCHAR(255) NOT NULL,
+  descricao VARCHAR(2000) NOT NULL,
   imagem TEXT,
   usuario_id INT NOT NULL,
   status BOOLEAN NOT NULL DEFAULT TRUE,
@@ -176,7 +176,7 @@ VALUES
  'walmonn.eduardo.tds2023@gmail.com',
  '$2y$12$/E551s2RVpWQgvvUnbq4E.ZZvKoaE2V1cNwPp2aTJokiCd6lle3/a',
  'Desenvolvedor e entusiasta de robótica.',
- 'https://example.com/sai-dr-stone.webp',
+ '/srv/http/RoboDrive-v1.0/app/config/../../store/users/user-1/img/693bba41ae823701b63aedc23d89a71a.jpeg',
  'admin',
  TRUE),
 
@@ -185,7 +185,7 @@ VALUES
  'guilherme.wernke.tds2023@gmail.com',
  '$2y$12$pIqRCJLzv2Ia0jGlzk9VSOTAIK4YZk4/UB0Zs/3gjUerizr0DSTpW',
  'Professor de robótica.',
- 'https://example.com/thumb.jpg',
+ '/srv/http/RoboDrive-v1.0/app/config/../../store/users/user-2/img/4b4c5d887ba820581966f5215c2d7b8e.jpg',
  'admin',
  TRUE),
 
@@ -194,7 +194,7 @@ VALUES
  'petrus.souza.tds2023@gmail.com',
  '$2y$12$ECX23EPvPazaiSUN2asdwOLf0carz.YsWft/4Y93ziODDBmoq08PW',
  'Especialista em eletrônica.',
- 'https://example.com/thumb2.png',
+ '/srv/http/RoboDrive-v1.0/app/config/../../store/users/user-3/img/f79dc89b68ade760f62dd93b3d8479a1.jpg',
  'admin',
  TRUE);
 

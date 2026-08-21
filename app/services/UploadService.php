@@ -2,8 +2,6 @@
 
 namespace app\services;
 
-use Exception;
-
 class UploadService
 {
     private array $extensoesPermitidas = [
@@ -72,27 +70,34 @@ class UploadService
             mkdir($this->uploadPath,0777,true);
         }
     }
-    public function upload(array $file)
+    public function upload(array $file): array
     {
         if($file["size"] > $this->tamanhoMaximo)
         {
-            throw new Exception("Arquivo muito grande. Tamanho máximo permitido é de: 5MB");
+            return [
+                "status" => false,
+                "mensagem" => "Arquivo muito grande. Tamanho máximo permitido é de: 5MB"];
         }
         $extensao = strtolower(pathinfo($file["name"],PATHINFO_EXTENSION));
         if(!in_array($extensao,$this->extensoesPermitidas))
         {
-            throw new Exception("Extensão de arquivo não permitido");
+            return [
+                "status" => false,
+                "mensagem" => "Extensão de arquivo não permitido"];
         }
 
-        //Gerar um nome único para salvar o arquivo
         $novaImagem = bin2hex(random_bytes(16)).".".$extensao;
 
         $destino = $this->uploadPath."/".$novaImagem;
         if(move_uploaded_file($file["tmp_name"],$destino))
         {
-            return $destino;
+            return [
+                "status" => true,
+                "mensagem" => $destino];
         }
-        return throw new Exception("Falha ao redirecionar a imagem");
+        return [
+            "status" => false,
+            "mensagem" => "Falha ao redirecionar a imagem"];
     }
 
     public function uploadArray(array $files)

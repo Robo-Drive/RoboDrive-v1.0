@@ -61,8 +61,8 @@
 
         <ul id="listaImagens" class="space-y-2 mt-3"></ul>
 
-        <?php if (isset($erros['imagens'])): ?>
-            <p class="text-[#00F5F5] mt-3"><?= $erros['imagens'] ?></p>
+        <?php if (isset($erros['imagem'])): ?>
+            <p class="text-[#00F5F5] mt-3"><?= $erros['imagem'] ?></p>
         <?php endif; ?>
     </div>
 
