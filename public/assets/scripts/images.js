@@ -3,16 +3,22 @@ const listaImagens = document.getElementById("listaImagens");
 
 const imagens = [];
 
-function adicionarImagens() {
+function adicionarImagens()
+{
     inputImagens.click();
 }
 
 inputImagens.addEventListener("change", () => {
 
-    for (const imagem of inputImagens.files) {
+    if (!inputImagens.multiple)
+    {
+        imagens.length = 0;
+    }
+    for (const imagem of inputImagens.files)
+    {
 
-        // Aceita apenas imagens
-        if (!imagem.type.startsWith("image/")) {
+        if (!imagem.type.startsWith("image/"))
+        {
             continue;
         }
 
@@ -22,7 +28,8 @@ inputImagens.addEventListener("change", () => {
             item.lastModified === imagem.lastModified
         );
 
-        if (!existe) {
+        if (!existe)
+        {
             imagens.push(imagem);
         }
     }
@@ -32,14 +39,15 @@ inputImagens.addEventListener("change", () => {
 
 });
 
-function atualizarListaImagens() {
+function atualizarListaImagens()
+{
 
     listaImagens.innerHTML = "";
 
     imagens.forEach((imagem, indice) => {
 
         const li = document.createElement("li");
-        li.className = "w-full bg-black/80 border border-white p-3 text-white hover:border-[#FF1A1A] transition-all flex justify-between items-center";
+        li.className = "w-full bg-black/80 border border-white p-3 text-white hover:border-[#00F5F5] transition-all flex justify-between items-center";
 
         const esquerda = document.createElement("div");
         esquerda.className = "flex items-center gap-3";
@@ -91,7 +99,8 @@ function atualizarListaImagens() {
     atualizarInputImagens();
 }
 
-function atualizarInputImagens() {
+function atualizarInputImagens()
+{
 
     const dataTransfer = new DataTransfer();
 
@@ -102,7 +111,8 @@ function atualizarInputImagens() {
     inputImagens.files = dataTransfer.files;
 }
 
-function removerImagem(indice) {
+function removerImagem(indice)
+{
 
     imagens.splice(indice, 1);
 

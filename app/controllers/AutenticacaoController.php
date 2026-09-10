@@ -46,14 +46,14 @@ class AutenticacaoController extends Controller
         else
         {
             $resposta = $this->service->logar($usuario->getEmail(),$usuario->getSenha());
-            if($resposta)
+            if(is_bool($resposta))
             {
                 $this->redirect(URL_BASE . '/usuario/perfil');
             } 
             else
             {
                 $data["usuario"] = $posts;
-                $data["erros"]["login"] = "Email ou senha incorretos";
+                $data["erros"]["login"] = $resposta;
                 $this->view('login/login',$data);
             }
         }

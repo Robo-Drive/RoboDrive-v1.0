@@ -9,12 +9,12 @@
         <input
             type="text"
             name="nome"
-            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all"
+            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
             value="<?= isset($projeto) ? (is_object($projeto) ? $projeto->getNome() : (isset($projeto['nome']) ? $projeto['nome'] : '')) : '' ?>"
         >
 
         <?php if (isset($erros['nome'])): ?>
-            <p class="text-[#FF1A1A] mt-3"><?= $erros['nome'] ?></p>
+            <p class="text-[#00F5F5] mt-3"><?= $erros['nome'] ?></p>
         <?php endif; ?>
     </div>
 
@@ -27,11 +27,11 @@
         <textarea
             name="descricao"
             rows="5"
-            class="w-full bg-black/80 border border-white px-4 py-3 text-white outline-none focus:border-[#FF1A1A] transition-all resize-none"
+            class="w-full bg-black/80 border border-white px-4 py-3 text-white outline-none focus:border-[#00F5F5] transition-all resize-none"
         ><?= isset($projeto) ? (is_object($projeto) ? $projeto->getDescricao() : (isset($projeto['descricao']) ? $projeto['descricao'] : '')) : '' ?></textarea>
 
         <?php if (isset($erros['descricao'])): ?>
-            <p class="text-[#FF1A1A] mt-3"><?= $erros['descricao'] ?></p>
+            <p class="text-[#00F5F5] mt-3"><?= $erros['descricao'] ?></p>
         <?php endif; ?>
     </div>
 
@@ -43,7 +43,7 @@
 
         <select
             name="visibilidade"
-            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all"
+            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
         >
             <option value="">Selecione</option>
 
@@ -88,7 +88,82 @@
         </select>
         
         <?php if (isset($erros['visibilidade'])): ?>
-            <p class="text-[#FF1A1A] mt-3"><?= $erros['visibilidade'] ?></p>
+            <p class="text-[#00F5F5] mt-3"><?= $erros['visibilidade'] ?></p>
+        <?php endif; ?>
+    </div>
+
+    <div class="relative">
+        <label class="absolute -top-3 left-3 bg-black px-2 text-white font-bold z-10">
+            Componentes
+        </label>
+
+        <div id="multiSelectComponente" class="relative">
+
+            <!-- Campo de pesquisa -->
+            <input
+                type="text"
+                id="pesquisaComponente"
+                placeholder="Pesquisar componente..."
+                autocomplete="off"
+                class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
+            >
+
+            <!-- Lista dos componentes -->
+            <div
+                id="listaComponentes"
+                class="hidden absolute z-50 w-full mt-1 bg-black border border-white max-h-60 overflow-y-auto"
+            >
+
+                <?php if (isset($componentes)): ?>
+
+                    <?php foreach ($componentes as $componente): ?>
+
+                        <?php
+                            $id = is_object($componente)
+                                ? $componente->getId()
+                                : $componente["id"];
+
+                            $nome = is_object($componente)
+                                ? $componente->getNome()
+                                : $componente["nome"];
+                        ?>
+
+                        <label
+                            class="componente-option flex items-center gap-3 px-4 py-3 text-white hover:bg-[#00F5F5]/10 cursor-pointer"
+                            data-nome="<?= strtolower(htmlspecialchars($nome)) ?>"
+                        >
+
+                            <input
+                                type="checkbox"
+                                name="componentes[]"
+                                value="<?= $id ?>"
+                                class="componente-checkbox accent-[#00F5F5]"
+                            >
+
+                            <span>
+                                <?= htmlspecialchars($nome) ?>
+                            </span>
+
+                        </label>
+
+                    <?php endforeach; ?>
+
+                <?php endif; ?>
+
+            </div>
+
+            <!-- Componentes selecionados -->
+            <div
+                id="componentesSelecionados"
+                class="flex flex-wrap gap-2 mt-3"
+            ></div>
+
+        </div>
+
+        <?php if (isset($erros["componentes"])): ?>
+            <p class="text-[#00F5F5] mt-3">
+                <?= $erros["componentes"] ?>
+            </p>
         <?php endif; ?>
     </div>
 
@@ -96,13 +171,13 @@
         <label for="visibilidade" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
             Arquivos de código
         </label>
-        <button type="button" onclick="adicionarArquivos()" class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all">Adicionar arquivos</button>
+        <button type="button" onclick="adicionarArquivos()" class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all">Adicionar arquivos</button>
         
         <input type="file" name="codigos[]" id="codigos" style="display:none;" multiple>
         <ul id="listaCodigos"></ul>
         
         <?php if (isset($erros['codigo'])): ?>
-            <p class="text-[#FF1A1A] mt-3"><?= $erros['codigo'] ?></p>
+            <p class="text-[#00F5F5] mt-3"><?= $erros['codigo'] ?></p>
         <?php endif; ?>
     </div>
     
@@ -114,7 +189,7 @@
         <button
             type="button"
             onclick="adicionarImagens()"
-            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#FF1A1A] transition-all"
+            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
         >
             Adicionar imagens
         </button>
@@ -131,7 +206,7 @@
         <ul id="listaImagens" class="space-y-2 mt-3"></ul>
 
         <?php if (isset($erros['imagens'])): ?>
-            <p class="text-[#FF1A1A] mt-3"><?= $erros['imagens'] ?></p>
+            <p class="text-[#00F5F5] mt-3"><?= $erros['imagens'] ?></p>
         <?php endif; ?>
     </div>
 
@@ -156,7 +231,7 @@
 <div class="flex justify-center items-center p-4">
     <button
         type="submit"
-        class="text-white px-5 py-2 border border-white hover:border-[#FF1A1A] hover:text-[#FF1A1A] transition-all"
+        class="text-white px-5 py-2 border border-white hover:border-[#00F5F5] hover:text-[#00F5F5] transition-all"
     >
         Enviar
     </button>

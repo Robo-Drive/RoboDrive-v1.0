@@ -7,13 +7,13 @@
     </div>
     <hr>
     <div class="mt-8 space-y-4">
-        <div class="border border-[#FF1A1A] p-4">
+        <div class="border border-[#00F5F5] p-4">
             <p class="text-zinc-400 text-sm">Descrição:</p>
             <p class="text-white text-lg">
                 <?= $projeto->getDescricao() ?>
             </p>
         </div>
-        <div class="border border-[#FF1A1A] p-4 text-white">
+        <div class="border border-[#00F5F5] p-4 text-white">
             <p class="text-zinc-400 text-sm">Componentes:</p>
             <div class="w-full h-full flex gap-2 p-2">
                 <?php foreach($projeto->getComponentes() as $componente): ?>
@@ -21,7 +21,7 @@
                 <?php endforeach; ?>
             </div>
         </div>
-        <div class="border border-[#FF1A1A] p-4 text-white">
+        <div class="border border-[#00F5F5] p-4 text-white">
             <p class="text-zinc-400 text-sm">Desenvolvedores:</p>
             <div class="w-full h-full flex gap-2 p-2">
                 <?php if(isset($usuarios)): ?>

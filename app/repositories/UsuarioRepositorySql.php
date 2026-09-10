@@ -18,23 +18,20 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
     }
     public function cadastrar(Usuario $usuario): ?Usuario
     {
-        try
-        {
+        try {
             $sql = "INSERT INTO usuario(nome, nome_usuario, email, senha, regra)
             VALUES(:nome, :nome_usuario, :email, :senha, :regra)";
-            
+
             $stmt = $this->connection->prepare($sql);
-            
+
             $stmt->bindValue(':nome', $usuario->getNome());
             $stmt->bindValue(':nome_usuario', $usuario->getNomeUsuario());
             $stmt->bindValue(':email', $usuario->getEmail());
             $stmt->bindValue(':senha', password_hash($usuario->getSenha(), PASSWORD_DEFAULT));
             $stmt->bindValue(':regra', 'usuario');
-            
+
             $stmt->execute();
-        }
-        catch(PDOException $e)
-        {
+        } catch (PDOException $e) {
             print_r($e);
             die;
         }
@@ -43,66 +40,82 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
     }
     public function editar(Usuario $usuario): ?Usuario
     {
-        try
-        {
-            $bind = array();
-            $itens = ["nome","email","senha","imagem","regra"];
+        try {
             $sql = "UPDATE usuario SET ";
-            $itensNaoNulos = array();
-            foreach($itens as $i)
+            if (null != $usuario->getNome())
             {
-                $metodo = "get".ucfirst($i);
-                if($usuario->$metodo() != null)
-                {
-                    $itensNaoNulos[] = $i;
-                }
+                $sql .= "nome = :nome ";
             }
-            for($i = 0 ; $i < count($itensNaoNulos); $i++)
+            if (null != $usuario->getNomeUsuario())
             {
-                $metodo = "get".ucfirst($itensNaoNulos[$i]);
-                
-                if($i != (count($itensNaoNulos)-1))
-                {
-                    $sql .= "$itensNaoNulos[$i] = :$itensNaoNulos[$i], ";
-                    $bind[] = [
-                        "posicao" => ":".$itensNaoNulos[$i],
-                        "metodo" => $metodo
-                    ];
-                }
-                else
-                {
-                    $sql .= "$itensNaoNulos[$i] = :$itensNaoNulos[$i] ";
-                    $bind[] = [
-                        "posicao" => ":".$itensNaoNulos[$i],
-                        "metodo" => $metodo
-                    ];
-                }
+                $sql .= ",nome_usuario = :nome_usuario ";
             }
-            $sql .= "WHERE id = :id";
-            $stmt = $this->connection->prepare($sql);
-            if($usuario->getSenha() != null)
+            if (null != $usuario->getSenha())
             {
-                $stmt->bindValue(':senha',password_hash($usuario->getSenha(), PASSWORD_DEFAULT));
-            
+                $sql .= ",senha = :senha ";
             }
-            foreach($bind as $b)
+            if (null !== $usuario->getBiografia())
             {
-                if($b["posicao"] == ":senha")
-                {
-                    continue;
-                }
-                $stmt->bindValue($b["posicao"], $usuario->{$b["metodo"]}());
+                $sql .= ",biografia = :biografia ";
             }
-            $stmt->bindValue(":id", $usuario->getId());    
+            if (null != $usuario->getImagem())
+            {
+                $sql .= ",imagem = :imagem ";
+            }
+            if (null != $usuario->getEmail())
+            {
+                $sql .= ",email = :email ";
+            }
+            if (null != $usuario->getRegra())
+            {
+                $sql .= ",regra = :regra ";
+            }
 
+            $sql .= "WHERE id = :id";
+
+            //print_r($sql);
+            //die;
+
+            $stmt = $this->connection->prepare($sql);
+
+            if (null != $usuario->getNome())
+            {
+                $stmt->bindValue(":nome", $usuario->getNome());
+            }
+            if (null != $usuario->getNomeUsuario())
+            {
+                $stmt->bindValue(":nome_usuario", $usuario->getNomeUsuario());
+            }
+            if (null != $usuario->getSenha())
+            {
+                $stmt->bindValue(":senha",password_hash($usuario->getSenha(), PASSWORD_DEFAULT));
+            }
+            if (null !== $usuario->getBiografia())
+            {
+                $stmt->bindValue(":biografia", $usuario->getBiografia());
+            }
+            if (null != $usuario->getImagem())
+            {
+                $stmt->bindValue(":imagem", $usuario->getImagem());
+            }
+            if (null != $usuario->getEmail())
+            {
+                $stmt->bindValue(":email", $usuario->getEmail());
+            }
+            if (null != $usuario->getRegra())
+            {
+                $stmt->bindValue(":regra", $usuario->getRegra());
+            }
+            $stmt->bindValue(":id", $usuario->getId());
+            echo "<pre>";
+            var_dump($sql);
+            echo "</pre>";
             $stmt->execute();
-        }
-        catch(PDOException $e)
-        {
+        } catch (PDOException $e) {
             print_r($e);
             die;
         }
-        
+
         return $usuario;
     }
     public function buscarId(Usuario $usuario): ?Usuario
@@ -119,7 +132,7 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':email', $usuario->getEmail());
         $stmt->execute();
-        return Usuario::map($stmt->fetchAll())[0]??null;
+        return Usuario::map($stmt->fetchAll())[0] ?? null;
     }
     public function buscarProjeto(int $projetoId): array
     {
@@ -137,7 +150,15 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
     {
         $sql = "SELECT * FROM usuario WHERE nome LIKE :nome";
         $stmt = $this->connection->prepare($sql);
-        $stmt->bindValue(':nome', "%".$usuario->getNome()."%");
+        $stmt->bindValue(':nome', "%" . $usuario->getNome() . "%");
+        $stmt->execute();
+        return Usuario::map($stmt->fetchAll());
+    }
+    public function buscarNomeUsuario(Usuario $usuario): ?array
+    {
+        $sql = "SELECT * FROM usuario WHERE nome_usuario = :nome_usuario;";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':nome_usuario', $usuario->getNomeUsuario());
         $stmt->execute();
         return Usuario::map($stmt->fetchAll());
     }
@@ -150,11 +171,31 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
     }
     public function deletar(Usuario $usuario): bool
     {
-        $sql = "DELETE FROM usuario WHERE id = :id";
+        $sql = "UPDATE usuario
+                SET 
+                status = false
+                WHERE id = :id";
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':id', $usuario->getId());
         $stmt->execute();
         return true;
     }
-    
+    public function buscarEmailDiferenteId(Usuario $usuario): ?Usuario
+    {
+        $sql = "SELECT * FROM usuario WHERE email = :email AND id != :id";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':email', $usuario->getEmail());
+        $stmt->bindValue(':id', $usuario->getId());
+        $stmt->execute();
+        return Usuario::map($stmt->fetchAll())[0] ?? null;
+    }
+    public function buscarNomeUsuarioDiferenteId(Usuario $usuario): ?array
+    {
+        $sql = "SELECT * FROM usuario WHERE nome_usuario = :nome_usuario AND id != :id";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':nome_usuario', $usuario->getNomeUsuario());
+        $stmt->bindValue(':id', $usuario->getId());
+        $stmt->execute();
+        return Usuario::map($stmt->fetchAll());
+    }
 }

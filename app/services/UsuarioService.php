@@ -14,26 +14,59 @@ class UsuarioService
     {
         $this->repositorySql = new UsuarioRepositorySql;
     }
-    public function salvarUsuario(Usuario $usuario): bool
+    public function salvarUsuario(Usuario $usuario): bool | array
     {
-        $resposta = $this->repositorySql->buscarEmail($usuario);
-        if(empty($resposta))
+        $mensages = array();
+        $emailResposta = $this->repositorySql->buscarEmail($usuario);
+        $nomeUsuarioResposta = $this->repositorySql->buscarNomeUsuario($usuario);
+        if(empty($emailResposta) && empty($nomeUsuarioResposta))
         {
             $this->repositorySql->cadastrar($usuario);
             return true;
         }
-        return false;
+        
+        if(!empty($emailResposta))
+        {
+            $mensages["email"] = "Erro: Este e-mail já está cadastrado!";
+        }
+        if(!empty($nomeUsuarioResposta))
+        {
+            $mensages["nome_usuario"] = "Erro: Este nome de usuário já está cadastrado!";
+        }
+        return $mensages;
     }
-    public function editarUsuario(Usuario $usuario)
+    public function editarUsuario(Usuario $usuario): bool | array
     {
+        $mensagens = array();
+        
+        $emailResposta = $this->repositorySql->buscarEmailDiferenteId($usuario);
+        $nomeUsuarioResposta = $this->repositorySql->buscarNomeUsuarioDiferenteId($usuario);
+        
+        if(!empty($emailResposta))
+        {
+            $mensagens["email"] = "Erro: Este e-mail já está sendo usado por outro usuário!";
+        }
+        if(!empty($nomeUsuarioResposta))
+        {
+            $mensagens["nome_usuario"] = "Erro: Este nome de usuário já está sendo usado por outro usuário!";
+        }
+        
+        if(!empty($mensagens))
+        {
+            return $mensagens;
+        }
+        
         try
         {
             $this->repositorySql->editar($usuario);
-        }
-        catch(Exception $e)
-        {
+            return true;
+        } catch (Exception $e) {
             return false;
         }
-        return true;
+    }
+
+    public function deletar(Usuario $usuario)
+    {
+        $this->repositorySql->deletar($usuario);
     }
 }

@@ -25,7 +25,7 @@ class ComponenteRepositorySql implements ComponenteRepositoryInterface
         $stmt->bindValue(':nome', $componente->getNome());
         $stmt->bindValue(':descricao', $componente->getDescricao());
         $stmt->bindValue(':imagem', $componente->getImagem());
-        $stmt->bindValue(':usuario_id', $componente->getUsuario()->getId());
+        $stmt->bindValue(':usuario_id', $_SESSION["usuario_logado"]->getId());
         
         if ($stmt->execute()) {
             $componente->setId($this->connection->lastInsertId());
@@ -35,20 +35,38 @@ class ComponenteRepositorySql implements ComponenteRepositoryInterface
         return null;
     }
     public function editar(Componente $componente): ?Componente
-    {
-           $sql = "UPDATE componente
+    {   
+        
+        $imagem = $componente->getImagem();
+        if($imagem != null)
+        {
+            
+            $sql = "UPDATE componente
+                     SET 
+                     nome = :nome,
+                     descricao = :descricao,
+                     imagem = :imagem
+                     WHERE id = :id";
+     
+        }
+        else
+        {
+        
+            $sql = "UPDATE componente
                     SET 
                     nome = :nome,
-                    descricao = :descricao,
-                    imagem = :imagem
+                    descricao = :descricao
                     WHERE id = :id";
+        }   
+        $stmt = $this->connection->prepare($sql);
     
-            $stmt = $this->connection->prepare($sql);
-    
-            $stmt->bindValue(':nome', $componente->getNome());
-            $stmt->bindValue(':descricao', $componente->getDescricao());
+        $stmt->bindValue(':nome', $componente->getNome());
+        $stmt->bindValue(':descricao', $componente->getDescricao());
+        if($imagem != null)
+        {
             $stmt->bindValue(':imagem', $componente->getImagem());
-            $stmt->bindValue(':id', $componente->getId(), PDO::PARAM_INT);
+        }
+        $stmt->bindValue(':id', $componente->getId(), PDO::PARAM_INT);
         
         if ($stmt->execute()) {
             return $componente;
@@ -58,7 +76,7 @@ class ComponenteRepositorySql implements ComponenteRepositoryInterface
     }
     public function buscarId(Componente $componente): ?Componente
     {
-        $sql = "SELECT * FROM componente WHERE id = :id";
+        $sql = "SELECT c.*, u.nome_usuario FROM componente c JOIN usuario u ON u.id = c.usuario_id WHERE c.id = :id  AND c.status=true";
         
         $stmt = $this->connection->prepare($sql);
         
@@ -69,7 +87,7 @@ class ComponenteRepositorySql implements ComponenteRepositoryInterface
     }
     public function buscarNome(Componente $componente): ?array
     {
-        $sql = "SELECT * FROM componente WHERE nome LIKE :nome";
+        $sql = "SELECT * FROM componente WHERE nome LIKE :nome AND c.status=true";
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':nome', $componente->getNome());
         $stmt->execute();
@@ -93,14 +111,19 @@ class ComponenteRepositorySql implements ComponenteRepositoryInterface
     }
     public function listarTodos(): array
     {
-        $sql = "SELECT * FROM componente";
+        $sql = "SELECT c.*, u.nome_usuario  FROM componente c
+        JOIN usuario u
+        ON u.id = c.usuario_id WHERE c.status=true";
         $stmt = $this->connection->prepare($sql);
         $stmt->execute();
         return Componente::map($stmt->fetchAll());
     }
     public function deletar(Componente $componente): bool
     {
-        $sql = "DELETE FROM componente WHERE id = :id";
+        $sql = "UPDATE componente
+                SET 
+                status = false
+                WHERE id = :id";
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':id', $componente->getId());
         $stmt->execute();

@@ -26,7 +26,7 @@ define('STORE_PATH', __DIR__.'/../../store');
 //Configurações do Banco de dados
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'robo_drive');
-define('DB_USER', 'root');
-define('DB_PASS', 'bancodedados');
+define('DB_USER', "root");
+define('DB_PASS', "bancodedados");
 
 //Configurações de gmail

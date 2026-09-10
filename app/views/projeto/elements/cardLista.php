@@ -1,6 +1,6 @@
 <?php if(isset($projeto)):?>
 <a href="<?= URL_BASE ?>/projeto/perfil?id=<?= $projeto->getId() ?>">
-    <div class="w-[500px] h-[200px] border hover:border-[#FF1A1A] px-4">
+    <div class="w-[500px] h-[200px] border hover:border-[#00F5F5] px-4">
         <h1 class="p-4 font-bold text-2xl text-center"><?= $projeto->getNome() ?></h1>
         <hr>
         <p><?= $projeto->getDescricao() ?></p>

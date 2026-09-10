@@ -4,7 +4,7 @@
         <?php foreach($equipes as $equipe): ?>
             <a
             href="<?= URL_BASE ?>/equipe/perfil?id=<?= $equipe->getId() ?>"
-            class="hover:border-[#FF1A1A]  px-5 py-2 text-white font-bold border"
+            class="hover:border-[#00F5F5]  px-5 py-2 text-white font-bold border"
             >
                 <h1 class="text-xl font-black text-white ">
                     <?= $equipe->getNome() ?>
