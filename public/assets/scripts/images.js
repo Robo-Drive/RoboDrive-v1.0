@@ -47,25 +47,25 @@ function atualizarListaImagens()
     imagens.forEach((imagem, indice) => {
 
         const li = document.createElement("li");
-        li.className = "w-full bg-black/80 border border-white p-3 text-white hover:border-[#00F5F5] transition-all flex justify-between items-center";
+        li.className = "rd-file-item";
 
         const esquerda = document.createElement("div");
         esquerda.className = "flex items-center gap-3";
 
         const preview = document.createElement("img");
         preview.src = URL.createObjectURL(imagem);
-        preview.className = "w-12 h-12 object-cover rounded border border-white";
+        preview.className = "rd-file-thumb";
         preview.alt = imagem.name;
 
         const info = document.createElement("div");
 
         const nome = document.createElement("p");
         nome.textContent = imagem.name;
-        nome.className = "text-sm";
+        nome.className = "text-sm text-[#F2FEFE]";
 
         const tamanho = document.createElement("p");
         tamanho.textContent = `${(imagem.size / 1024).toFixed(0)} KB`;
-        tamanho.className = "text-xs text-gray-400";
+        tamanho.className = "text-xs text-[#4E6B72]";
 
         info.appendChild(nome);
         info.appendChild(tamanho);
@@ -75,11 +75,11 @@ function atualizarListaImagens()
 
         const botao = document.createElement("button");
         botao.type = "button";
-        botao.className = "cursor-pointer";
+        botao.className = "cursor-pointer shrink-0";
 
         const icone = document.createElement("img");
         icone.src = `${IMG_URL_BASE}/close-icon.png`;
-        icone.className = "w-5 h-5";
+        icone.className = "h-4 w-4 opacity-70";
         icone.alt = "Remover";
 
         botao.appendChild(icone);

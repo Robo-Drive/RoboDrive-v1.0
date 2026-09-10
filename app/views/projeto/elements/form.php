@@ -1,238 +1,95 @@
 <div class="space-y-6">
 
-    <!-- Nome -->
-    <div class="relative">
-        <label for="nome" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
-            Nome
-        </label>
-
+    <div class="rd-field">
+        <label for="nome" class="rd-label">Nome</label>
         <input
             type="text"
+            id="nome"
             name="nome"
-            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
+            class="rd-input"
             value="<?= isset($projeto) ? (is_object($projeto) ? $projeto->getNome() : (isset($projeto['nome']) ? $projeto['nome'] : '')) : '' ?>"
         >
-
         <?php if (isset($erros['nome'])): ?>
-            <p class="text-[#00F5F5] mt-3"><?= $erros['nome'] ?></p>
+            <p class="rd-error"><?= $erros['nome'] ?></p>
         <?php endif; ?>
     </div>
 
-    <!-- Descrição -->
-    <div class="relative">
-        <label for="descricao" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
-            Descrição
-        </label>
-
-        <textarea
-            name="descricao"
-            rows="5"
-            class="w-full bg-black/80 border border-white px-4 py-3 text-white outline-none focus:border-[#00F5F5] transition-all resize-none"
-        ><?= isset($projeto) ? (is_object($projeto) ? $projeto->getDescricao() : (isset($projeto['descricao']) ? $projeto['descricao'] : '')) : '' ?></textarea>
-
+    <div class="rd-field">
+        <label for="descricao" class="rd-label">Descrição</label>
+        <textarea name="descricao" id="descricao" rows="5" class="rd-textarea"><?= isset($projeto) ? (is_object($projeto) ? $projeto->getDescricao() : (isset($projeto['descricao']) ? $projeto['descricao'] : '')) : '' ?></textarea>
         <?php if (isset($erros['descricao'])): ?>
-            <p class="text-[#00F5F5] mt-3"><?= $erros['descricao'] ?></p>
+            <p class="rd-error"><?= $erros['descricao'] ?></p>
         <?php endif; ?>
     </div>
 
-    <!-- Visibilidade -->
-    <div class="relative">
-        <label for="visibilidade" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
-            Visibilidade
-        </label>
-
-        <select
-            name="visibilidade"
-            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
-        >
+    <div class="rd-field">
+        <label for="visibilidade" class="rd-label">Visibilidade</label>
+        <select name="visibilidade" id="visibilidade" class="rd-select">
             <option value="">Selecione</option>
-
-            <option
-                value="privado"
-                <?= isset($projeto)
-                    ? (is_object($projeto)
-                        ? ($projeto->getVisibilidade() == "privado" ? "selected" : "")
-                        : (isset($projeto["visibilidade"])
-                            ? ($projeto["visibilidade"] == "privado" ? "selected" : "")
-                            : ""))
-                    : "" ?>
-            >
-                Privado
-            </option>
-
-            <option
-                value="equipe"
-                <?= isset($projeto)
-                    ? (is_object($projeto)
-                        ? ($projeto->getVisibilidade() == "equipe" ? "selected" : "")
-                        : (isset($projeto["visibilidade"])
-                            ? ($projeto["visibilidade"] == "equipe" ? "selected" : "")
-                            : ""))
-                    : "" ?>
-            >
-                Equipe
-            </option>
-
-            <option
-                value="publico"
-                <?= isset($projeto)
-                    ? (is_object($projeto)
-                        ? ($projeto->getVisibilidade() == "publico" ? "selected" : "")
-                        : (isset($projeto["visibilidade"])
-                            ? ($projeto["visibilidade"] == "publico" ? "selected" : "")
-                            : ""))
-                    : "" ?>
-            >
-                Público
-            </option>
+            <option value="privado" <?= isset($projeto) ? (is_object($projeto) ? ($projeto->getVisibilidade() == "privado" ? "selected" : "") : (isset($projeto["visibilidade"]) ? ($projeto["visibilidade"] == "privado" ? "selected" : "") : "")) : "" ?>>Privado</option>
+            <option value="equipe" <?= isset($projeto) ? (is_object($projeto) ? ($projeto->getVisibilidade() == "equipe" ? "selected" : "") : (isset($projeto["visibilidade"]) ? ($projeto["visibilidade"] == "equipe" ? "selected" : "") : "")) : "" ?>>Equipe</option>
+            <option value="publico" <?= isset($projeto) ? (is_object($projeto) ? ($projeto->getVisibilidade() == "publico" ? "selected" : "") : (isset($projeto["visibilidade"]) ? ($projeto["visibilidade"] == "publico" ? "selected" : "") : "")) : "" ?>>Público</option>
         </select>
-        
         <?php if (isset($erros['visibilidade'])): ?>
-            <p class="text-[#00F5F5] mt-3"><?= $erros['visibilidade'] ?></p>
+            <p class="rd-error"><?= $erros['visibilidade'] ?></p>
         <?php endif; ?>
     </div>
 
-    <div class="relative">
-        <label class="absolute -top-3 left-3 bg-black px-2 text-white font-bold z-10">
-            Componentes
-        </label>
+    <div class="rd-field">
+        <label class="rd-label">Componentes</label>
 
         <div id="multiSelectComponente" class="relative">
+            <input type="text" id="pesquisaComponente" placeholder="Pesquisar componente..." autocomplete="off" class="rd-input">
 
-            <!-- Campo de pesquisa -->
-            <input
-                type="text"
-                id="pesquisaComponente"
-                placeholder="Pesquisar componente..."
-                autocomplete="off"
-                class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
-            >
-
-            <!-- Lista dos componentes -->
-            <div
-                id="listaComponentes"
-                class="hidden absolute z-50 w-full mt-1 bg-black border border-white max-h-60 overflow-y-auto"
-            >
-
+            <div id="listaComponentes" class="hidden absolute z-50 mt-1 max-h-60 w-full overflow-y-auto border-2 border-[#07556A] bg-[#000505]">
                 <?php if (isset($componentes)): ?>
-
                     <?php foreach ($componentes as $componente): ?>
-
                         <?php
-                            $id = is_object($componente)
-                                ? $componente->getId()
-                                : $componente["id"];
-
-                            $nome = is_object($componente)
-                                ? $componente->getNome()
-                                : $componente["nome"];
+                            $id = is_object($componente) ? $componente->getId() : $componente["id"];
+                            $nome = is_object($componente) ? $componente->getNome() : $componente["nome"];
                         ?>
-
-                        <label
-                            class="componente-option flex items-center gap-3 px-4 py-3 text-white hover:bg-[#00F5F5]/10 cursor-pointer"
-                            data-nome="<?= strtolower(htmlspecialchars($nome)) ?>"
-                        >
-
-                            <input
-                                type="checkbox"
-                                name="componentes[]"
-                                value="<?= $id ?>"
-                                class="componente-checkbox accent-[#00F5F5]"
-                            >
-
-                            <span>
-                                <?= htmlspecialchars($nome) ?>
-                            </span>
-
+                        <label class="componente-option flex cursor-pointer items-center gap-3 px-4 py-3 text-sm text-[#F2FEFE] hover:bg-[rgba(19,243,247,.08)]" data-nome="<?= strtolower(htmlspecialchars($nome)) ?>">
+                            <input type="checkbox" name="componentes[]" value="<?= $id ?>" class="componente-checkbox accent-[#13F3F7]">
+                            <span><?= htmlspecialchars($nome) ?></span>
                         </label>
-
                     <?php endforeach; ?>
-
                 <?php endif; ?>
-
             </div>
 
-            <!-- Componentes selecionados -->
-            <div
-                id="componentesSelecionados"
-                class="flex flex-wrap gap-2 mt-3"
-            ></div>
-
+            <div id="componentesSelecionados" class="mt-3 flex flex-wrap gap-2"></div>
         </div>
 
         <?php if (isset($erros["componentes"])): ?>
-            <p class="text-[#00F5F5] mt-3">
-                <?= $erros["componentes"] ?>
-            </p>
+            <p class="rd-error"><?= $erros["componentes"] ?></p>
         <?php endif; ?>
     </div>
 
-    <div class="relative">
-        <label for="visibilidade" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
-            Arquivos de código
-        </label>
-        <button type="button" onclick="adicionarArquivos()" class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all">Adicionar arquivos</button>
-        
+    <div class="rd-field">
+        <label class="rd-label">Arquivos de código</label>
+        <button type="button" onclick="adicionarArquivos()" class="rd-file-btn">Adicionar arquivos</button>
         <input type="file" name="codigos[]" id="codigos" style="display:none;" multiple>
-        <ul id="listaCodigos"></ul>
-        
+        <ul id="listaCodigos" class="rd-file-list"></ul>
         <?php if (isset($erros['codigo'])): ?>
-            <p class="text-[#00F5F5] mt-3"><?= $erros['codigo'] ?></p>
+            <p class="rd-error"><?= $erros['codigo'] ?></p>
         <?php endif; ?>
     </div>
-    
-    <div class="relative">
-        <label for="imagens" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
-            Imagens
-        </label>
 
-        <button
-            type="button"
-            onclick="adicionarImagens()"
-            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
-        >
-            Adicionar imagens
-        </button>
-
-        <input
-            type="file"
-            name="imagens[]"
-            id="imagens"
-            accept="image/*"
-            style="display:none;"
-            multiple
-        >
-
-        <ul id="listaImagens" class="space-y-2 mt-3"></ul>
-
+    <div class="rd-field">
+        <label class="rd-label">Imagens</label>
+        <button type="button" onclick="adicionarImagens()" class="rd-file-btn">Adicionar imagens</button>
+        <input type="file" name="imagens[]" id="imagens" accept="image/*" style="display:none;" multiple>
+        <ul id="listaImagens" class="rd-file-list"></ul>
         <?php if (isset($erros['imagens'])): ?>
-            <p class="text-[#00F5F5] mt-3"><?= $erros['imagens'] ?></p>
+            <p class="rd-error"><?= $erros['imagens'] ?></p>
         <?php endif; ?>
     </div>
 
-    <!-- ID oculto -->
     <?php if (isset($_POST["id"]) || isset($projeto)): ?>
-        <input
-            type="hidden"
-            name="id"
-            value="<?= isset($_POST['id'])
-                ? $_POST['id']
-                : (isset($projeto)
-                    ? (is_object($projeto)
-                        ? $projeto->getId()
-                        : (isset($projeto['id']) ? $projeto['id'] : ''))
-                    : '') ?>"
-        >
+        <input type="hidden" name="id" value="<?= isset($_POST['id']) ? $_POST['id'] : (isset($projeto) ? (is_object($projeto) ? $projeto->getId() : (isset($projeto['id']) ? $projeto['id'] : '')) : '') ?>">
     <?php endif; ?>
 
 </div>
 
-<!-- Botão -->
-<div class="flex justify-center items-center p-4">
-    <button
-        type="submit"
-        class="text-white px-5 py-2 border border-white hover:border-[#00F5F5] hover:text-[#00F5F5] transition-all"
-    >
-        Enviar
-    </button>
+<div class="flex items-center justify-center p-4 pt-6">
+    <button type="submit" class="rd-btn rd-btn-primary">Enviar</button>
 </div>

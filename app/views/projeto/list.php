@@ -1,21 +1,25 @@
 <?php
 $titulo = "Projetos públicos";
-
 include_once(__DIR__."/../elements/header.php");
 ?>
-<div class="h-[90dvh] w-full grid grid-cols-12 grid-rows-12">
+<div class="rd-shell">
     <?php include_once(__DIR__."/../elements/sidebar.php") ?>
-    <div class="main usa overflow-y-auto col-span-10 row-span-12 bg-black">
-        <div class="p-5 text-2xl font-bold w-full text-center text-white">
-            <h1>Projetos</h1>
-        </div>
-        <div class="p-5 w-full text-white border border-zinc-700 flex flex-wrap gap-2">
-            <?php if(isset($projetos)):?>
+    <div class="rd-content rd-scroll-hidden">
+
+        <section class="rd-section">
+            <p class="rd-eyebrow">COMUNIDADE ROBODRIVE</p>
+            <h1 class="rd-heading text-[clamp(1.8rem,4vw,2.8rem)]">PROJETOS <span>PÚBLICOS</span></h1>
+        </section>
+
+        <section class="rd-section flex flex-wrap gap-6">
+            <?php if(isset($projetos) && count($projetos) > 0):?>
                 <?php foreach($projetos as $projeto):?>
                     <?php include(__DIR__."/elements/cardLista.php")?>
                 <?php endforeach;?>
+            <?php else: ?>
+                <p class="rd-empty w-full">Nenhum projeto público disponível no momento</p>
             <?php endif;?>
-        </div>
+        </section>
 
     </div>
 </div>

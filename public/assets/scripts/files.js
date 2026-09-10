@@ -34,19 +34,19 @@ function atualizarLista() {
     arquivos.forEach((arquivo, indice) => {
 
         const li = document.createElement("li");
-        li.className = "w-full h-12 bg-black/80 border border-white px-4 text-white hover:border-[#00F5F5] transition-all flex justify-between items-center";
+        li.className = "rd-file-item";
 
         const span = document.createElement("span");
         span.textContent = `${arquivo.name} (${(arquivo.size / 1024).toFixed(0)} KB)`;
 
         const botao = document.createElement("button");
         botao.type = "button";
-        botao.className = "cursor-pointer";
+        botao.className = "cursor-pointer shrink-0";
 
         const img = document.createElement("img");
         img.src = `${IMG_URL_BASE}/close-icon.png`;
         img.alt = "Remover";
-        img.className = "w-5 h-5";
+        img.className = "h-4 w-4 opacity-70";
 
         botao.appendChild(img);
 

@@ -1,42 +1,51 @@
 <?php
 $titulo = "Listagem de Equipes";
-$header = "Equipes";
-$menu = [
-    [
-        "rota" => URL_BASE,
-        "nome" => "Home"
-    ],
-    [
-        "rota" => URL_BASE."/equipe/cadastrar",
-        "nome" => "Cadastro"
-    ]
-];
 include_once(__DIR__."/../elements/header.php");
 ?>
-<div class="h-[80dvh] w-full ">
-    <table class="w-full ">
-        <tr>
-            <th class="bg-blue-500 text-center">Id</th>
-            <th class="bg-red-500 text-white text-center">Nome</th>
-            <th class="bg-blue-500 text-center">Senha</th>
-            <th class="bg-red-500 text-white text-center">Visualizar</th>
-            <th class="bg-blue-500 text-center">Editar</th>
-            <th class="bg-red-500 text-white text-center">Excluir</th>
-        </tr>
-        <?php if(isset($equipes)):?>
-        <?php foreach($equipes as $e):?>
-        <tr class="hover:[&>td]:bg-black hover:[&>td]:text-white">
-            <td class="bg-blue-500 text-center"><?= $e->getId() ?></td>
-            <td class="bg-red-500 text-white text-center"><?= $e->getNome() ?></td>
-            <td class="bg-blue-500 text-center"><?= $e->getSenha() ?></td>
-            <td class="bg-red-500 text-white text-center"><form action="<?= URL_BASE ?>/equipe/perfil" method="post" class="w-full h-full"><input  class="w-full h-full" type="hidden" name="id" value="<?= $e->getId() ?>"><button type="submit" class="w-full h-full">Visualizar</button></form></td>
-            <td class="bg-blue-500 text-center"><form action="<?= URL_BASE ?>/equipe/editar" method="post" class="w-full h-full"><input  class="w-full h-full" type="hidden" name="id" value="<?= $e->getId() ?>"><button type="submit" class="w-full h-full">Editar</button></form></td>
-            <td class="bg-red-500 text-white text-center"><form action="<?= URL_BASE ?>/equipe/excluir" method="post" class="w-full h-full"><input  class="w-full h-full" type="hidden" name="id" value="<?= $e->getId() ?>"><button type="submit" class="w-full h-full">Excluir</button></form></td>
-        </tr>
-        <?php endforeach;?>
-        <?php endif; ?>
-    </table>
+<div class="rd-shell">
+    <?php include_once(__DIR__."/../elements/sidebar.php") ?>
+    <div class="rd-content rd-scroll-hidden">
+
+        <section class="rd-section flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <p class="rd-eyebrow">COLABORAÇÃO</p>
+                <h1 class="rd-heading text-[clamp(1.8rem,4vw,2.8rem)]">EQUIPES <span>CADASTRADAS</span></h1>
+            </div>
+            <a href="<?= URL_BASE ?>/equipe/cadastro" class="rd-btn rd-btn-primary w-fit">Nova equipe</a>
+        </section>
+
+        <section class="rd-section">
+            <div class="rd-table-wrap">
+                <table class="rd-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nome</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if(isset($equipes)):?>
+                        <?php foreach($equipes as $e):?>
+                        <tr>
+                            <td>#<?= $e->getId() ?></td>
+                            <td><?= $e->getNome() ?></td>
+                            <td>
+                                <div class="flex flex-wrap gap-2">
+                                    <form action="<?= URL_BASE ?>/equipe/perfil" method="get"><input type="hidden" name="id" value="<?= $e->getId() ?>"><button type="submit" class="rd-btn rd-btn-ghost rd-btn-sm">Ver</button></form>
+                                    <form action="<?= URL_BASE ?>/equipe/editar" method="post"><input type="hidden" name="id" value="<?= $e->getId() ?>"><button type="submit" class="rd-btn rd-btn-secondary rd-btn-sm">Editar</button></form>
+                                    <form action="<?= URL_BASE ?>/equipe/excluir" method="post"><input type="hidden" name="id" value="<?= $e->getId() ?>"><button type="submit" class="rd-btn rd-btn-danger rd-btn-sm">Excluir</button></form>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach;?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
 </div>
 <?php
-$marquee = "Listagem de equipes do projeto Robo Drive";
 include_once(__DIR__."/../elements/footer.php");
