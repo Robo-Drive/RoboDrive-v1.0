@@ -121,7 +121,10 @@
                         </div>
 
                     <?php endforeach; ?>
-
+                <?php else: ?>
+                    <div class="px-4 py-3 text-gray-400">
+                        Nenhum componente cadastrado.
+                    </div>
                 <?php endif; ?>
 
                 <!-- Criar categoria -->
