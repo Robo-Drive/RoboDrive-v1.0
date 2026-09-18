@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\models\Usuario;
+
 class Categoria
 {
     private ?int $id;
@@ -9,6 +11,21 @@ class Categoria
     private ?Usuario $usuario;
     private ?bool $status;
 
+
+    public static function map(array $categorias) :array
+    {
+        $categoriasObj = array();
+        foreach($categorias as $categoria)
+        {
+            $categoriaObj = new Categoria();
+            $categoriaObj->setId($categoria["id"]??null);
+            $categoriaObj->setNome($categoria["nome"]??null);
+            $categoriaObj->setUsuario(new Usuario()->setId($_SESSION["usuario_logado"]->getId()??null));
+            $categoriaObj->setStatus($categoria["status"]??null);
+            $categoriasObj[] = $categoriaObj;
+        }
+        return $categoriasObj;
+    }
     
     public function getId(): ?int
     {

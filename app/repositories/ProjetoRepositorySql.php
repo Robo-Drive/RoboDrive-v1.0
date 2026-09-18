@@ -32,6 +32,7 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
             $stmt->bindValue(':descricao', $projeto->getDescricao());
             $stmt->bindValue(':categoria', $projeto->getCategoria()->getId());
             $stmt->execute();
+            
             $projeto->setId($this->connection->lastInsertId());
             $sqlAssoc = "INSERT INTO projeto_usuario (projeto_id, usuario_id, tipo)
                         VALUES (:projeto_id, :usuario_id, :tipo)";
