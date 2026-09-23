@@ -35,6 +35,117 @@
         <?php endif; ?>
     </div>
 
+    <!-- Categoria -->
+    <div class="relative divCategoria">
+
+        <label
+            for="pesquisaCategoria"
+            class="absolute -top-3 left-3 bg-black px-2 text-white font-bold z-20"
+        >
+            Categoria
+        </label>
+
+        <!-- Campo de pesquisa -->
+        <input
+            type="text"
+            id="pesquisaCategoria"
+            placeholder="Pesquisar categoria..."
+            autocomplete="off"
+            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
+        >
+
+        <!-- Select real -->
+        <select
+            name="categoria"
+            id="categoria"
+            class="hidden"
+        >
+            <option value="">Selecione</option>
+
+            <?php if(isset($categorias)): ?>
+                <?php foreach($categorias as $cat): ?>
+
+                    <option
+                        value="<?= $cat->getId() ?>"
+                        <?= isset($projeto)
+                            ? (
+                                is_object($projeto)
+                                    ? ($projeto->getCategoria() == $cat->getId() ? "selected" : "")
+                                    : (
+                                        isset($projeto["categoria"])
+                                            ? ($projeto["categoria"] == $cat->getId() ? "selected" : "")
+                                            : ""
+                                    )
+                            )
+                            : ""
+                        ?>
+                    >
+                        <?= $cat->getNome() ?>
+                    </option>
+
+                <?php endforeach; ?>
+            <?php endif; ?>
+
+            <option value="criar">
+                Criar categoria
+            </option>
+        </select>
+
+        <!-- Lista pesquisável -->
+        <div
+            id="listaCategorias"
+            class="hidden absolute z-50 w-full mt-1 bg-black border border-white max-h-60 overflow-y-auto"
+        >
+
+            <?php if(isset($categorias)): ?>
+
+                <?php foreach($categorias as $cat): ?>
+
+                    <div
+                        class="categoria-option px-4 py-3 text-white hover:bg-[#00F5F5]/10 cursor-pointer"
+                        data-value="<?= $cat->getId() ?>"
+                        data-nome="<?= strtolower($cat->getNome()) ?>"
+                    >
+                        <?= $cat->getNome() ?>
+                    </div>
+
+                <?php endforeach; ?>
+
+            <?php endif; ?>
+
+            <!-- Criar categoria -->
+            <div
+                class="categoria-option px-4 py-3 text-[#00F5F5] hover:bg-[#00F5F5]/10 cursor-pointer"
+                data-value="criar"
+                data-nome="criar categoria"
+            >
+                + Criar categoria
+            </div>
+
+        </div>
+
+        <!-- Campo que aparece ao criar categoria -->
+        <div id="novaCategoriaContainer" class="hidden mt-3">
+
+            <input
+                type="text"
+                name="novaCategoria"
+                id="novaCategoria"
+                placeholder="Digite o nome da nova categoria"
+                class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
+            >
+
+        </div>
+
+        <?php if (isset($erros['categoria'])): ?>
+            <p class="text-[#00F5F5] mt-3">
+                <?= $erros['categoria'] ?>
+            </p>
+        <?php endif; ?>
+
+    </div>
+
+
     <!-- Visibilidade -->
     <div class="relative">
         <label for="visibilidade" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
@@ -45,8 +156,6 @@
             name="visibilidade"
             class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
         >
-            <option value="">Selecione</option>
-
             <option
                 value="privado"
                 <?= isset($projeto)
@@ -58,19 +167,6 @@
                     : "" ?>
             >
                 Privado
-            </option>
-
-            <option
-                value="equipe"
-                <?= isset($projeto)
-                    ? (is_object($projeto)
-                        ? ($projeto->getVisibilidade() == "equipe" ? "selected" : "")
-                        : (isset($projeto["visibilidade"])
-                            ? ($projeto["visibilidade"] == "equipe" ? "selected" : "")
-                            : ""))
-                    : "" ?>
-            >
-                Equipe
             </option>
 
             <option
@@ -92,13 +188,12 @@
         <?php endif; ?>
     </div>
 
+    <!-- Componentes -->
     <div class="relative">
         <label class="absolute -top-3 left-3 bg-black px-2 text-white font-bold z-10">
             Componentes
         </label>
-
         <div id="multiSelectComponente" class="relative">
-
             <!-- Campo de pesquisa -->
             <input
                 type="text"
@@ -107,59 +202,46 @@
                 autocomplete="off"
                 class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
             >
-
             <!-- Lista dos componentes -->
             <div
                 id="listaComponentes"
                 class="hidden absolute z-50 w-full mt-1 bg-black border border-white max-h-60 overflow-y-auto"
             >
-
-                <?php if (isset($componentes)): ?>
-
+                <?php if (!empty($componentes)): ?>
                     <?php foreach ($componentes as $componente): ?>
-
                         <?php
-                            $id = is_object($componente)
-                                ? $componente->getId()
-                                : $componente["id"];
-
-                            $nome = is_object($componente)
-                                ? $componente->getNome()
-                                : $componente["nome"];
+                            $id = $componente->getId();
+                            $nome = $componente->getNome();
                         ?>
-
                         <label
                             class="componente-option flex items-center gap-3 px-4 py-3 text-white hover:bg-[#00F5F5]/10 cursor-pointer"
-                            data-nome="<?= strtolower(htmlspecialchars($nome)) ?>"
+                            data-nome="<?= strtolower($nome) ?>"
                         >
-
                             <input
                                 type="checkbox"
-                                name="componentes[]"
                                 value="<?= $id ?>"
+                                data-nome="<?= $nome ?>"
                                 class="componente-checkbox accent-[#00F5F5]"
                             >
-
                             <span>
-                                <?= htmlspecialchars($nome) ?>
+                                <?= $nome ?>
                             </span>
-
                         </label>
-
                     <?php endforeach; ?>
-
+                <?php else: ?>
+                    <div class="px-4 py-3 text-gray-400">
+                        Nenhum componente cadastrado.
+                    </div>
                 <?php endif; ?>
 
             </div>
-
             <!-- Componentes selecionados -->
             <div
                 id="componentesSelecionados"
-                class="flex flex-wrap gap-2 mt-3"
-            ></div>
-
+                class="space-y-2 mt-3"
+            >
+            </div>
         </div>
-
         <?php if (isset($erros["componentes"])): ?>
             <p class="text-[#00F5F5] mt-3">
                 <?= $erros["componentes"] ?>
@@ -168,18 +250,23 @@
     </div>
 
     <div class="relative">
-        <label for="visibilidade" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
+        <label for="codigos" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
             Arquivos de código
         </label>
-        <button type="button" onclick="adicionarArquivos()" class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all">Adicionar arquivos</button>
+        <button type="button" onclick="adicionarArquivos()" class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all">
+            Adicionar arquivos
+        </button>
         
         <input type="file" name="codigos[]" id="codigos" style="display:none;" multiple>
-        <ul id="listaCodigos"></ul>
+        
+        <!-- Adicionado space-y-2 mt-3 para espaçamento vertical entre os cards -->
+        <ul id="listaCodigos" class="space-y-2 mt-3"></ul>
         
         <?php if (isset($erros['codigo'])): ?>
             <p class="text-[#00F5F5] mt-3"><?= $erros['codigo'] ?></p>
         <?php endif; ?>
     </div>
+
     
     <div class="relative">
         <label for="imagens" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">

@@ -4,16 +4,19 @@ namespace app\controllers;
 
 use app\core\Controller;
 use app\helpers\ValidadorHelper;
+use app\models\Componente;
 use app\models\Projeto;
 use app\repositories\ProjetoRepositorySql;
 use app\repositories\ComponenteRepositorySql;
 use app\repositories\UsuarioRepositorySql;
+use app\repositories\CategoriaRepositorySql;
 use app\services\ProjetoService;
 class ProjetoController extends Controller
 {
     private ProjetoService $service;
     private ProjetoRepositorySql $repositorySql;
     private ComponenteRepositorySql $componenteRepositorySql;
+    private CategoriaRepositorySql $categoriaRepositorySql;
     private UsuarioRepositorySql $usuarioRepositorySql;
 
     public function __construct()
@@ -21,6 +24,7 @@ class ProjetoController extends Controller
         $this->service = new ProjetoService();
         $this->repositorySql = new ProjetoRepositorySql();
         $this->componenteRepositorySql = new ComponenteRepositorySql();
+        $this->categoriaRepositorySql = new CategoriaRepositorySql();
         $this->usuarioRepositorySql = new UsuarioRepositorySql();
     }
 
@@ -28,29 +32,48 @@ class ProjetoController extends Controller
     {
         $this->loginRequired();
         $data['projetos'] = $this->repositorySql->listarPublico();
-    
         $this->view("projeto/list",$data);
     }
     public function cadastrar()
     {
         $this->loginRequired();
-        $this->view("projeto/create");
+        $componentes = $this->componenteRepositorySql->listarTodos();
+        $categorias = $this->categoriaRepositorySql->listarTodos();
+        $data["componentes"] = $componentes;
+        $data["categorias"] = $categorias;
+        $this->view("projeto/create",$data);
     }
     public function salvar()
     {
         $this->loginRequired();
+
         $validador = new ValidadorHelper();
-        
+        print "<pre>";
+        print_r($_POST);
+        print_r($_FILES);
+        print "</pre>";
+        die;
         $validador->obrigatorio('nome',   trim($_POST["nome"]));
-        $validador->obrigatorio('descricao',  trim($_POST["visibilidade"]));
+        $validador->obrigatorio('descricao',  trim($_POST["descricao"]));
         $validador->obrigatorio('visibilidade',  trim($_POST["visibilidade"]));
         $validador->tamanho('nome', trim($_POST["nome"]), 3,100);
+        $validador->tamanho('descricao', trim($_POST["descricao"]), 3,2000);
         
         $posts["nome"]   = trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
         $posts["descricao"]   = trim(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
         $posts["visibilidade"]  = trim(filter_input(INPUT_POST, 'visibilidade', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
+ 
+        $componentes = $_POST['componentes'] ?? [];
+        $componentesObj = array();
+        $i = 0;
+        foreach ($componentes as $componenteId => $dados)
+        {
+            $quantidade = (int) $dados['quantidade'];
+            $componentesObj[$i] = new Componente();
+            $componentesObj[$i]->setId($componenteId);
+            $componentesObj[$i]->setQuantidade($quantidade);
+        }
         
-
         if(isset($_FILES["imagens"]))
         {
             $posts["imagens"] = $_FILES["imagens"];

@@ -1,239 +1,132 @@
 <div class="space-y-6">
 
-    <!-- Nome de usuário-->
-    <div class="relative">
-        <label for="nome_usuario" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
-            Nome de usuário
-        </label>
-
+    <div class="rd-field">
+        <label for="nome_usuario" class="rd-label">Nome de usuário</label>
         <input
             type="text"
+            id="nome_usuario"
             name="nome_usuario"
-            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
+            class="rd-input"
             value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getNomeUsuario() : (isset($usuario['nome_usuario']) ? $usuario['nome_usuario'] : '')) : '' ?>"
         >
-
         <?php if (isset($erros['nome_usuario'])): ?>
-            <p class="text-[#00F5F5] mt-3"><?= $erros['nome_usuario'] ?></p>
+            <p class="rd-error"><?= $erros['nome_usuario'] ?></p>
         <?php endif; ?>
     </div>
-    
-    <!-- Nome -->
-    <div class="relative">
-        <label for="nome" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
-            Nome
-        </label>
 
+    <div class="rd-field">
+        <label for="nome" class="rd-label">Nome</label>
         <input
             type="text"
+            id="nome"
             name="nome"
-            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
+            class="rd-input"
             value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getNome() : (isset($usuario['nome']) ? $usuario['nome'] : '')) : '' ?>"
         >
-
         <?php if (isset($erros['nome'])): ?>
-            <p class="text-[#00F5F5] mt-3"><?= $erros['nome'] ?></p>
+            <p class="rd-error"><?= $erros['nome'] ?></p>
         <?php endif; ?>
     </div>
 
-    <!-- Bio -->
-    <div class="relative">
-        <label
-            for="biografia"
-            class="absolute -top-3 left-3 bg-black px-2 text-white font-bold z-10"
-        >
-            Biografia
-        </label>
-
+    <div class="rd-field">
+        <label for="biografia" class="rd-label">Biografia</label>
         <textarea
             name="biografia"
             id="biografia"
             rows="5"
             maxlength="500"
             placeholder="Conte um pouco sobre você..."
-            class="w-full min-h-[140px] bg-black/80 border border-white px-4 py-3 text-white placeholder-white/40 outline-none focus:border-[#00F5F5] transition-all resize-y leading-relaxed"
+            class="rd-textarea"
         ><?= isset($usuario)
             ? (is_object($usuario)
                 ? $usuario->getBiografia()
                 : (isset($usuario['biografia']) ? $usuario['biografia'] : ''))
             : '' ?></textarea>
-
         <?php if (isset($erros['biografia'])): ?>
-            <p class="text-[#00F5F5] mt-3">
-                <?= $erros['biografia'] ?>
-            </p>
+            <p class="rd-error"><?= $erros['biografia'] ?></p>
         <?php endif; ?>
     </div>
 
-    <!-- Email -->
-    <div class="relative">
-        <label for="email" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
-            Email
-        </label>
-
+    <div class="rd-field">
+        <label for="email" class="rd-label">Email</label>
         <input
             type="text"
+            id="email"
             name="email"
-            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
+            class="rd-input"
             value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getEmail() : (isset($usuario['email']) ? $usuario['email'] : '')) : '' ?>"
         >
-
         <?php if (isset($erros['email'])): ?>
-            <p class="text-[#00F5F5] mt-3"><?= $erros['email'] ?></p>
+            <p class="rd-error"><?= $erros['email'] ?></p>
         <?php endif; ?>
     </div>
 
-    <!-- Senha -->
-    <div class="relative">
-        <label for="senha" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
-            Senha
-        </label>
-
+    <div class="rd-field">
+        <label for="senha" class="rd-label">Senha</label>
         <div class="flex w-full">
             <input
                 type="password"
+                id="senha"
                 name="senha"
-                class="password flex-1 h-12 bg-black/80 border border-r-0 border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
+                class="password rd-input flex-1 border-r-0"
                 value="<?= isset($usuario) ? (is_object($usuario) ? '' : (isset($usuario['senha']) ? $usuario['senha'] : '')) : '' ?>"
             >
-
-            <button
-                type="button"
-                onclick="passowrdChange()"
-                class="h-12 px-4 bg-black/80 border border-white border-l-0 text-white hover:text-[#00F5F5] transition-all flex items-center justify-center"
-            >
-                <img
-                    class="passwordButton"
-                    src="<?= IMG_URL_BASE ?>/visibility.png"
-                    alt="visualização"
-                >
+            <button type="button" onclick="passowrdChange()" class="flex h-11 w-11 shrink-0 items-center justify-center border-2 border-[#07556A] bg-[#000505] transition-colors duration-200 hover:border-[#13F3F7]">
+                <img class="passwordButton h-4 w-4" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
             </button>
         </div>
-
         <?php if (isset($erros['senha'])): ?>
-            <p class="text-[#00F5F5] mt-3"><?= $erros['senha'] ?></p>
+            <p class="rd-error"><?= $erros['senha'] ?></p>
         <?php endif; ?>
     </div>
-    <div class="relative">
-        <label for="confirmar_senha" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
-            Confirmar senha
-        </label>
 
+    <div class="rd-field">
+        <label for="confirmar_senha" class="rd-label">Confirmar senha</label>
         <div class="flex w-full">
-            <input type="password" name="confirmar_senha" class="confirmarPassword flex-1 h-12 bg-black/80 border border-r-0 border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all">
-
-            <button type="button" onclick="confirmarPassowrdChange()"class="h-12 px-4 bg-black/80 border border-white border-l-0 text-white hover:text-[#00F5F5] transition-all flex items-center justify-center">
-                <img  class="confirmarPasswordButton" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
+            <input type="password" id="confirmar_senha" name="confirmar_senha" class="confirmarPassword rd-input flex-1 border-r-0">
+            <button type="button" onclick="confirmarPassowrdChange()" class="flex h-11 w-11 shrink-0 items-center justify-center border-2 border-[#07556A] bg-[#000505] transition-colors duration-200 hover:border-[#13F3F7]">
+                <img class="confirmarPasswordButton h-4 w-4" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
             </button>
         </div>
-        <p class="confirmarErro text-[#00F5F5] mt-3">
+        <p class="confirmarErro rd-error">
             <?php if(isset($erros)): ?>
                 <?php if(isset($erros["confirmar_senha"])): ?>
                     <?= $erros["confirmar_senha"] ?>
                 <?php endif;?>
             <?php endif;?>
         </p>
-        
     </div>
 
-    <!-- Imagem -->
-    <div class="relative">
-        <label for="imagem" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
-            Imagem
-        </label>
-
-        <button
-            type="button"
-            onclick="adicionarImagens()"
-            class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
-        >
-            Adicionar imagens
-        </button>
-
-        <input
-            type="file"
-            name="imagem"
-            id="imagens"
-            accept="image/*"
-            style="display:none;"
-        >
-
-        <ul id="listaImagens" class="space-y-2 mt-3"></ul>
-
+    <div class="rd-field">
+        <label for="imagem" class="rd-label">Imagem</label>
+        <button type="button" onclick="adicionarImagens()" class="rd-file-btn">Adicionar imagens</button>
+        <input type="file" name="imagem" id="imagens" accept="image/*" style="display:none;">
+        <ul id="listaImagens" class="rd-file-list"></ul>
         <?php if (isset($erros['imagem'])): ?>
-            <p class="text-[#00F5F5] mt-3"><?= $erros['imagem'] ?></p>
+            <p class="rd-error"><?= $erros['imagem'] ?></p>
         <?php endif; ?>
     </div>
 
-    <!-- Regra -->
     <?php if($_SESSION["usuario_logado"]->getRegra() == "admin"): ?>
-        <div class="relative">
-            <label for="regra" class="absolute -top-3 left-3 bg-black px-2 text-white font-bold">
-                Regra
-            </label>
-
-            <select
-                name="regra"
-                class="w-full h-12 bg-black/80 border border-white px-4 text-white outline-none focus:border-[#00F5F5] transition-all"
-            >
+        <div class="rd-field">
+            <label for="regra" class="rd-label">Regra</label>
+            <select name="regra" id="regra" class="rd-select">
                 <option value="">Selecione</option>
-
-                <option
-                    value="admin"
-                    <?= isset($usuario)
-                        ? (is_object($usuario)
-                            ? ($usuario->getRegra() == "admin" ? "selected" : "")
-                            : (isset($usuario["regra"])
-                                ? ($usuario["regra"] == "admin" ? "selected" : "")
-                                : ""))
-                        : "" ?>
-                >
-                    Admin
-                </option>
-
-                <option
-                    value="usuario"
-                    <?= isset($usuario)
-                        ? (is_object($usuario)
-                            ? ($usuario->getRegra() == "usuario" ? "selected" : "")
-                            : (isset($usuario["regra"])
-                                ? ($usuario["regra"] == "usuario" ? "selected" : "")
-                                : ""))
-                        : "" ?>
-                >
-                    Usuário
-                </option>
+                <option value="admin" <?= isset($usuario) ? (is_object($usuario) ? ($usuario->getRegra() == "admin" ? "selected" : "") : (isset($usuario["regra"]) ? ($usuario["regra"] == "admin" ? "selected" : "") : "")) : "" ?>>Admin</option>
+                <option value="usuario" <?= isset($usuario) ? (is_object($usuario) ? ($usuario->getRegra() == "usuario" ? "selected" : "") : (isset($usuario["regra"]) ? ($usuario["regra"] == "usuario" ? "selected" : "") : "")) : "" ?>>Usuário</option>
             </select>
-
             <?php if (isset($erros['regra'])): ?>
-                <p class="text-[#00F5F5] mt-3"><?= $erros['regra'] ?></p>
+                <p class="rd-error"><?= $erros['regra'] ?></p>
             <?php endif; ?>
         </div>
     <?php endif; ?>
 
-    <!-- ID hidden -->
     <?php if(isset($_POST["id"]) || isset($usuario)): ?>
-        <input
-            type="hidden"
-            name="id"
-            value="<?= isset($_POST['id'])
-                ? $_POST['id']
-                : (isset($usuario)
-                    ? (is_object($usuario)
-                        ? $usuario->getId()
-                        : (isset($usuario['id']) ? $usuario['id'] : ''))
-                    : '') ?>"
-        >
+        <input type="hidden" name="id" value="<?= isset($_POST['id']) ? $_POST['id'] : (isset($usuario) ? (is_object($usuario) ? $usuario->getId() : (isset($usuario['id']) ? $usuario['id'] : '')) : '') ?>">
     <?php endif; ?>
 
 </div>
 
-<!-- Botão -->
-<div class="flex justify-center items-center p-4">
-    <button
-        type="submit"
-        class="text-white px-5 py-2 border border-white hover:border-[#00F5F5] hover:text-[#00F5F5] transition-all"
-    >
-        Enviar
-    </button>
+<div class="flex items-center justify-center p-4 pt-6">
+    <button type="submit" class="rd-btn rd-btn-primary">Enviar</button>
 </div>

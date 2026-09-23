@@ -1,6 +1,5 @@
 <?php
 $titulo = "Cadastro de Projetos";
-
 include_once(__DIR__."/../elements/header.php");
 ?>
 <div class="h-[90dvh] w-full grid grid-cols-12 grid-rows-12">
@@ -20,7 +19,9 @@ include_once(__DIR__."/../elements/header.php");
     </div>
 </div>
 
-<script src="<?= JS_URL_BASE ?>/files.js"></script>
-<script src="<?= JS_URL_BASE ?>/images.js"></script>
+<script src="<?= JS_URL_BASE ?>/categoria.js"></script>
+<script src="<?= JS_URL_BASE ?>/componente.js"></script>
+<script src="<?= JS_URL_BASE ?>/inputFiles.js"></script>
+<script src="<?= JS_URL_BASE ?>/images.js""></script>
 <?php
 include_once(__DIR__."/../elements/footer.php");
