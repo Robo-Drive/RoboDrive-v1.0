@@ -2,6 +2,7 @@
 $titulo = "RoboDrive/".$_SESSION["usuario_logado"]->getNome();
 if(isset($usuario)):
 $header = "RoboDrive";
+$perfilProprio = $usuario->getId() == $_SESSION["usuario_logado"]->getId();
 
 include_once(__DIR__."/../elements/header.php");
 ?>
@@ -12,7 +13,7 @@ include_once(__DIR__."/../elements/header.php");
 
         <section class="rd-section">
             <p class="rd-eyebrow">PAINEL</p>
-            <h1 class="rd-heading text-[clamp(1.8rem,4vw,3rem)]">MEU <span>PERFIL</span></h1>
+            <h1 class="rd-heading text-[clamp(1.8rem,4vw,3rem)]"><?= $perfilProprio ? "MEU" : "PERFIL DO" ?> <span><?= $perfilProprio ? "PERFIL" : "USUÁRIO" ?></span></h1>
             <div class="mt-8">
                 <?php include_once(__DIR__."/elements/card.php")?>
             </div>
@@ -20,7 +21,7 @@ include_once(__DIR__."/../elements/header.php");
 
         <section class="rd-section">
             <p class="rd-eyebrow">COLABORAÇÃO</p>
-            <h2 class="rd-heading text-[clamp(1.5rem,3.5vw,2.5rem)]">MINHAS <span>EQUIPES</span></h2>
+            <h2 class="rd-heading text-[clamp(1.5rem,3.5vw,2.5rem)]"><?= $perfilProprio ? "MINHAS" : "" ?> <span>EQUIPES</span></h2>
             <div class="mt-8">
                 <?php include(__DIR__."/elements/cardEquipe.php")?>
             </div>
@@ -30,11 +31,13 @@ include_once(__DIR__."/../elements/header.php");
             <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <p class="rd-eyebrow">TRABALHOS</p>
-                    <h2 class="rd-heading text-[clamp(1.5rem,3.5vw,2.5rem)]">MEUS <span>PROJETOS</span></h2>
+                    <h2 class="rd-heading text-[clamp(1.5rem,3.5vw,2.5rem)]"><?= $perfilProprio ? "MEUS" : "" ?> <span>PROJETOS</span></h2>
                 </div>
-                <a href="<?= URL_BASE ?>/projeto/cadastro" class="rd-btn rd-btn-primary w-fit">
-                    Adicionar projeto
-                </a>
+                <?php if($perfilProprio): ?>
+                    <a href="<?= URL_BASE ?>/projeto/cadastro" class="rd-btn rd-btn-primary w-fit">
+                        Adicionar projeto
+                    </a>
+                <?php endif; ?>
             </div>
 
             <div class="flex flex-wrap gap-4 sm:gap-6">
@@ -51,5 +54,7 @@ include_once(__DIR__."/../elements/header.php");
     </div>
 </div>
 <?php
+include_once(__DIR__."/../elements/adminModais.php");
+include_once(__DIR__."/../elements/denunciaModal.php");
 include_once(__DIR__."/../elements/footer.php");
 endif;

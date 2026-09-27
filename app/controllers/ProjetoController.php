@@ -178,4 +178,9 @@ class ProjetoController extends Controller
         $this->repositorySql->deletar($projeto);
         $this->listar();
     }
+    public function desativar()
+    {
+        $this->loginRequired();
+        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/projeto');
+    }
 }

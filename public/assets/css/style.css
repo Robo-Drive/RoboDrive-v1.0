@@ -54,14 +54,14 @@ html, body {
 }
 
 .rd-content {
-    grid-column: span 10 / span 10;
+    grid-column: span 12 / span 12;
     grid-row: span 12 / span 12;
     overflow-y: auto;
     background-color: var(--rd-bg-black);
 }
 
 .rd-content-centered {
-    grid-column: span 10 / span 10;
+    grid-column: span 12 / span 12;
     grid-row: span 12 / span 12;
     overflow-y: auto;
     background-color: var(--rd-bg-black);
@@ -72,15 +72,46 @@ html, body {
     padding: 2.5rem 1.5rem;
 }
 
+/* Telas pequenas e médias: gaveta sobreposta ao conteúdo, aberta pelo botão sanduíche do header */
 .rd-sidebar {
-    grid-column: span 2 / span 2;
-    grid-row: span 12 / span 12;
+    position: fixed;
+    top: 10dvh;
+    left: 0;
+    z-index: 50;
+    height: 90dvh;
+    width: min(18rem, 85vw);
     display: flex;
     flex-direction: column;
     gap: .5rem;
+    overflow-y: auto;
     border-right: 3px solid var(--rd-blue);
     background-color: var(--rd-bg-primary);
     padding: 1.5rem .75rem;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform .2s ease, visibility 0s linear .2s;
+}
+.rd-sidebar.is-open {
+    transform: translateX(0);
+    visibility: visible;
+    box-shadow: 8px 0 0 var(--rd-blue);
+    transition: transform .2s ease;
+}
+
+@media (min-width: 1024px) {
+    .rd-content, .rd-content-centered { grid-column: span 10 / span 10; }
+    .rd-sidebar {
+        position: static;
+        z-index: auto;
+        height: auto;
+        width: auto;
+        grid-column: span 2 / span 2;
+        grid-row: span 12 / span 12;
+        transform: none;
+        visibility: visible;
+        box-shadow: none;
+        transition: none;
+    }
 }
 
 .rd-nav-link {

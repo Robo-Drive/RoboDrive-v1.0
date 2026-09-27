@@ -28,9 +28,23 @@ include_once(__DIR__."/../elements/header.php");
                     <button type="submit" class="rd-btn rd-btn-danger">Excluir componente</button>
                 </form>
             </div>
+
+            <div class="w-full max-w-3xl">
+                <?php
+                $adminAlvo = [
+                    "tipo" => "componente",
+                    "id" => $componente->getId(),
+                    "nome" => $componente->getNome(),
+                    "responsavel" => $componente->getUsuario()->getNomeUsuario() ? "@".$componente->getUsuario()->getNomeUsuario() : null
+                ];
+                include(__DIR__."/../elements/adminBarra.php");
+                ?>
+            </div>
         </div>
     </div>
 </div>
 <?php
+include_once(__DIR__."/../elements/adminModais.php");
+include_once(__DIR__."/../elements/denunciaModal.php");
 include_once(__DIR__."/../elements/footer.php");
 endif;

@@ -166,4 +166,9 @@ class ComponenteController extends Controller
         $this->repositorySql->deletar($componente);
         $this->listar();
     }
+    public function desativar()
+    {
+        $this->loginRequired();
+        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/componente');
+    }
 }

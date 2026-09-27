@@ -5,7 +5,7 @@ include_once(__DIR__."/../elements/header.php");
 ?>
 <div class="h-[90dvh] w-full grid grid-cols-12 grid-rows-12">
     <?php include_once(__DIR__."/../elements/sidebar.php") ?>    
-    <div class="col-span-10 row-span-12 flex flex-col items-center  place-items-center bg-cover bg-center bg-no-repeat text-white" style="background-image: url('<?= IMG_URL_BASE ?>/robodrive-fundo.png');">
+    <div class="col-span-12 lg:col-span-10 row-span-12 flex flex-col items-center  place-items-center bg-cover bg-center bg-no-repeat text-white" style="background-image: url('<?= IMG_URL_BASE ?>/robodrive-fundo.png');">
         <div class="p-4 flex items-center justify-center">
             <h1 class="text-3xl text-white">Fórum</h1>
         </div>
@@ -20,4 +20,6 @@ include_once(__DIR__."/../elements/header.php");
     </div>
 </div>
 <?php
+include_once(__DIR__."/../elements/adminModais.php");
+include_once(__DIR__."/../elements/denunciaModal.php");
 include_once(__DIR__."/../elements/footer.php");

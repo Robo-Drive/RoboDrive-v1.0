@@ -27,4 +27,5 @@ include_once(__DIR__."/../elements/header.php");
     </div>
 </div>
 <?php
+include_once(__DIR__."/../elements/denunciaModal.php");
 include_once(__DIR__."/../elements/footer.php");

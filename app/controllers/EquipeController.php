@@ -136,4 +136,9 @@ class EquipeController extends Controller
         $this->repositorySql->deletar($equipe);
         $this->listar();
     }
+    public function desativar()
+    {
+        $this->loginRequired();
+        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/equipe');
+    }
 }

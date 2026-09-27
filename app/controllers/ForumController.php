@@ -134,4 +134,9 @@ class ForumController extends Controller
         $this->repositorySql->deletar($forum);
         $this->listar();
     }
+    public function desativar()
+    {
+        $this->loginRequired();
+        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/forum');
+    }
 }

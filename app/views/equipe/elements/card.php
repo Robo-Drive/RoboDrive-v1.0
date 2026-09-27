@@ -1,5 +1,14 @@
 <?php if(isset($equipe)):?>
-<div class="bg-zinc-900 rounded-2xl shadow-2xl p-8 w-full max-w-xl border border-zinc-700">
+<div class="relative bg-zinc-900 rounded-2xl shadow-2xl p-8 w-full max-w-xl border border-zinc-700">
+    <?php
+    $denunciaAlvo = [
+        "tipo" => "equipe",
+        "id" => $equipe->getId(),
+        "nome" => $equipe->getNome(),
+        "classe" => "absolute right-3 top-3"
+    ];
+    include(__DIR__."/../../elements/denunciaBotao.php");
+    ?>
     <div class="flex flex-col items-center">
 
         <h1 class="mt-4 text-3xl font-bold text-white">

@@ -1,9 +1,28 @@
 <?php if(isset($projeto)):?>
-<div class="p-8 col-span-10 row-span-12 border border-zinc-700 overflow-y-auto">
-    <div class="w-full flex items-center justify-center h-[5dvh]">
-        <h1 class="text-3xl font-bold text-white">
+<div class="p-8 col-span-12 lg:col-span-10 row-span-12 border border-zinc-700 overflow-y-auto">
+    <?php
+    $adminAlvo = [
+        "tipo" => "projeto",
+        "id" => $projeto->getId(),
+        "nome" => $projeto->getNome(),
+        "visibilidade" => $projeto->getVisibilidade()
+    ];
+    include(__DIR__."/../../elements/adminBarra.php");
+    ?>
+    <div class="relative w-full flex items-center justify-center min-h-[5dvh]">
+        <h1 class="px-12 text-3xl font-bold text-white">
             <?= $projeto->getNome() ?>
         </h1>
+        <?php
+        $denunciaAlvo = [
+            "tipo" => "projeto",
+            "id" => $projeto->getId(),
+            "nome" => $projeto->getNome(),
+            "autores" => array_map(fn($membro) => $membro->getId(), $usuarios ?? []),
+            "classe" => "absolute right-0 top-1/2 -translate-y-1/2"
+        ];
+        include(__DIR__."/../../elements/denunciaBotao.php");
+        ?>
     </div>
     <hr>
     <div class="mt-8 space-y-4">

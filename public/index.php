@@ -15,6 +15,12 @@ $router->post('/logout', 'AutenticacaoController@logout');
 $router->get('/arquivo', 'ArquivoController@visualizar');
 $router->get('/', 'HomeController@home');
 
+$router->get('/denuncia', 'DenunciaController@listar');
+$router->post('/denuncia/salvar', 'DenunciaController@salvar');
+$router->post('/denuncia/excluir', 'DenunciaController@excluir');
+
+$router->post('/usuario/comunicado', 'UsuarioController@comunicado');
+
 
 $crudsPrincipais = ["usuario","equipe","projeto","componente","forum"];
 
@@ -28,6 +34,7 @@ foreach($crudsPrincipais as $cp)
     $router->post('/'.$cp.'/editar', ucfirst($cp).'Controller@editar');
     $router->post('/'.$cp.'/atualizar', ucfirst($cp).'Controller@atualizar');
     $router->post('/'.$cp.'/excluir', ucfirst($cp).'Controller@excluir');
+    $router->post('/'.$cp.'/desativar', ucfirst($cp).'Controller@desativar');
 }
 
 $router->run();

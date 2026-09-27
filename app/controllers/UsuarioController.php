@@ -199,4 +199,14 @@ class UsuarioController extends Controller
         $this->service->deletar($usuario);
         (new AutenticacaoController)->logout();
     }
+    public function desativar()
+    {
+        $this->loginRequired();
+        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/usuario');
+    }
+    public function comunicado()
+    {
+        $this->loginRequired();
+        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/usuario');
+    }
 }
