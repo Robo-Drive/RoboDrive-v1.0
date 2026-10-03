@@ -9,14 +9,14 @@ use app\models\Projeto;
 use app\repositories\ProjetoRepositorySql;
 use app\repositories\ComponenteRepositorySql;
 use app\repositories\UsuarioRepositorySql;
-use app\repositories\CategoriaRepositorySql;
+use app\services\CategoriaService;
 use app\services\ProjetoService;
 class ProjetoController extends Controller
 {
     private ProjetoService $service;
     private ProjetoRepositorySql $repositorySql;
     private ComponenteRepositorySql $componenteRepositorySql;
-    private CategoriaRepositorySql $categoriaRepositorySql;
+    private CategoriaService $categoriaService;
     private UsuarioRepositorySql $usuarioRepositorySql;
 
     public function __construct()
@@ -24,7 +24,7 @@ class ProjetoController extends Controller
         $this->service = new ProjetoService();
         $this->repositorySql = new ProjetoRepositorySql();
         $this->componenteRepositorySql = new ComponenteRepositorySql();
-        $this->categoriaRepositorySql = new CategoriaRepositorySql();
+        $this->categoriaService = new CategoriaService();
         $this->usuarioRepositorySql = new UsuarioRepositorySql();
     }
 
@@ -38,7 +38,7 @@ class ProjetoController extends Controller
     {
         $this->loginRequired();
         $componentes = $this->componenteRepositorySql->listarTodos();
-        $categorias = $this->categoriaRepositorySql->listarTodos();
+        $categorias = $this->categoriaService->listarTodos();
         $data["componentes"] = $componentes;
         $data["categorias"] = $categorias;
         $this->view("projeto/create",$data);
@@ -47,18 +47,21 @@ class ProjetoController extends Controller
     {
         $this->loginRequired();
 
-        $validador = new ValidadorHelper();
         print "<pre>";
         print_r($_POST);
         print_r($_FILES);
         print "</pre>";
-        die;
+        $validador = new ValidadorHelper();
+    
         $validador->obrigatorio('nome',   trim($_POST["nome"]));
         $validador->obrigatorio('descricao',  trim($_POST["descricao"]));
         $validador->obrigatorio('visibilidade',  trim($_POST["visibilidade"]));
         $validador->tamanho('nome', trim($_POST["nome"]), 3,100);
         $validador->tamanho('descricao', trim($_POST["descricao"]), 3,2000);
-        
+        if(!is_int($_POST["categoria"]))
+        {
+            $validador->tamanho('descricao', trim($_POST["descricao"]), 3,2000);    
+        }
         $posts["nome"]   = trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
         $posts["descricao"]   = trim(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
         $posts["visibilidade"]  = trim(filter_input(INPUT_POST, 'visibilidade', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
@@ -91,6 +94,7 @@ class ProjetoController extends Controller
         }
         else
         {
+            
             if ($this->service->salvarProjeto($posts))
             {
                 $this->redirect(URL_BASE . '/projeto/listar');
