@@ -18,35 +18,54 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
     {
         $this->connection = ConnectionFactory::getConnection();
     }
-    public function cadastrar(Projeto $projeto): ?Projeto
+    public function cadastrar(Projeto $projeto): ?array
     {
         try
         {
-            $sql = "INSERT INTO projeto (nome, visibilidade, descricao)
-                    VALUES (:nome, :visibilidade, :descricao, :categoria)";
+            $sql = "INSERT INTO projeto (nome, visibilidade, descricao, categoria_id, usuario_id)
+                    VALUES (:nome, :visibilidade, :descricao, :categoria_id, :usuario_id)";
     
             $stmt = $this->connection->prepare($sql);
     
             $stmt->bindValue(':nome', $projeto->getNome());
             $stmt->bindValue(':visibilidade', $projeto->getVisibilidade());
             $stmt->bindValue(':descricao', $projeto->getDescricao());
-            $stmt->bindValue(':categoria', $projeto->getCategoria()->getId());
+            $stmt->bindValue(':categoria_id', $projeto->getCategoria()->getId());
+            $stmt->bindValue(':usuario_id', $_SESSION["usuario_logado"]->getId());
             $stmt->execute();
             
             $projeto->setId($this->connection->lastInsertId());
-            $sqlAssoc = "INSERT INTO projeto_usuario (projeto_id, usuario_id, tipo)
-                        VALUES (:projeto_id, :usuario_id, :tipo)";
+            
+            $sqlAssocVersao = "INSERT INTO projeto_versao (projeto_id, usuario_id, versao,descricao_alteracao)
+                    VALUES (:projeto_id, :usuario_id,  :versao, :descricao_alteracao)";
 
-            $stmtAssoc = $this->connection->prepare($sqlAssoc);
-            $stmtAssoc->bindValue(':projeto_id', $projeto->getId());
-            $stmtAssoc->bindValue(':usuario_id', $_SESSION['usuario_logado']->getId());
-            $stmtAssoc->bindValue(':tipo', "coordenador");
-            $stmtAssoc->execute();
+            $stmtAssocVersao = $this->connection->prepare($sqlAssocVersao);
+            $stmtAssocVersao->bindValue(':projeto_id', $projeto->getId());
+            $stmtAssocVersao->bindValue(':usuario_id', $_SESSION["usuario_logado"]->getId());
+            $stmtAssocVersao->bindValue(':versao',1);
+            $stmtAssocVersao->bindValue(':descricao_alteracao', $projeto->getDescricao());
+            $stmtAssocVersao->execute();
+            
+            
 
-            return $projeto;
+            $sqlAssocUsuario = "INSERT INTO projeto_usuario (projeto_id, usuario_id, papel)
+                        VALUES (:projeto_id, :usuario_id, :papel)";
+
+            $stmtAssocUsuario = $this->connection->prepare($sqlAssocUsuario);
+            $stmtAssocUsuario->bindValue(':projeto_id', $projeto->getId());
+            $stmtAssocUsuario->bindValue(':usuario_id', $_SESSION['usuario_logado']->getId());
+            $stmtAssocUsuario->bindValue(':papel', "coordenador");
+            $stmtAssocUsuario->execute();
+
+            $projetoVersao = new Projeto()->setId($this->connection->lastInsertId());
+            return [$projeto,$projetoVersao];
         }
         catch(PDOException $e)
         {
+            if ($this->connection->inTransaction())
+            {
+                $this->connection->rollBack();
+            }
             print_r($e);
             die;
         }

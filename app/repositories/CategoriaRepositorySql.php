@@ -18,7 +18,18 @@ class CategoriaRepositorySql implements CategoriaRepositoryInterface
     }
     public function cadastrar(Categoria $categoria): ?Categoria
     {
-        return new Categoria();
+        $sql = "INSERT INTO categoria(nome,usuario_id) VALUES(:nome,:usuario_id)";
+        
+        $stmt = $this->connection->prepare($sql);
+        
+        $stmt->bindValue(':nome', $categoria->getNome());
+        $stmt->bindValue(':usuario_id', $categoria->getUsuario()->getId());
+        
+        $stmt->execute();
+        
+        $categoria->setId($this->connection->lastInsertId());
+
+        return $categoria;
     }
     public function buscarId(Categoria $categoria): ?Categoria
     {

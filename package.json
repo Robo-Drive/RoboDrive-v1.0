@@ -1,0 +1,23 @@
+{
+  "name": "robodrive-v1.0",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Projeto RoboDrive - Sistema de gerenciamento de projetos de robótica.",
+  "scripts": {
+    "css:build": "npx @tailwindcss/cli -i ./public/assets/css/input.css -o ./public/assets/css/output.css",
+    "css:watch": "npx @tailwindcss/cli -i ./public/assets/css/input.css -o ./public/assets/css/output.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Robo-Drive/RoboDrive-v1.0.git"
+  },
+  "keywords": [
+    "robodrive",
+    "php",
+    "tailwindcss"
+  ],
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}

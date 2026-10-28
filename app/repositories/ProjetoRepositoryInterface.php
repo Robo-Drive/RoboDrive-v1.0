@@ -8,7 +8,7 @@ use app\models\Equipe;
 
 interface ProjetoRepositoryInterface
 {
-    public function cadastrar(Projeto $projeto):?Projeto;
+    public function cadastrar(Projeto $projeto):?array;
     public function buscarId(Projeto $projeto):?Projeto;
     public function buscarNome(Projeto $projeto): ?array;
     public function buscarEquipe(Equipe $usuario):?array;

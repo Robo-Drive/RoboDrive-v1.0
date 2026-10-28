@@ -102,10 +102,12 @@ class UploadService
 
     public function uploadArray(array $files)
     {
+        $destinos = array();
         foreach($files as $file)
         {
-            $this->upload($file);
+            $destinos[] = $this->upload($file);
         }
+        return $destinos;
 
     }
 

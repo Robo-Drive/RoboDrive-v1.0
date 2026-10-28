@@ -6,6 +6,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Orbitron:wght@700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
     <link href="<?= CSS_URL_BASE ?>/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?= CSS_URL_BASE ?>/output.css">
     <link rel="icon" type="image/png" href="<?= IMG_URL_BASE ?>/robodrive-logo.png">
     <title><?= $titulo ?></title>
     <script src="<?= JS_URL_BASE ?>/tailwind.js"></script>
@@ -41,3 +42,5 @@
         </a>
     <?php endif; ?>
 </header>
+    <!--npm init -y
+npm install -D tailwindcss @tailwindcss/clix-->

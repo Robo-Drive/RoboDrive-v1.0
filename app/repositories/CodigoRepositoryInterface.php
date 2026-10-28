@@ -2,7 +2,7 @@
 
 namespace app\repositories;
 
-class CodigoRepositoryInterface
+interface CodigoRepositoryInterface
 {
-    
+    public function cadastrar(array $posts): bool;
 }

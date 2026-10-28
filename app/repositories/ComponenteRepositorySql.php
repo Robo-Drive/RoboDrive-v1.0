@@ -74,6 +74,22 @@ class ComponenteRepositorySql implements ComponenteRepositoryInterface
 
         return null;
     }
+    public function associar(array $posts)
+    {
+        $sql = "INSERT INTO projeto_versao_componente(quantidade, componente_id, projeto_versao_id)
+                VALUES(:quantidade, :componente_id, :projeto_versao_id)";
+
+        $stmt = $this->connection->prepare($sql);
+        
+        foreach ($posts["componentes"] as $componente)
+        {
+            $stmt->execute([
+                ':quantidade' => $componente->getQuantidade(),
+                ':componente_id' => $componente->getId(),
+                ':projeto_versao_id' => $posts["projeto"]->getId()
+            ]);
+        }
+    }
     public function buscarId(Componente $componente): ?Componente
     {
         $sql = "SELECT c.*, u.nome_usuario FROM componente c JOIN usuario u ON u.id = c.usuario_id WHERE c.id = :id  AND c.status=true";

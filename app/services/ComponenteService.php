@@ -14,6 +14,10 @@ class ComponenteService
     {
         $this->repositorySql = new ComponenteRepositorySql();
     }
+    public function listarTodos() : array|null
+    {
+        return $this->repositorySql->listarTodos();
+    }
     public function salvarComponente(Componente $equipe): bool
     {
         $this->repositorySql->cadastrar($equipe);
@@ -32,5 +36,18 @@ class ComponenteService
             return false;
         }
         return true;
+    }
+    public function associar(array $posts)
+    {
+        $this->repositorySql->associar($posts);
+    }
+    public function buscarProjeto(int $id): array
+    {
+
+        return [];
+    }
+    public function desativar()
+    {
+
     }
 }

@@ -9,7 +9,7 @@ class ImagemService
 {
     private UploadService $uploadService;
 
-    public function transformarObjetoArquivo(array $imagens,Projeto $projeto)
+    public function salvarImagem(array $imagens,Projeto $projeto)
     {
         $arquivos = array();
         for($i = 0 ; $i < count($imagens["name"]) ; $i++)
@@ -19,8 +19,8 @@ class ImagemService
                 $arquivos[$i][$key] = $img[$i];
             }
         }
-        $path = "/user-".$_SESSION["usuario_logado"]->getId()."/projects/project-".$projeto->getId()."/img";
+        $path = "/users/user-".$_SESSION["usuario_logado"]->getId()."/projects/project-".$projeto->getId()."/img";
         $this->uploadService = new UploadService($path);
-        $this->uploadService->uploadArray($arquivos);
+        $destinos = $this->uploadService->uploadArray($arquivos);
     }
 }

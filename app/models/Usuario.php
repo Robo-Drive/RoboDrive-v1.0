@@ -15,7 +15,8 @@ class Usuario
     private ?string $biografia = null;
     private ?string $imagem = null;
     private ?string $regra = null;
-    private ?string $tipo = null;
+    private ?string $papelProjeto = null;
+    private ?string $papelEquipe = null;
     private ?string $categoria = null;
     private ?DateTimeImmutable $criadoEm = null;
 
@@ -36,7 +37,7 @@ class Usuario
             $usuarioObj->setBiografia($usuario["biografia"] ?? null);
             $usuarioObj->setImagem($usuario["imagem"] ?? null);
             $usuarioObj->setRegra($usuario["regra"] ?? null);
-            $usuarioObj->setTipo($usuario["tipo"] ?? null);
+            $usuarioObj->setPapelProjeto($usuario["papelProjeto"] ?? null);
             $usuarioObj->setCategoria($usuario["categoria"] ?? null);
             $usuarioObj->setCriadoEm(isset($usuario["criado_em"])
                 ? new DateTimeImmutable($usuario["criado_em"])
@@ -138,13 +139,13 @@ class Usuario
         return $this;
     }
 
-    public function getTipo(): ?string
+    public function getPapelProjeto(): ?string
     {
-        return $this->tipo;
+        return $this->papelProjeto;
     }
-    public function setTipo(?string $tipo): self
+    public function setPapelProjeto(?string $papelProjeto): self
     {
-        $this->tipo = $tipo;
+        $this->papelProjeto = $papelProjeto;
 
         return $this;
     }

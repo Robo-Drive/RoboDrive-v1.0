@@ -134,16 +134,6 @@ CREATE TABLE IF NOT EXISTS projeto_versao_componente (
   FOREIGN KEY (projeto_versao_id) REFERENCES projeto_versao(id)
 );
 
-CREATE TABLE IF NOT EXISTS projeto_componente (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  quantidade INT NOT NULL,
-  projeto_id INT NOT NULL,
-  componente_id INT NOT NULL,
-  status BOOLEAN NOT NULL DEFAULT TRUE,
-  FOREIGN KEY (projeto_id) REFERENCES projeto(id),
-  FOREIGN KEY (componente_id) REFERENCES componente(id)
-);
-
 CREATE TABLE IF NOT EXISTS projeto_usuario (
   id INT AUTO_INCREMENT PRIMARY KEY,
   projeto_id INT NOT NULL,
