@@ -1,5 +1,5 @@
 <?php
-$titulo = "RoboDrive/".$_SESSION["usuario_logado"]->getNome();
+$titulo = "RoboDrive/".$_SESSION["usuario_logado"]->getNomeUsuario();
 if(isset($usuario)):
 $header = "RoboDrive";
 $perfilProprio = $usuario->getId() == $_SESSION["usuario_logado"]->getId();
@@ -20,10 +20,31 @@ include_once(__DIR__."/../elements/header.php");
         </section>
 
         <section class="rd-section">
-            <p class="rd-eyebrow">COLABORAÇÃO</p>
-            <h2 class="rd-heading text-[clamp(1.5rem,3.5vw,2.5rem)]"><?= $perfilProprio ? "MINHAS" : "" ?> <span>EQUIPES</span></h2>
-            <div class="mt-8">
-                <?php include(__DIR__."/elements/cardEquipe.php")?>
+            <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <p class="rd-eyebrow">COLABORAÇÃO</p>
+                    <h2 class="rd-heading text-[clamp(1.5rem,3.5vw,2.5rem)]"><?= $perfilProprio ? "MINHAS" : "" ?> <span>EQUIPES</span></h2>
+                </div>
+                <?php if($perfilProprio): ?>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="<?= URL_BASE ?>/equipe/cadastro" class="rd-btn rd-btn-primary w-fit">
+                            Adicionar equipe
+                        </a>
+                        <a href="<?= URL_BASE ?>/equipe/entrar" class="rd-btn rd-btn-secondary w-fit">
+                            Entrar em equipe
+                        </a>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="flex flex-wrap gap-4 sm:gap-6">
+                <?php if(isset($equipes) && count($equipes) > 0):?>
+                    <?php foreach($equipes as $equipe):?>
+                        <?php include(__DIR__."/elements/cardEquipe.php")?>
+                    <?php endforeach;?>
+                <?php else: ?>
+                    <p class="rd-empty">Não está em nenhuma equipe ainda</p>
+                <?php endif;?>
             </div>
         </section>
 
@@ -34,9 +55,14 @@ include_once(__DIR__."/../elements/header.php");
                     <h2 class="rd-heading text-[clamp(1.5rem,3.5vw,2.5rem)]"><?= $perfilProprio ? "MEUS" : "" ?> <span>PROJETOS</span></h2>
                 </div>
                 <?php if($perfilProprio): ?>
-                    <a href="<?= URL_BASE ?>/projeto/cadastro" class="rd-btn rd-btn-primary w-fit">
-                        Adicionar projeto
-                    </a>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="<?= URL_BASE ?>/projeto/cadastro" class="rd-btn rd-btn-primary w-fit">
+                            Adicionar projeto
+                        </a>
+                        <a href="<?= URL_BASE ?>/projeto/entrar" class="rd-btn rd-btn-secondary w-fit">
+                            Entrar em projeto
+                        </a>
+                    </div>
                 <?php endif; ?>
             </div>
 

@@ -8,34 +8,67 @@ use DateTimeImmutable;
 
 class Projeto
 {
-    private ?int $id;
-    private ?string $nome;
-    private ?string $descricao;
-    private ?string $visibilidade;
-    private ?Categoria $categoria;
-    private ?Equipe $equipe;
-    private ?DateTimeImmutable $criadoEm;
-    private array $componentes;
-    
+    private ?int $id = null;
+    private ?string $nome = null;
+    private ?string $descricao = null;
+    private ?string $visibilidade = null;
+    private ?Categoria $categoria = null;
+    private ?Equipe $equipe = null;
+    private ?DateTimeImmutable $criadoEm = null;
+    private ?string $hashAcesso = null;
+    private ?string $senha = null;
+
     public static function map(?array $projetos): array
     {
-        if ($projetos == null) {
+        if ($projetos === null) {
             return [];
         }
-        $projetosObj = array();
+
+        $projetosObj = [];
+
         foreach ($projetos as $projeto) {
             $projetoObj = new Projeto();
-            $projetoObj->setId($projeto["id"]??null);
-            $projetoObj->setNome($projeto["nome"]??null);
-            $projetoObj->setDescricao($projeto["descricao"]??null);
-            $projetoObj->setVisibilidade($projeto["visibilidade"])??null;
-            $projetoObj->setCategoria(new Categoria()->setId($projeto["categoria_id"]??null)->setNome($projeto["categoria_nome"]??null)??null);
-            $projetoObj->setEquipe(new Equipe()->setId($projeto["equipe_id"]??null)->setNome($projeto["equipe_nome"]??null)??null);
-            $projetoObj->setCriadoEm(isset($projeto["criado_em"])
-                ? new DateTimeImmutable($projeto["criado_em"])
-                : null);
+
+            $projetoObj->setId($projeto["id"] ?? null);
+            $projetoObj->setNome($projeto["nome"] ?? null);
+            $projetoObj->setDescricao($projeto["descricao"] ?? null);
+            $projetoObj->setVisibilidade($projeto["visibilidade"] ?? null);
+            
+            // Adicionado o mapeamento do hash e da senha
+            $projetoObj->setHashAcesso($projeto["hash_acesso"] ?? null);
+            $projetoObj->setSenha($projeto["senha"] ?? null);
+
+            // Categoria: somente cria o objeto se existir ID
+            if (!empty($projeto["categoria_id"])) {
+                $categoria = new Categoria();
+                $categoria->setId($projeto["categoria_id"]);
+                $categoria->setNome($projeto["categoria_nome"] ?? null);
+
+                $projetoObj->setCategoria($categoria);
+            } else {
+                $projetoObj->setCategoria(null);
+            }
+
+            // Equipe: somente cria o objeto se existir ID
+            if (!empty($projeto["equipe_id"])) {
+                $equipe = new Equipe();
+                $equipe->setId($projeto["equipe_id"]);
+                $equipe->setNome($projeto["equipe_nome"] ?? null);
+
+                $projetoObj->setEquipe($equipe);
+            } else {
+                $projetoObj->setEquipe(null);
+            }
+
+            $projetoObj->setCriadoEm(
+                isset($projeto["criado_em"])
+                    ? new DateTimeImmutable($projeto["criado_em"])
+                    : null
+            );
+
             $projetosObj[] = $projetoObj;
         }
+
         return $projetosObj;
     }
 
@@ -43,6 +76,7 @@ class Projeto
     {
         return $this->id;
     }
+
     public function setId(?int $id): self
     {
         $this->id = $id;
@@ -53,6 +87,7 @@ class Projeto
     {
         return $this->nome;
     }
+
     public function setNome(?string $nome): self
     {
         $this->nome = $nome;
@@ -63,6 +98,7 @@ class Projeto
     {
         return $this->visibilidade;
     }
+
     public function setVisibilidade(?string $visibilidade): self
     {
         $this->visibilidade = $visibilidade;
@@ -73,6 +109,7 @@ class Projeto
     {
         return $this->criadoEm;
     }
+
     public function setCriadoEm(?DateTimeImmutable $criadoEm): self
     {
         $this->criadoEm = $criadoEm;
@@ -83,19 +120,10 @@ class Projeto
     {
         return $this->descricao;
     }
+
     public function setDescricao(?string $descricao): self
     {
         $this->descricao = $descricao;
-        return $this;
-    }
-
-    public function getComponentes(): array
-    {
-        return $this->componentes;
-    }
-    public function setComponentes(array $componentes): self
-    {
-        $this->componentes = $componentes;
         return $this;
     }
 
@@ -103,10 +131,10 @@ class Projeto
     {
         return $this->categoria;
     }
+
     public function setCategoria(?Categoria $categoria): self
     {
         $this->categoria = $categoria;
-
         return $this;
     }
 
@@ -114,10 +142,32 @@ class Projeto
     {
         return $this->equipe;
     }
+
     public function setEquipe(?Equipe $equipe): self
     {
         $this->equipe = $equipe;
+        return $this;
+    }
 
+    public function getHashAcesso(): ?string
+    {
+        return $this->hashAcesso;
+    }
+
+    public function setHashAcesso(?string $hashAcesso): self
+    {
+        $this->hashAcesso = $hashAcesso;
+        return $this;
+    }
+
+    public function getSenha(): ?string
+    {
+        return $this->senha;
+    }
+
+    public function setSenha(?string $senha): self
+    {
+        $this->senha = $senha;
         return $this;
     }
 }

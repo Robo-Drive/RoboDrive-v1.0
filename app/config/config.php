@@ -29,4 +29,9 @@ define('DB_NAME', 'robo_drive');
 define('DB_USER', getenv("DB_USER"));
 define('DB_PASS', getenv("DB_PASS"));
 
+// Configurações de envio de e-mail
+define('MAIL_USER', getenv('PHP_MAILER_TCC_EMAIL'));
+define('MAIL_PASS', getenv('PHP_MAILER_TCC_PASS'));
+define('MAIL_NAME', 'RoboDrive');
+
 //Configurações de gmail

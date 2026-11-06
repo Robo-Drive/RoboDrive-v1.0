@@ -2,28 +2,31 @@
 
 namespace app\helpers;
 
-use Exception;
+require_once __DIR__ . '/../libraries/vendor/autoload.php';
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
-
-require_once(__DIR__."/../libraries/PHPMailer/src/PHPMailer");
-require_once(__DIR__."/../libraries/PHPMailer/src/SMTP");
-require_once(__DIR__."/../libraries/PHPMailer/src/Exception");
-
-
-
+use PHPMailer\PHPMailer\Exception;
 
 class MailHelper
 {
     private string $seuEmail;
     private string $suaSenha;
     private string $seuNome;
-    public function enviarEmail($destinatario,$anexo,$formato,$assunto,$mensagem,$altmensage)
+
+    public function __construct()
     {
-        $mail = new PHPMailer(True);
+        $this->seuEmail = defined('MAIL_USER') ? MAIL_USER : '';
+        $this->suaSenha = defined('MAIL_PASS') ? MAIL_PASS : '';
+        $this->seuNome  = defined('MAIL_NAME') ? MAIL_NAME : 'RoboDrive';
+    }
+
+    public function enviarEmail(string $destinatario,?string $anexo = null, $formato = '', $assunto = '', $mensagem = '', $altmensage = ''): bool
+    {
+        $mail = new PHPMailer(true);
         try
         {
-            $mail->SMTPDebug = SMTP::DEBUG_SERVER;
+            $mail->SMTPDebug = SMTP::DEBUG_OFF;
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
@@ -31,80 +34,47 @@ class MailHelper
             $mail->Password   = $this->suaSenha;
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
             $mail->Port       = 465;
-            $mail->setFrom($this->seuEmail,$this->seuNome);
+            $mail->CharSet    = 'UTF-8';
+
+            $mail->setFrom($this->seuEmail, $this->seuNome);
             $mail->addAddress($destinatario);
-            $mail->addReplyTo($this->seuEmail, 'Informações');
-            if($anexo != null)
-            {
-                $mail->addAttachment($anexo,$formato); 
+            $mail->addReplyTo($this->seuEmail, $this->seuNome);
+
+            if ($anexo !== null && file_exists($anexo)) {
+                $mail->addAttachment($anexo, $formato);
             }
+
             $mail->isHTML(true);
             $mail->Subject = $assunto;
             $mail->Body    = $mensagem;
-            if($altmensage != null)
-            {
+            if (!empty($altmensage)) {
                 $mail->AltBody = $altmensage;
             }
-            $mail->send();
-            print "\033[36m Mensagem enviada com sucesso para $destinatario!\033[m";
+
+            return $mail->send();
         }
-        catch(Exception $e)
+        catch (Exception $e)
         {
-            print "\033[31m Mensagem não pode ser enviada. MAILER ERROR\033[m{$mail->ErrorInfo}";
+            error_log("Erro ao enviar email para {$destinatario}: " . $mail->ErrorInfo);
+            return false;
         }
     }
 
-    /**
-     * Get the value of seuEmail
-     */
-    public function getSeuEmail(): string
-    {
-        return $this->seuEmail;
-    }
-
-    /**
-     * Set the value of seuEmail
-     */
     public function setSeuEmail(string $seuEmail): self
     {
         $this->seuEmail = $seuEmail;
-
         return $this;
     }
 
-    /**
-     * Get the value of suaSenha
-     */
-    public function getSuaSenha(): string
-    {
-        return $this->suaSenha;
-    }
-
-    /**
-     * Set the value of suaSenha
-     */
     public function setSuaSenha(string $suaSenha): self
     {
         $this->suaSenha = $suaSenha;
-
         return $this;
     }
 
-    /**
-     * Get the value of seuNome
-     */
-    public function getSeuNome(): string
-    {
-        return $this->seuNome;
-    }
-
-    /**
-     * Set the value of seuNome
-     */
     public function setSeuNome(string $seuNome): self
     {
         $this->seuNome = $seuNome;
-
         return $this;
     }
 }

@@ -1,24 +1,21 @@
 <?php
-$titulo = "Criar postagem";
-
+$titulo = "Postagem fórum";
 include_once(__DIR__."/../elements/header.php");
 ?>
-<div class="h-[90dvh] w-full grid grid-cols-12 grid-rows-12">
+<div class="rd-shell">
     <?php include_once(__DIR__."/../elements/sidebar.php") ?>
-    <div class="col-span-12 lg:col-span-10 row-span-12 flex flex-col items-center justify-center place-items-center bg-cover bg-center bg-no-repeat text-white" style="background-image: url('<?= IMG_URL_BASE ?>/robodrive-fundo.png');">
-        <div class="flex flex-col items-center bg-black/80 px-8 py-7 border border-white gap-[50px]">
-            <div class="flex gap-1 font-bold font-['Orbitron']">
-                <h1 class="text-3xl font-bold text-[#00F5F5]">CRIAR</h1>
-                <h1 class="text-3xl font-bold text-white">POSTAGEM</h1>
-            </div>
-            <div class="flex flex-col items-center">
-                <form action="<?= URL_BASE?>/projeto/salvar" method="post"">
-                    <?php include_once(__DIR__."/elements/form.php")?>
-                </form>
-            </div>
+    <div class="rd-content-centered !justify-start overflow-y-auto rd-scroll-hidden">
+
+        <div class="mb-8 text-center">
+            <p class="rd-eyebrow">POSTAGEM</p>
+            <h1 class="rd-heading text-[clamp(1.8rem,4vw,2.8rem)]">FAZER <span>POSTAGEM</span></h1>
         </div>
+
+        <form action="<?= URL_BASE?>/forum/salvar" autocomplete="off" method="post" enctype="multipart/form-data" class="rd-form-card rd-form-card-wide w-full">
+            <?php include_once(__DIR__."/elements/form.php")?>
+        </form>
+
     </div>
 </div>
-
 <?php
 include_once(__DIR__."/../elements/footer.php");

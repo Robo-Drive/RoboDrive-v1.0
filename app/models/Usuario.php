@@ -37,7 +37,7 @@ class Usuario
             $usuarioObj->setBiografia($usuario["biografia"] ?? null);
             $usuarioObj->setImagem($usuario["imagem"] ?? null);
             $usuarioObj->setRegra($usuario["regra"] ?? null);
-            $usuarioObj->setPapelProjeto($usuario["papelProjeto"] ?? null);
+            $usuarioObj->setPapelProjeto($usuario["papel"] ?? $usuario["papelProjeto"] ?? null);
             $usuarioObj->setCategoria($usuario["categoria"] ?? null);
             $usuarioObj->setCriadoEm(isset($usuario["criado_em"])
                 ? new DateTimeImmutable($usuario["criado_em"])

@@ -31,6 +31,11 @@
             <?php endif;?>
         <?php endif;?>
     </div>
+    <div class="text-right">
+        <a href="<?= URL_BASE ?>/recuperar-senha" class="text-xs text-[#91B5BD] hover:text-[#13F3F7] transition underline">
+            Esqueceu sua senha?
+        </a>
+    </div>
     <?php if(isset($erros["login"])): ?>
         <p class="text-xs sm:text-sm font-medium text-[#13F3F7]"><?= $erros["login"] ?></p>
     <?php endif;?>    

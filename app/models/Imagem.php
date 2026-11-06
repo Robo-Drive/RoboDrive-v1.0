@@ -8,7 +8,6 @@ class Imagem
 {
     private ?int $id;
     private ?string $caminho;
-    private ?string $descricao;
     private ?int $projetoId;
     private ?DateTimeImmutable $criadoEm;
 
@@ -24,8 +23,9 @@ class Imagem
             $imagemObj = new Imagem();
             $imagemObj->setId($imagem["id"]);
             $imagemObj->setCaminho($imagem["caminho"]);
-            $imagemObj->setDescricao($imagem["descricao"]);
-            $imagemObj->setCriadoEm($imagem["criado_em"]);
+            $imagemObj->setCriadoEm(isset($projeto["criado_em"])
+            ? new DateTimeImmutable($projeto["criado_em"])
+            : null);
             $imagensObj[] = $imagemObj;
         }
         return $imagensObj;
@@ -48,16 +48,6 @@ class Imagem
     public function setCaminho(?string $caminho): self
     {
         $this->caminho = $caminho;
-        return $this;
-    }
-
-    public function getDescricao(): ?string
-    {
-        return $this->descricao;
-    }
-    public function setDescricao(?string $descricao): self
-    {
-        $this->descricao = $descricao;
         return $this;
     }
 

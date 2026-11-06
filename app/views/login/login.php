@@ -21,7 +21,7 @@ include_once(__DIR__ . "/../elements/header.php");
         </div>
 
         <div>
-            <form action="<?= URL_BASE ?>/logar" method="post" class="w-full">
+            <form action="<?= URL_BASE ?>/logar" autocomplete="off" method="post" class="w-full">
                 <?php include_once(__DIR__ . "/elements/form.php") ?>
             </form>
 

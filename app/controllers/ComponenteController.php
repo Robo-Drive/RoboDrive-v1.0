@@ -158,17 +158,13 @@ class ComponenteController extends Controller
         }
 
     }
-    public function excluir()
+    public function desativar()
     {
         $this->loginRequired();
         $componente = new Componente();
         $componente->setId($_POST["id"]);
-        $this->repositorySql->deletar($componente);
+        $this->repositorySql->desativar($componente);
         $this->listar();
     }
-    public function desativar()
-    {
-        $this->loginRequired();
-        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/componente');
-    }
+    
 }

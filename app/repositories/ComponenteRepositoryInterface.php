@@ -13,5 +13,5 @@ interface ComponenteRepositoryInterface
     public function buscarProjeto(int $projetoId): ?array;
     public function listarTodos():array;
     public function editar(Componente $componente):?Componente;
-    public function deletar(Componente $componente):bool;
+    public function desativar(Componente $componente):bool;
 }

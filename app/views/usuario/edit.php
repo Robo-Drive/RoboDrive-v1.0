@@ -13,11 +13,11 @@ include_once(__DIR__."/../elements/header.php");
             <h1 class="rd-heading text-[clamp(1.8rem,4vw,2.8rem)]">EDITAR <span>PERFIL</span></h1>
         </div>
 
-        <form action="<?= URL_BASE ?>/usuario/atualizar" method="post" enctype="multipart/form-data" class="rd-form-card rd-form-card-wide w-full">
+        <form action="<?= URL_BASE ?>/usuario/atualizar" autocomplete="off" method="post" enctype="multipart/form-data" class="rd-form-card rd-form-card-wide w-full">
             <?php include_once(__DIR__."/elements/form.php") ?>
         </form>
 
-        <form action="<?= URL_BASE ?>/usuario/excluir" method="post" class="mt-6">
+        <form action="<?= URL_BASE ?>/usuario/excluir" autocomplete="off" method="post" class="mt-6">
             <input type="hidden" name="id" value="<?= is_object($usuario) ? $usuario->getId() : ($usuario['id'] ?? '') ?>">
             <button type="submit" class="rd-btn rd-btn-danger rd-btn-sm">Excluir conta</button>
         </form>

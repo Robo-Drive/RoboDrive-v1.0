@@ -7,6 +7,8 @@ class Equipe
     private ?int $id;
     private ?string $nome;
     private ?string $senha;
+    private ?string $descricao = null;
+    private ?string $hashAcesso = null;
 
     public static function map(?array $equipes): array
     {
@@ -18,9 +20,11 @@ class Equipe
         foreach($equipes as $equipe)
         {
             $equipeObj = new Equipe();
-            $equipeObj->setId($equipe["id"]??null);
-            $equipeObj->setNome($equipe["nome"]??null);
-            $equipeObj->setSenha($equipe["senha"]??null);
+            $equipeObj->setId($equipe["id"] ?? null);
+            $equipeObj->setNome($equipe["nome"] ?? null);
+            $equipeObj->setSenha($equipe["senha"] ?? null);
+            $equipeObj->setDescricao($equipe["descricao"] ?? null);
+            $equipeObj->setHashAcesso($equipe["hash_acesso"] ?? null);
             $equipesObj[] = $equipeObj;
         }
         return $equipesObj;
@@ -53,6 +57,27 @@ class Equipe
     public function setSenha(?string $senha): self
     {
         $this->senha = $senha;
+        return $this;
+    }
+
+    public function getDescricao(): ?string
+    {
+        return $this->descricao;
+    }
+    public function setDescricao(?string $descricao): self
+    {
+        $this->descricao = $descricao;
+        return $this;
+    }
+
+        public function getHashAcesso(): ?string
+    {
+        return $this->hashAcesso;
+    }
+
+    public function setHashAcesso(?string $hashAcesso): self
+    {
+        $this->hashAcesso = $hashAcesso;
         return $this;
     }
 }

@@ -25,7 +25,9 @@ class Codigo
             $codigoObj->setId($codigo["id"]);
             $codigoObj->setCaminho($codigo["caminho"]);
             $codigoObj->setDescricao($codigo["descricao"]);
-            $codigoObj->setCriadoEm($codigo["criado_em"]);
+            $codigoObj->setCriadoEm(isset($projeto["criado_em"])
+            ? new DateTimeImmutable($projeto["criado_em"])
+            : null);
             $CodigosObj[] = $codigoObj;
         }
         return $CodigosObj;

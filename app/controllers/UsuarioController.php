@@ -183,30 +183,124 @@ class UsuarioController extends Controller
                 $this->view("usuario/list");
             }
         } else {
+            
             $usuario = new Usuario();
             $usuario->setId($_SESSION["usuario_logado"]->getId());
             $data["usuario"] = $this->repositorySql->buscarId($usuario);
             $data["projetos"] = $this->projetoRepositorySql->buscarUsuario($data["usuario"]);
             $data["equipes"] = $this->equipeRepositorySql->buscarUsuario($data["usuario"]);
+
             $this->view("usuario/perfil", $data);
         }
-    }
-    public function excluir()
-    {
-        $this->loginRequired();
-        $usuario = new Usuario();
-        $usuario->setId($_POST["id"]);
-        $this->service->deletar($usuario);
-        (new AutenticacaoController)->logout();
     }
     public function desativar()
     {
         $this->loginRequired();
+
+        $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+        $justificativa = trim(filter_input(INPUT_POST, 'justificativa', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
+
+        if (!$id) {
+            $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/usuario');
+            return;
+        }
+
+        $usuarioLogado = $_SESSION["usuario_logado"];
+        $eAdmin = ($usuarioLogado->getRegra() === 'admin');
+
+        // Apenas o próprio usuário ou um administrador podem desativar a conta
+        if (!$eAdmin && $usuarioLogado->getId() !== $id) {
+            $this->redirect(URL_BASE . '/usuario/perfil');
+            return;
+        }
+
+        $usuario = new Usuario();
+        $usuario->setId($id);
+        $usuarioAlvo = $this->repositorySql->buscarId($usuario);
+
+        if ($usuarioAlvo) {
+            // Desativa no banco
+            $this->service->deletar($usuario);
+
+            // Envia e-mail de notificação com a justificativa
+            if (!empty($usuarioAlvo->getEmail())) {
+                $mailHelper = new \app\helpers\MailHelper();
+                $assunto = "[RoboDrive] Sua conta foi desativada";
+                $motivo = !empty($justificativa) ? nl2br(htmlspecialchars(html_entity_decode($justificativa))) : 'Sem justificativa detalhada.';
+
+                $mensagem = "
+                    <div style='font-family: Arial, sans-serif; background-color: #06141C; color: #F2FEFE; padding: 20px; border: 2px solid #07556A;'>
+                        <h2 style='color: #F2A058;'>RoboDrive - Aviso de Desativação de Conta</h2>
+                        <p>Olá, <strong>" . htmlspecialchars(html_entity_decode($usuarioAlvo->getNome())) . "</strong>,</p>
+                        <p>Informamos que sua conta na plataforma RoboDrive foi desativada pela administração pelo seguinte motivo:</p>
+                        <blockquote style='background-color: #000505; border-left: 4px solid #F2A058; padding: 12px; margin: 15px 0; color: #F2FEFE;'>
+                            {$motivo}
+                        </blockquote>
+                        <p>Caso discorde desta decisão ou queira solicitar revisão, responda a este e-mail.</p>
+                        <hr style='border: 0; border-top: 1px solid #07556A; margin: 20px 0;'>
+                        <p style='font-size: 12px; color: #91B5BD;'>Atenciosamente,<br><strong>Administração RoboDrive</strong></p>
+                    </div>
+                ";
+
+                $mailHelper->enviarEmail($usuarioAlvo->getEmail(), null, '', htmlspecialchars(html_entity_decode($assunto)), $mensagem);
+            }
+        }
+
+        // Se o próprio usuário desativou a si mesmo, encerra a sessão
+        if ($id === $usuarioLogado->getId()) {
+            (new AutenticacaoController())->logout();
+            return;
+        }
+
+        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/usuario');
+    }
+    public function ativar()
+    {
+        $this->loginRequired();
+        $this->adminRequired();
+
+        $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+        if ($id) {
+            $usuario = new Usuario();
+            $usuario->setId($id);
+            $this->service->ativar($usuario);
+        }
+
         $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/usuario');
     }
     public function comunicado()
     {
         $this->loginRequired();
-        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/usuario');
+        $this->adminRequired();
+
+        $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+        $mensagemTexto = trim(filter_input(INPUT_POST, 'mensagem', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
+
+        if ($id && !empty($mensagemTexto)) {
+            $usuario = new Usuario();
+            $usuario->setId($id);
+            $destinatario = $this->repositorySql->buscarId($usuario);
+
+            if ($destinatario && !empty($destinatario->getEmail())) {
+                $mailHelper = new \app\helpers\MailHelper();
+                $assunto = "[RoboDrive] Comunicado da administração";
+                $corpoHtml = "
+                    <div style='font-family: Arial, sans-serif; background-color: #06141C; color: #F2FEFE; padding: 24px; border: 2px solid #07556A;'>
+                        <h2 style='color: #13F3F7; font-size: 20px; margin-top: 0;'>RoboDrive - Comunicado</h2>
+                        <p>Olá, <strong>" . htmlspecialchars($destinatario->getNome()) . "</strong>,</p>
+                        <div style='background-color: #000505; border-left: 4px solid #13F3F7; padding: 14px; margin: 18px 0; color: #F2FEFE; line-height: 1.6;'>
+                            " . nl2br(htmlspecialchars($mensagemTexto)) . "
+                        </div>
+                        <hr style='border: 0; border-top: 1px solid #07556A; margin: 20px 0;'>
+                        <p style='font-size: 12px; color: #91B5BD; margin-bottom: 4px;'>Atenciosamente,<br><strong style='color: #F2FEFE;'>Administração RoboDrive</strong></p>
+                        <p style='font-size: 11px; color: #4E6B72;'>Este é um comunicado institucional da plataforma RoboDrive. Em caso de dúvidas, responda a este e-mail.</p>
+                    </div>
+                ";
+
+                $mailHelper->enviarEmail($destinatario->getEmail(), null, '', $assunto, $corpoHtml);
+            }
+        }
+
+        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/denuncia');
     }
 }

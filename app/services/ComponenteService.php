@@ -41,10 +41,9 @@ class ComponenteService
     {
         $this->repositorySql->associar($posts);
     }
-    public function buscarProjeto(int $id): array
+    public function buscarProjeto(int $id): array  
     {
-
-        return [];
+        return $this->repositorySql->buscarProjeto($id);
     }
     public function desativar()
     {

@@ -26,8 +26,8 @@ class Forum
             $forumObj->setId($forum["id"]??null);
             $forumObj->setConteudo($forum["conteudo"]??null);
             $forumObj->setVisibilidade($forum["visibilidade"]??null);
-            $forumObj->setUsuario((new Usuario)->setId($forum["usuario_id"]??null)->setNomeUsuario($forum["nome_usuario"]));
-            $forumObj->setEquipe(isset($forum["usuario_id"]) ? (new Equipe)->setId($forum["usuario_id"]??null)->setNome($forum["nome_equipe"]??null):null);
+            $forumObj->setUsuario((new Usuario)->setId($forum["usuario_id"]??null)->setNomeUsuario($forum["nome_usuario"]??null));
+            $forumObj->setEquipe(isset($forum["equipe_id"]) ? (new Equipe)->setId($forum["equipe_id"]??null):null);
             $forumObj->setCriadoEm(isset($forum["criado_em"])
                 ? new DateTimeImmutable($forum["criado_em"]??null)
                 : null);

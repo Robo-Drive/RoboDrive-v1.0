@@ -1,6 +1,6 @@
 <?php if(isset($usuario)):?>
     <a href="<?= URL_BASE ?>/usuario/perfil?id=<?= $usuario->getId() ?>" class="border border-[#00F5F5] p-4 w-[400px]">
         <h1><?= $usuario->getNome() ?></h1>
-        <p class="text-zinc-500"><?= $usuario->getTipo() ?></p>
+        <p class="text-zinc-500"><?= $usuario->getPapelProjeto() ?></p>
     </a>
 <?php endif;?>

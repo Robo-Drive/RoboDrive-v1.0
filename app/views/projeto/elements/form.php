@@ -38,6 +38,14 @@
                 <p class="rd-error"><?= $erros['descricao'] ?></p>
             <?php endif; ?>
         </div>
+
+        <?php if (isset($projeto)): ?>
+        <div class="rd-field mb-6">
+            <label for="descricao_alteracao" class="rd-label">Notas da Nova Versão (O que mudou?)</label>
+            <input type="text" id="descricao_alteracao" name="descricao_alteracao" placeholder="Ex: Substituído servo motor por motor de passo e ajustado script de calibração" class="rd-input">
+            <p class="mt-1 text-xs text-[#91B5BD]">Se você alterar componentes ou códigos, uma nova versão do projeto será criada automaticamente.</p>
+        </div>
+        <?php endif; ?>
     </fieldset>
 
     <fieldset class="min-w-0 space-y-6">
@@ -49,57 +57,89 @@
             </span>
         </legend>
 
+        <!-- Senha de Acesso do Projeto -->
+        <?php if (!isset($projeto)): ?>
+            <div class="rd-field">
+                <label for="senha" class="rd-label">Senha de Entrada no Projeto</label>
+                <input
+                    type="password"
+                    id="senha"
+                    name="senha"
+                    placeholder="Defina a senha para novos membros entrarem..."
+                    class="rd-input"
+                >
+                <p class="mt-1 text-xs text-[#91B5BD]">Esta senha será exigida junto ao Hash para novos membros solicitarem entrada.</p>
+                <?php if (isset($erros['senha'])): ?>
+                    <p class="rd-error"><?= $erros['senha'] ?></p>
+                <?php endif; ?>
+            </div>
+
+            <!-- Confirmar Senha do Projeto -->
+            <div class="rd-field">
+                <label for="confirmar_senha" class="rd-label">Confirmar Senha do Projeto</label>
+                <input
+                    type="password"
+                    id="confirmar_senha"
+                    name="confirmar_senha"
+                    placeholder="Repita a senha de acesso..."
+                    class="rd-input"
+                >
+                <?php if (isset($erros['confirmar_senha'])): ?>
+                    <p class="rd-error"><?= $erros['confirmar_senha'] ?></p>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
         <!-- Categoria -->
         <div class="rd-field divCategoria">
-            <label for="pesquisaCategoria" class="rd-label z-20">Categoria</label>
+            <?php
+                // Identifica o ID e o Nome da Categoria do projeto (se estiver editando)
+                $catIdSelecionada = '';
+                $catNomeSelecionado = '';
+                if (isset($projeto)) {
+                    if (is_object($projeto)) {
+                        $catIdSelecionada = $projeto->getCategoria()?->getId() ?? '';
+                        $catNomeSelecionado = $projeto->getCategoria()?->getNome() ?? '';
+                    } else {
+                        $catIdSelecionada = $projeto['categoria_id'] ?? $projeto['categoria'] ?? '';
+                    }
+                }
+                if (!empty($catIdSelecionada) && empty($catNomeSelecionado) && isset($categorias)) {
+                    foreach ($categorias as $c) {
+                        if ($c->getId() == $catIdSelecionada) {
+                            $catNomeSelecionado = $c->getNome();
+                            break;
+                        }
+                    }
+                }
+            ?>
 
-            <!-- Campo de pesquisa -->
+            <label for="pesquisaCategoria" class="rd-label z-25">Categoria</label>
+
+            <!-- Campo de pesquisa preenchido automaticamente com a categoria atual -->
             <div class="relative">
                 <input
                     type="text"
                     id="pesquisaCategoria"
                     placeholder="Pesquisar categoria..."
                     autocomplete="off"
+                    value="<?= htmlspecialchars(html_entity_decode($catNomeSelecionado)) ?>"
                     class="rd-input pr-11"
                 >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true" class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#91B5BD]"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
             </div>
 
-            <!-- Select real -->
-            <select
-                name="categoria"
-                id="categoria"
-                class="hidden"
-            >
+            <!-- Select real com a opção já 'selected' -->
+            <select name="categoria" id="categoria" class="hidden">
                 <option value="">Selecione</option>
-
                 <?php if(isset($categorias)): ?>
                     <?php foreach($categorias as $cat): ?>
-
-                        <option
-                            value="<?= $cat->getId() ?>"
-                            <?= isset($projeto)
-                                ? (
-                                    is_object($projeto)
-                                        ? ($projeto->getCategoria() == $cat->getId() ? "selected" : "")
-                                        : (
-                                            isset($projeto["categoria"])
-                                                ? ($projeto["categoria"] == $cat->getId() ? "selected" : "")
-                                                : ""
-                                        )
-                                )
-                                : ""
-                            ?>
-                        >
+                        <option value="<?= $cat->getId() ?>" <?= ($cat->getId() == $catIdSelecionada) ? 'selected' : '' ?>>
                             <?= $cat->getNome() ?>
                         </option>
-
                     <?php endforeach; ?>
                 <?php endif; ?>
-
-                <option value="criar">
-                    Criar categoria
-                </option>
+                <option value="criar">+ Criar categoria</option>
             </select>
 
             <!-- Lista pesquisável -->
@@ -107,11 +147,8 @@
                 id="listaCategorias"
                 class="hidden absolute z-50 mt-1 max-h-60 w-full overflow-y-auto border-[3px] border-[#07556A] bg-[#000505] shadow-[6px_6px_0_#07556A] [scrollbar-color:#07556A_transparent] [scrollbar-width:thin]"
             >
-
                 <?php if(isset($categorias)): ?>
-
                     <?php foreach($categorias as $cat): ?>
-
                         <div
                             class="categoria-option cursor-pointer border-b border-[#07556A]/60 px-4 py-3 text-sm text-[#F2FEFE] transition-colors duration-150 hover:bg-[#13F3F7]/10 hover:text-[#13F3F7]"
                             data-value="<?= $cat->getId() ?>"
@@ -119,11 +156,10 @@
                         >
                             <?= $cat->getNome() ?>
                         </div>
-
                     <?php endforeach; ?>
                 <?php else: ?>
                     <div class="px-4 py-3 text-gray-400">
-                        Nenhum componente cadastrado.
+                        Nenhuma categoria cadastrada.
                     </div>
                 <?php endif; ?>
 
@@ -135,12 +171,10 @@
                 >
                     + Criar categoria
                 </div>
-
             </div>
 
             <!-- Campo que aparece ao criar categoria -->
             <div id="novaCategoriaContainer" class="hidden mt-3 border-l-4 border-[#13F3F7] pl-3">
-
                 <input
                     type="text"
                     name="novaCategoria"
@@ -149,7 +183,6 @@
                     aria-label="Nome da nova categoria"
                     class="rd-input"
                 >
-
             </div>
 
             <?php if (isset($erros['categoria'])): ?>
@@ -157,50 +190,64 @@
                     <?= $erros['categoria'] ?>
                 </p>
             <?php endif; ?>
-
         </div>
 
         <!-- Visibilidade -->
-        <div class="rd-field">
+        <?php
+            $equipeIdVisibilidade = $_GET['equipe_id'] ?? null;
+
+            if (empty($equipeIdVisibilidade) && isset($projeto)) {
+                if (is_object($projeto)) {
+                    $equipeIdVisibilidade = $projeto->getEquipe()?->getId() ?? null;
+                } else {
+                    $equipeIdVisibilidade = $projeto['equipe_id'] ?? null;
+                }
+            }
+
+            $visibilidadeAtual = 'privado';
+
+            if (isset($projeto)) {
+                $visibilidadeAtual = is_object($projeto)
+                    ? $projeto->getVisibilidade()
+                    : ($projeto['visibilidade'] ?? 'privado');
+            }
+        ?>
+
+        <div class="rd-field mt-6">
             <label for="visibilidade" class="rd-label">Visibilidade</label>
+
             <select
                 id="visibilidade"
                 name="visibilidade"
                 aria-describedby="visibilidadeAjuda"
                 class="rd-select"
             >
-                <option
-                    value="privado"
-                    <?= isset($projeto)
-                        ? (is_object($projeto)
-                            ? ($projeto->getVisibilidade() == "privado" ? "selected" : "")
-                            : (isset($projeto["visibilidade"])
-                                ? ($projeto["visibilidade"] == "privado" ? "selected" : "")
-                                : ""))
-                        : "" ?>
-                >
+                <option value="privado" <?= $visibilidadeAtual === 'privado' ? 'selected' : '' ?>>
                     Privado
                 </option>
-
-                <option
-                    value="publico"
-                    <?= isset($projeto)
-                        ? (is_object($projeto)
-                            ? ($projeto->getVisibilidade() == "publico" ? "selected" : "")
-                            : (isset($projeto["visibilidade"])
-                                ? ($projeto["visibilidade"] == "publico" ? "selected" : "")
-                                : ""))
-                        : "" ?>
-                >
+                <option value="publico" <?= $visibilidadeAtual === 'publico' ? 'selected' : '' ?>>
                     Público
                 </option>
+                <?php if (!empty($equipeIdVisibilidade)): ?>
+                    <option value="equipe" <?= $visibilidadeAtual === 'equipe' ? 'selected' : '' ?>>
+                        Visível para equipe
+                    </option>
+                <?php endif; ?>
             </select>
-            <p id="visibilidadeAjuda" class="mt-2 text-xs text-[#91B5BD]">Privado: só o time do projeto vê. Público: todos os usuários da plataforma.</p>
+
+            <p id="visibilidadeAjuda" class="mt-2 text-xs text-[#91B5BD]">
+                Privado: somente os responsáveis pelo projeto podem visualizar.
+                Público: todos os usuários da plataforma.
+                <?php if (!empty($equipeIdVisibilidade)): ?>
+                    Visível para equipe: somente os integrantes da equipe vinculada.
+                <?php endif; ?>
+            </p>
 
             <?php if (isset($erros['visibilidade'])): ?>
                 <p class="rd-error"><?= $erros['visibilidade'] ?></p>
             <?php endif; ?>
         </div>
+
     </fieldset>
 
     <fieldset class="min-w-0 space-y-6">
@@ -258,13 +305,25 @@
                             Nenhum componente cadastrado.
                         </div>
                     <?php endif; ?>
-
                 </div>
-                <!-- Componentes selecionados (itens criados por componente.js, estilizados a partir deste container) -->
-                <div
-                    id="componentesSelecionados"
-                    class="border-t-2 border-[#07556A] [counter-reset:componente] empty:before:block empty:before:px-4 empty:before:py-4 empty:before:text-center empty:before:text-xs empty:before:uppercase empty:before:tracking-[.12em] empty:before:text-[#91B5BD] empty:before:content-['Nenhum_componente_selecionado'] [&:not(:empty)]:before:block [&:not(:empty)]:before:bg-[#082B3A] [&:not(:empty)]:before:px-4 [&:not(:empty)]:before:py-2 [&:not(:empty)]:before:text-[.6rem] [&:not(:empty)]:before:font-bold [&:not(:empty)]:before:uppercase [&:not(:empty)]:before:tracking-[.2em] [&:not(:empty)]:before:text-[#91B5BD] [&:not(:empty)]:before:content-['Selecionados'] [&>.componente-selecionado]:flex-wrap [&>.componente-selecionado]:gap-x-3 [&>.componente-selecionado]:gap-y-1 max-[359px]:[&>.componente-selecionado]:gap-x-2 max-[359px]:[&_label]:tracking-normal sm:[&>.componente-selecionado]:flex-nowrap [&>.componente-selecionado>.flex-1]:basis-[calc(100%-2.25rem)] sm:[&>.componente-selecionado>.flex-1]:basis-0 [&>.componente-selecionado>div:nth-of-type(2)]:ml-auto sm:[&>.componente-selecionado>div:nth-of-type(2)]:ml-0 [&>.componente-selecionado]:border-x-0 [&>.componente-selecionado]:border-b-0 [&>.componente-selecionado]:border-t [&>.componente-selecionado]:border-[#07556A]/60 [&>.componente-selecionado]:bg-transparent [&>.componente-selecionado]:px-4 [&>.componente-selecionado]:py-2 [&>.componente-selecionado]:[counter-increment:componente] [&>.componente-selecionado]:before:font-['Orbitron'] [&>.componente-selecionado]:before:text-xs [&>.componente-selecionado]:before:font-black [&>.componente-selecionado]:before:text-[#13F3F7] [&>.componente-selecionado]:before:content-[counter(componente,decimal-leading-zero)] [&_.flex-1]:min-w-0 [&_.flex-1_span]:block [&_.flex-1_span]:truncate [&_.flex-1_span]:text-sm [&_.flex-1_span]:text-[#F2FEFE] [&_label]:text-[.6rem] [&_label]:font-bold [&_label]:uppercase [&_label]:tracking-[.15em] [&_label]:text-[#91B5BD] [&_input]:h-9 [&_input]:w-16 [&_input]:border-2 [&_input]:border-[#07556A] [&_input]:bg-[#06141C] [&_input]:font-bold [&_input]:text-[#F2FEFE] [&_input:focus]:border-[#13F3F7] [&_.remover-componente]:flex [&_.remover-componente]:h-9 [&_.remover-componente]:w-9 [&_.remover-componente]:items-center [&_.remover-componente]:justify-center [&_.remover-componente]:border-2 [&_.remover-componente]:border-transparent [&_.remover-componente]:px-0 [&_.remover-componente]:text-2xl [&_.remover-componente]:leading-none [&_.remover-componente]:text-[#91B5BD] [&_.remover-componente]:transition-colors [&_.remover-componente:hover]:border-[#F2A058] [&_.remover-componente:hover]:text-[#F2A058]"
-                ></div>
+
+                <!-- Componentes selecionados -->
+                <div id="componentesSelecionados" class="border-t-2 border-[#07556A] p-2 space-y-2">
+                    <?php if (!empty($componentesAtuais)): ?>
+                        <?php foreach ($componentesAtuais as $comp): ?>
+                            <div class="componente-selecionado flex items-center gap-3 bg-black/80 border border-white/20 p-3" data-id="<?= $comp->getId() ?>">
+                                <div class="flex-1">
+                                    <span class="text-white font-bold"><?= htmlspecialchars(html_entity_decode($comp->getNome())) ?></span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <label class="text-gray-400 text-sm">Quantidade</label>
+                                    <input type="number" name="componentes[<?= $comp->getId() ?>][quantidade]" value="<?= $comp->getQuantidade() ?>" class="w-20 h-9 bg-black border border-white px-2 text-white text-center outline-none focus:border-[#00F5F5]">
+                                </div>
+                                <button type="button" class="remover-componente text-red-400 hover:text-red-300 px-2 text-xl" data-id="<?= $comp->getId() ?>" title="Remover componente">×</button>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
             </div>
             <?php if (isset($erros["componentes"])): ?>
                 <p class="rd-error">
@@ -283,29 +342,124 @@
             </span>
         </legend>
 
+        <?php if (!empty($codigosAtuais)): ?>
+        <div class="mb-4">
+            <p class="text-xs font-bold text-[#13F3F7] uppercase tracking-wider mb-2 font-['Orbitron']">
+                Arquivos da versão <?= !empty($versaoAtual) ? 'v' . $versaoAtual['versao'] : 'atual' ?> (desmarque para retirar da nova versão):
+            </p>
+            <ul class="space-y-2">
+                <?php foreach ($codigosAtuais as $cod): ?>
+                    <li class="flex items-center justify-between border-2 border-[#07556A] bg-[#06141C] p-3 text-xs">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" name="codigos_manter[]" value="<?= $cod->getId() ?>" checked class="accent-[#13F3F7] h-4 w-4">
+                            <div>
+                                <span class="font-mono font-bold text-[#F2FEFE]"><?= htmlspecialchars(html_entity_decode(basename($cod->getCaminho()))) ?></span>
+                                <span class="block text-[.65rem] text-[#91B5BD]"><?= htmlspecialchars(html_entity_decode($cod->getDescricao() ?? 'Sem descrição')) ?></span>
+                            </div>
+                        </label>
+                        <span class="text-[.6rem] text-[#4E6B72] uppercase font-mono">Manter na versão</span>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+        <?php endif; ?>
+
         <!-- Arquivos de código -->
         <div class="rd-field">
             <label for="codigos" class="rd-label">Arquivos de código</label>
-            <button type="button" onclick="adicionarArquivos()" class="group flex w-full items-center gap-4 border-2 border-[#07556A] bg-[#000505] px-4 py-3 text-left transition-colors duration-200 hover:border-[#13F3F7] focus-visible:border-[#13F3F7] focus-visible:outline-none">
+
+            <button
+                type="button"
+                onclick="adicionarArquivos()"
+                class="group flex w-full items-center gap-4 border-2 border-[#07556A] bg-[#000505] px-4 py-3 text-left transition-colors duration-200 hover:border-[#13F3F7] focus-visible:border-[#13F3F7] focus-visible:outline-none"
+            >
                 <span class="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-[#07556A] text-[#13F3F7] transition-colors duration-200 group-hover:border-[#13F3F7]">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true" class="h-5 w-5"><path d="m8 7-5 5 5 5"/><path d="m16 7 5 5-5 5"/><path d="m14 4-4 16"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true" class="h-5 w-5">
+                        <path d="m8 7-5 5 5 5"/>
+                        <path d="m16 7 5 5-5 5"/>
+                        <path d="m14 4-4 16"/>
+                    </svg>
                 </span>
+
                 <span class="flex min-w-0 flex-1 flex-col">
-                    <span class="text-xs font-black uppercase tracking-[.08em] text-[#F2FEFE]">Adicionar arquivos</span>
-                    <span class="text-xs leading-snug text-[#91B5BD]">.ino, .py, .cpp, .c, .h, .java, .js...</span>
+                    <span class="text-xs font-black uppercase tracking-[.08em] text-[#F2FEFE]">
+                        Adicionar arquivos
+                    </span>
+                    <span class="text-xs leading-snug text-[#91B5BD]">
+                        .ino, .py, .cpp, .c, .h, .java, .js...
+                    </span>
                 </span>
-                <span class="text-2xl font-light leading-none text-[#13F3F7]" aria-hidden="true">+</span>
+
+                <span class="text-2xl font-light leading-none text-[#13F3F7]" aria-hidden="true">
+                    +
+                </span>
             </button>
 
-            <input type="file" name="codigos[]" id="codigos" style="display:none;" multiple>
+            <input
+                type="file"
+                name="codigos[]"
+                id="codigos"
+                style="display:none;"
+                multiple
+            >
 
-            <!-- Itens criados por inputFiles.js, estilizados a partir desta lista -->
-            <ul id="listaCodigos" class="mt-3 flex flex-col gap-2 empty:hidden [&>li]:gap-3 [&>li]:border-2 [&>li]:border-[#07556A] [&>li]:bg-[#06141C] [&>li]:p-3 [&>li:hover]:border-[#13F3F7] [&>li>div]:gap-3 [&>li>div>span]:min-w-0 [&>li>div>span]:text-[#F2FEFE] [&>li>div>span]:before:mr-2 [&>li>div>span]:before:font-black [&>li>div>span]:before:text-[#13F3F7] [&>li>div>span]:before:content-['#'] [&>li>div>button]:flex [&>li>div>button]:h-8 [&>li>div>button]:w-8 [&>li>div>button]:shrink-0 [&>li>div>button]:items-center [&>li>div>button]:justify-center [&>li>div>button]:border-2 [&>li>div>button]:border-transparent [&>li>div>button]:transition-colors [&>li>div>button:hover]:border-[#F2A058] [&>li>div>button_img]:h-4 [&>li>div>button_img]:w-4 [&>li>input]:h-10 [&>li>input]:border-2 [&>li>input]:border-[#07556A] [&>li>input]:bg-[#000505] [&>li>input]:text-[#F2FEFE] [&>li>input]:placeholder:text-[#4E6B72] [&>li>input:focus]:border-[#13F3F7]"></ul>
+            <ul id="listaCodigos" class="mt-3 flex flex-col gap-2 empty:hidden"></ul>
 
-            <?php if (isset($erros['codigo'])): ?>
-                <p class="rd-error"><?= $erros['codigo'] ?></p>
+            <?php if (isset($erros['codigos'])): ?>
+                <p class="rd-error">
+                    <?= htmlspecialchars(html_entity_decode($erros['codigos'])) ?>
+                </p>
+            <?php endif; ?>
+
+            <?php if (isset($erros['codigos_descricao'])): ?>
+                <p class="rd-error">
+                    <?= htmlspecialchars(html_entity_decode($erros['codigos_descricao'])) ?>
+                </p>
             <?php endif; ?>
         </div>
+        
+        <!-- FOTOS ATUAIS DO PROJETO -->
+        <?php if (!empty($imagensAtuais)): ?>
+            <div class="mb-4">
+                <p class="text-xs font-bold text-[#13F3F7] uppercase tracking-wider mb-2 font-['Orbitron']">
+                    Fotos atuais do projeto (desmarque para retirar):
+                </p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    <?php foreach ($imagensAtuais as $img): ?>
+                        <div class="relative border-2 border-[#07556A] bg-[#06141C] p-2 flex flex-col justify-between group hover:border-[#13F3F7] transition">
+                            <a 
+                                href="<?= URL_BASE ?>/arquivo?arquivo=<?= urlencode($img->getCaminho()) ?>" 
+                                target="_blank" 
+                                title="Clique para abrir imagem em tamanho real" 
+                                class="block aspect-square overflow-hidden bg-black mb-2 relative"
+                            >
+                                <img 
+                                    src="<?= URL_BASE ?>/arquivo?arquivo=<?= urlencode($img->getCaminho()) ?>" 
+                                    alt="Foto do projeto" 
+                                    class="w-full h-full object-cover group-hover:scale-105 transition duration-200"
+                                >
+                                <span class="absolute bottom-1 right-1 bg-black/80 text-[.6rem] text-[#13F3F7] px-1.5 py-0.5 border border-[#07556A]">
+                                    🔍 Ver
+                                </span>
+                            </a>
+
+                            <label class="flex items-center gap-2 cursor-pointer bg-[#000505] p-1.5 border border-[#07556A] text-xs">
+                                <input 
+                                    type="checkbox" 
+                                    name="imagens_manter[]" 
+                                    value="<?= $img->getId() ?>" 
+                                    checked 
+                                    class="accent-[#13F3F7] h-4 w-4"
+                                >
+                                <span class="text-[.65rem] text-[#F2FEFE] font-bold uppercase select-none">
+                                    Manter foto
+                                </span>
+                            </label>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endif; ?>
 
         <!-- Imagens -->
         <div class="rd-field">
@@ -334,8 +488,7 @@
                 multiple
             >
 
-            <!-- Itens criados por images.js, estilizados a partir desta lista -->
-            <ul id="listaImagens" class="mt-3 grid grid-cols-2 gap-3 empty:hidden sm:grid-cols-3 [&>li]:relative [&>li]:flex-col [&>li]:items-stretch [&>li]:justify-start [&>li]:border-2 [&>li]:border-[#07556A] [&>li]:bg-[#06141C] [&>li]:p-0 [&>li:hover]:border-[#13F3F7] [&>li>div]:min-w-0 [&>li>div]:flex-col [&>li>div]:items-stretch [&>li>div]:gap-0 [&>li>div>img]:aspect-square [&>li>div>img]:h-auto [&>li>div>img]:w-full [&>li>div>img]:rounded-none [&>li>div>img]:border-0 [&>li>div>img]:border-b-2 [&>li>div>img]:border-[#07556A] [&>li>div>div]:min-w-0 [&>li>div>div]:px-2.5 [&>li>div>div]:py-2 [&>li>div>div>p:first-child]:truncate [&>li>div>div>p:first-child]:text-xs [&>li>div>div>p:first-child]:text-[#F2FEFE] [&>li>div>div>p:last-child]:text-[.6rem] [&>li>div>div>p:last-child]:font-bold [&>li>div>div>p:last-child]:uppercase [&>li>div>div>p:last-child]:tracking-[.12em] [&>li>div>div>p:last-child]:text-[#91B5BD] [&>li>button]:absolute [&>li>button]:right-1.5 [&>li>button]:top-1.5 [&>li>button]:flex [&>li>button]:h-8 [&>li>button]:w-8 [&>li>button]:items-center [&>li>button]:justify-center [&>li>button]:border-2 [&>li>button]:border-[#07556A] [&>li>button]:bg-[#000505]/85 [&>li>button]:transition-colors [&>li>button:hover]:border-[#F2A058] [&>li>button_img]:h-4 [&>li>button_img]:w-4"></ul>
+            <ul id="listaImagens" class="mt-3 grid grid-cols-2 gap-3 empty:hidden sm:grid-cols-3"></ul>
 
             <?php if (isset($erros['imagens'])): ?>
                 <p class="rd-error"><?= $erros['imagens'] ?></p>
@@ -356,6 +509,18 @@
                         : (isset($projeto['id']) ? $projeto['id'] : ''))
                     : '') ?>"
         >
+    <?php endif; ?>
+
+    <?php 
+        $equipeIdHidden = $_GET['equipe_id'] ?? null;
+        if (empty($equipeIdHidden) && isset($projeto)) {
+            $equipeIdHidden = is_object($projeto) 
+                ? $projeto->getEquipe()?->getId() 
+                : ($projeto['equipe_id'] ?? null);
+        }
+    ?>
+    <?php if (!empty($equipeIdHidden)): ?>
+        <input type="hidden" name="equipe_id" value="<?= htmlspecialchars($equipeIdHidden) ?>">
     <?php endif; ?>
 
 </div>

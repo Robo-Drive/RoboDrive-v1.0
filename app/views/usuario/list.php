@@ -52,9 +52,16 @@ include_once(__DIR__."/../elements/header.php");
                                     <form action="<?= URL_BASE ?>/usuario/perfil" method="get"><input type="hidden" name="id" value="<?= $u->getId() ?>"><button type="submit" class="rd-btn rd-btn-ghost rd-btn-sm">Ver</button></form>
                                     <?php if($adminLogado): ?>
                                         <form action="<?= URL_BASE ?>/usuario/editar" method="post"><input type="hidden" name="id" value="<?= $u->getId() ?>"><button type="submit" class="rd-btn rd-btn-secondary rd-btn-sm">Editar</button></form>
-                                        <?php if(!$proprioUsuario): ?>
+                                                                                <?php if(!$proprioUsuario): ?>
+                                        <?php if($u->isStatus() === false): ?>
+                                            <form action="<?= URL_BASE ?>/usuario/ativar" method="post" onsubmit="return confirm('Deseja realmente reativar a conta deste usuário?');">
+                                                <input type="hidden" name="id" value="<?= $u->getId() ?>">
+                                                <button type="submit" class="rd-btn rd-btn-primary rd-btn-sm !bg-emerald-600 hover:!bg-emerald-500 !text-black font-bold">Ativar</button>
+                                            </form>
+                                        <?php else: ?>
                                             <button type="button" class="rd-btn rd-btn-danger rd-btn-sm" data-desativar data-tipo="usuario" data-id="<?= $u->getId() ?>" data-nome="<?= $u->getNome() ?> (@<?= $u->getNomeUsuario() ?>)" data-responsavel="<?= $u->getNome() ?>">Desativar</button>
                                         <?php endif; ?>
+                                    <?php endif; ?>
                                     <?php endif; ?>
                                 </div>
                             </td>

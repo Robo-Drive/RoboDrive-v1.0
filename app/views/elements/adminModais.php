@@ -2,7 +2,7 @@
 
 <dialog id="modalComunicado" aria-labelledby="modalComunicadoTitulo" class="rd-scroll-hidden m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto border-[3px] border-[#07556A] bg-[#06141C] p-0 text-[#F2FEFE] shadow-[8px_8px_0_#07556A] backdrop:bg-[#000505]/85">
     <div class="h-[3px] w-full bg-[#13F3F7]"></div>
-    <form action="<?= URL_BASE ?>/usuario/comunicado" method="post" class="flex flex-col">
+    <form action="<?= URL_BASE ?>/usuario/comunicado" autocomplete="off" method="post" class="flex flex-col">
         <input type="hidden" name="id" data-campo="id">
 
         <div class="flex items-start justify-between gap-4 border-b-[3px] border-[#07556A] p-5 sm:p-6">
@@ -51,7 +51,7 @@
 
 <dialog id="modalDesativar" aria-labelledby="modalDesativarTitulo" class="rd-scroll-hidden m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto border-[3px] border-[#07556A] bg-[#06141C] p-0 text-[#F2FEFE] shadow-[8px_8px_0_#07556A] backdrop:bg-[#000505]/85">
     <div class="h-[3px] w-full bg-[#F2A058]"></div>
-    <form method="post" data-rota-base="<?= URL_BASE ?>" class="flex flex-col">
+    <form method="post" autocomplete="off" data-rota-base="<?= URL_BASE ?>" class="flex flex-col">
         <input type="hidden" name="id" data-campo="id">
 
         <div class="flex items-start justify-between gap-4 border-b-[3px] border-[#07556A] p-5 sm:p-6">
@@ -77,7 +77,7 @@
 
             <div class="rd-field">
                 <label for="desativarJustificativa" class="rd-label">Justificativa</label>
-                <textarea id="desativarJustificativa" name="justificativa" rows="5" required minlength="10" maxlength="2000" data-contar data-preview="desativarPreview" placeholder="Explique o motivo da desativação de forma clara, para que o usuário entenda o que ocorreu..." class="rd-textarea"></textarea>
+                <textarea id="desativarJustificativa" name="justificativa" rows="5" data-contar data-preview="desativarPreview" placeholder="Explique o motivo da desativação de forma clara, para que o usuário entenda o que ocorreu..." class="rd-textarea"></textarea>
                 <p class="mt-2 text-right text-[.65rem] font-bold tracking-[.1em] text-[#4E6B72]"><span data-contador>0</span>/2000</p>
             </div>
 

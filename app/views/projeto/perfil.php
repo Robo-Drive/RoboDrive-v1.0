@@ -8,6 +8,7 @@ include_once(__DIR__."/../elements/header.php");
     <?php include_once(__DIR__."/../elements/sidebar.php") ?>
     <?php include_once(__DIR__."/elements/card.php")?>
 </div>
+
 <?php
 include_once(__DIR__."/../elements/adminModais.php");
 include_once(__DIR__."/../elements/denunciaModal.php");

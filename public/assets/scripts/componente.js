@@ -35,6 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
         listaComponentes.classList.remove('hidden');
 
     });
+    pesquisaComponente.addEventListener('click', () => {
+
+        listaComponentes.classList.remove('hidden');
+    
+    });
 
 
     /*
@@ -148,8 +153,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     type="number"
                     name="componentes[${id}][quantidade]"
                     value="1"
-                    min="1"
-                    required
                     class="w-20 h-9 bg-black border border-white px-2 text-white text-center outline-none focus:border-[#00F5F5]"
                 >
 

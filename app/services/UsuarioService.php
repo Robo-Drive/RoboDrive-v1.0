@@ -14,6 +14,10 @@ class UsuarioService
     {
         $this->repositorySql = new UsuarioRepositorySql;
     }
+    public function ativar(Usuario $usuario): void
+    {
+        $this->repositorySql->ativar($usuario);
+    }
     public function salvarUsuario(Usuario $usuario): bool | array
     {
         $mensages = array();

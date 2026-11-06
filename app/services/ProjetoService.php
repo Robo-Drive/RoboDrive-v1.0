@@ -9,10 +9,7 @@ use Exception;
 
 class ProjetoService
 {
-
-    
     private ProjetoRepositorySql $repositorySql;
-
     
     public function __construct()
     {
@@ -21,26 +18,25 @@ class ProjetoService
     }
     public function salvarProjeto(array $posts): array
     {
+        $nome = trim($posts['nome'] ?? '');
+
+        if ($this->repositorySql->existeNome($nome))
+        {
+            throw new Exception('Já existe um projeto com esse nome.');
+        }
+        $posts['nome'] = $nome;
         $projeto = Projeto::map([$posts])[0];
-        
-        //print "<pre>";
-        //print_r($projeto);
-        //print "</pre>";
-        
-        $projetos = $this->repositorySql->cadastrar($projeto);
-        
-        return $projetos;
+        return $this->repositorySql->cadastrar($projeto);
     }
     public function editarProjeto(Projeto $projeto):bool
     {
-        try
+        $nome = $projeto->getNome();
+        $id = $projeto->getId();
+        if ($this->repositorySql->existeNome($nome,$id))
         {
-            $this->repositorySql->editar($projeto);
+            throw new Exception('Já existe um projeto com esse nome.');
         }
-        catch(Exception $e)
-        {
-            return false;
-        }
+        $this->repositorySql->editar($projeto);
         return true;
     }
 }

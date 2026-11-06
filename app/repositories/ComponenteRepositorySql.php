@@ -74,19 +74,43 @@ class ComponenteRepositorySql implements ComponenteRepositoryInterface
 
         return null;
     }
-    public function associar(array $posts)
+    public function associar(array $posts): void
     {
-        $sql = "INSERT INTO projeto_versao_componente(quantidade, componente_id, projeto_versao_id)
-                VALUES(:quantidade, :componente_id, :projeto_versao_id)";
+        $sqlVerificar = "SELECT COUNT(*)
+                        FROM projeto_versao_componente
+                        WHERE componente_id = :componente_id
+                        AND projeto_versao_id = :projeto_versao_id";
 
-        $stmt = $this->connection->prepare($sql);
-        
-        foreach ($posts["componentes"] as $componente)
+        $stmtVerificar = $this->connection->prepare($sqlVerificar);
+
+        $sqlInserir = "INSERT INTO projeto_versao_componente
+                        (quantidade, componente_id, projeto_versao_id)
+                    VALUES
+                        (:quantidade, :componente_id, :projeto_versao_id)";
+
+        $stmtInserir = $this->connection->prepare($sqlInserir);
+
+        foreach ($posts['componentes'] as $componente)
         {
-            $stmt->execute([
+            $componenteId = $componente->getId();
+            $projetoVersaoId = $posts['projeto']->getId();
+
+            $stmtVerificar->execute([
+                ':componente_id' => $componenteId,
+                ':projeto_versao_id' => $projetoVersaoId
+            ]);
+
+            $existe =  $stmtVerificar->fetchColumn() > 0;
+
+            if ($existe)
+            {
+                continue;
+            }
+
+            $stmtInserir->execute([
                 ':quantidade' => $componente->getQuantidade(),
-                ':componente_id' => $componente->getId(),
-                ':projeto_versao_id' => $posts["projeto"]->getId()
+                ':componente_id' => $componenteId,
+                ':projeto_versao_id' => $projetoVersaoId
             ]);
         }
     }
@@ -111,11 +135,11 @@ class ComponenteRepositorySql implements ComponenteRepositoryInterface
     }
     public function buscarProjeto(int $projetoId): array
     {
-        $sql = "SELECT c.*,pc.quantidade
-                FROM componente c
-                JOIN projeto_versao_componente pc 
-                ON pc.componente_id = c.id
-                WHERE pc.projeto_versao_id = :id";
+        $sql = "SELECT c.*, pc.quantidade
+        FROM componente c
+        JOIN projeto_versao_componente pc ON pc.componente_id = c.id
+        JOIN projeto_versao pv ON pv.id = pc.projeto_versao_id
+        WHERE pv.projeto_id = :id AND c.status = true";
 
         $stmt = $this->connection->prepare($sql);
 
@@ -134,7 +158,7 @@ class ComponenteRepositorySql implements ComponenteRepositoryInterface
         $stmt->execute();
         return Componente::map($stmt->fetchAll());
     }
-    public function deletar(Componente $componente): bool
+    public function desativar(Componente $componente): bool
     {
         $sql = "UPDATE componente
                 SET 
@@ -145,5 +169,16 @@ class ComponenteRepositorySql implements ComponenteRepositoryInterface
         $stmt->execute();
         return true;
     }
-    
+    public function buscarPorVersao(int $projetoVersaoId): array
+    {
+        $sql = "SELECT c.*, pvc.quantidade
+                FROM componente c
+                JOIN projeto_versao_componente pvc ON pvc.componente_id = c.id
+                WHERE pvc.projeto_versao_id = :versao_id AND c.status = true";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':versao_id', $projetoVersaoId, \PDO::PARAM_INT);
+        $stmt->execute();
+        return \app\models\Componente::map($stmt->fetchAll());
+    }
 }
