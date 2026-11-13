@@ -1,26 +1,28 @@
 document.addEventListener('DOMContentLoaded', () =>
 {
-    // Seleciona tanto o formulário de cadastro quanto o de atualização.
-    const form = document.querySelector(
-        'form[action*="/projeto/salvar"], form[action*="/projeto/atualizar"]'
-    );
+    const form = document.querySelector('form[action*="/projeto/"]');
 
-    if (!form) return;
-
-    const btnSubmit = form.querySelector('button[type="submit"]');
-
-    if (!btnSubmit) return;
+    if (!form)
+    {
+        return;
+    }
 
     form.addEventListener('submit', async (e) =>
     {
         e.preventDefault();
 
+        // Limpa erros anteriores da tela.
         limparErros();
 
-        const textoOriginal = btnSubmit.innerHTML;
+        // Botão de envio (desativa para evitar cliques duplos).
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const textoOriginal = submitBtn ? submitBtn.innerText : 'Enviar';
 
-        btnSubmit.disabled = true;
-        btnSubmit.innerHTML = 'Enviando...';
+        if (submitBtn)
+        {
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Processando...';
+        }
 
         try
         {
@@ -39,9 +41,6 @@ document.addEventListener('DOMContentLoaded', () =>
             // Lê a resposta do servidor.
             const data = await response.json();
 
-            console.log('Status HTTP:', response.status);
-            console.log('Resposta do servidor:', data);
-
             // Cadastro ou atualização concluídos.
             if (response.ok && data.sucesso === true)
             {
@@ -51,92 +50,107 @@ document.addEventListener('DOMContentLoaded', () =>
                     return;
                 }
 
-                console.error(
-                    'URL de redirecionamento não informada:',
-                    data
-                );
-
-                alert(
-                    data.mensagem ||
-                    'Operação concluída, mas a URL de redirecionamento não foi informada.'
-                );
-
+                alert(data.mensagem || 'Operação realizada com sucesso!');
+                window.location.reload();
                 return;
             }
 
-            // Exibe erros de validação nos respectivos campos.
-            if (data.erros)
+            // Erros de validação (HTTP 422).
+            if (response.status === 422 && data.erros)
             {
                 exibirErros(data.erros);
+                rolarParaPrimeiroErro();
+                return;
             }
-            else if (data.mensagem)
+
+            // Outros erros HTTP (403, 404, 500 etc).
+            if (data.mensagem)
             {
-                alert(data.mensagem);
+                exibirMensagemGeral(data.mensagem);
             }
             else
             {
-                alert('Não foi possível concluir a operação.');
+                exibirMensagemGeral(
+                    'Ocorreu um erro inesperado. Tente novamente.'
+                );
             }
         }
         catch (error)
         {
-            console.error('Erro na requisição AJAX:', error);
+            console.error('Erro na requisição Ajax:', error);
 
-            alert(
-                'Ocorreu uma falha na comunicação com o servidor. ' +
-                'Verifique o console para mais detalhes.'
+            exibirMensagemGeral(
+                'Falha na comunicação com o servidor. Verifique sua conexão.'
             );
         }
         finally
         {
-            // Restaura o botão se a página continuar aberta.
-            btnSubmit.disabled = false;
-            btnSubmit.innerHTML = textoOriginal;
+            // Restaura o botão de envio.
+            if (submitBtn)
+            {
+                submitBtn.disabled = false;
+                submitBtn.innerText = textoOriginal;
+            }
         }
     });
 
+    /*
+     * Remove mensagens e estilos de erro anteriores.
+     */
+    function limparErros()
+    {
+        document.querySelectorAll('.rd-error-ajax').forEach(el => el.remove());
 
-    /**
-     * Renderiza os erros abaixo dos respectivos campos.
+        document.querySelectorAll('.border-red-500').forEach(el =>
+        {
+            el.classList.remove('border-red-500');
+        });
+
+        const alertGeral = document.getElementById('alertaGeralAjax');
+
+        if (alertGeral)
+        {
+            alertGeral.remove();
+        }
+    }
+
+    /*
+     * Exibe os erros retornados pela API nos campos correspondentes.
      */
     function exibirErros(erros)
     {
         for (const [campo, mensagem] of Object.entries(erros))
         {
-            let inputElement = document.getElementById(campo);
+            let inputElement =
+                document.getElementById(campo) ||
+                document.querySelector(`[name="${campo}"]`);
 
-            // Mapeamento dos campos especiais.
-            if (campo === 'categoria')
+            // Mapeamentos para campos com seletores especiais ou arrays
+            if (campo === 'novaCategoria')
             {
-                inputElement = document.getElementById('pesquisaCategoria');
-            }
-            else if (campo === 'novaCategoria')
-            {
-                inputElement = document.getElementById('novaCategoria');
-
-                document.getElementById('novaCategoriaContainer')
-                    ?.classList.remove('hidden');
+                inputElement =
+                    document.getElementById('novaCategoria') ||
+                    document.getElementById('categoria');
             }
             else if (campo === 'componentes')
             {
                 inputElement = document.getElementById('multiSelectComponente');
             }
-            else if (campo === 'codigos')
-            {
-                inputElement = document.getElementById('listaCodigos');
-            }
-            else if (campo === 'codigos_descricao')
+            else if (campo === 'codigos' || campo === 'codigos_descricao')
             {
                 inputElement = document.getElementById('listaCodigos');
             }
             else if (campo.startsWith('codigos_descricao_'))
             {
-                inputElement = document.getElementById(campo);
-
-                if (!inputElement)
-                {
-                    inputElement = document.getElementById('listaCodigos');
-                }
+                inputElement = document.getElementById(campo) || document.getElementById('listaCodigos');
+            }
+            else if (campo === 'extras' || campo === 'extras_descricao')
+            {
+                inputElement = document.getElementById('listaExtras');
+            }
+            else if (campo.startsWith('extras_descricao_'))
+            {
+                inputElement = document.getElementById(campo) || document.getElementById('listaExtras');
             }
             else if (campo === 'imagens')
             {
@@ -145,10 +159,7 @@ document.addEventListener('DOMContentLoaded', () =>
 
             if (!inputElement)
             {
-                console.warn(
-                    `Campo não encontrado para o erro: ${campo}`
-                );
-
+                console.warn(`Campo não encontrado para o erro: ${campo}`);
                 continue;
             }
 
@@ -158,37 +169,64 @@ document.addEventListener('DOMContentLoaded', () =>
 
             if (!containerField)
             {
-                console.warn(
-                    `Container não encontrado para o campo: ${campo}`
-                );
-
                 continue;
             }
 
-            // Cria a mensagem de erro.
-            const pErro = document.createElement('p');
+            // Destaca o elemento com borda vermelha
+            inputElement.classList.add('border-red-500');
 
-            pErro.className =
-                'rd-error text-red-400 text-xs mt-1 transition-all';
+            // Cria e insere o texto do erro
+            const errorElement = document.createElement('p');
+            errorElement.className = 'rd-error rd-error-ajax mt-1 text-xs text-red-400 font-bold';
+            errorElement.textContent = mensagem;
 
-            pErro.dataset.ajaxErro = 'true';
-
-            pErro.textContent = Array.isArray(mensagem)
-                ? mensagem.join(', ')
-                : mensagem;
-
-            containerField.appendChild(pErro);
+            // Se for a descrição do código ou extra, insere logo abaixo do input
+            if (campo.startsWith('codigos_descricao_') || campo.startsWith('extras_descricao_'))
+            {
+                inputElement.insertAdjacentElement('afterend', errorElement);
+            }
+            else
+            {
+                containerField.appendChild(errorElement);
+            }
         }
     }
 
-
-    /**
-     * Remove as mensagens de erro anteriores do AJAX.
+    /*
+     * Rola suavemente a página até o primeiro campo com erro.
      */
-    function limparErros()
+    function rolarParaPrimeiroErro()
     {
-        document
-            .querySelectorAll('[data-ajax-erro="true"]')
-            .forEach((el) => el.remove());
+        const primeiroErro = document.querySelector('.rd-error-ajax');
+
+        if (primeiroErro)
+        {
+            primeiroErro.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+    }
+
+    /*
+     * Exibe mensagem de erro geral no topo do formulário.
+     */
+    function exibirMensagemGeral(mensagem)
+    {
+        const alertDiv = document.createElement('div');
+
+        alertDiv.id = 'alertaGeralAjax';
+
+        alertDiv.className =
+            'mb-6 p-4 border-2 border-red-500 bg-red-950/40 text-red-200 text-xs font-bold font-["Orbitron"] tracking-wider';
+
+        alertDiv.textContent = `AVISO: ${mensagem}`;
+
+        form.insertAdjacentElement('afterbegin', alertDiv);
+
+        alertDiv.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
     }
 });

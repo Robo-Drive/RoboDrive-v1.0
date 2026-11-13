@@ -108,3 +108,70 @@ document.addEventListener("click", evento => {
 
     atualizarTextarea(textarea);
 });
+// --- VALIDAÇÃO AJAX DE DESATIVAÇÃO COM JUSTIFICATIVA OBRIGATÓRIA ---
+if (modalDesativar) {
+    const formDesativar = modalDesativar.querySelector("form");
+
+    formDesativar.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // Remove erro anterior se houver
+        const erroAntigo = formDesativar.querySelector(".rd-error-ajax");
+        if (erroAntigo) erroAntigo.remove();
+
+        const textarea = formDesativar.querySelector("textarea[name='justificativa']");
+        const justificativa = textarea.value.trim();
+
+        // Validação no frontend (mínimo 10 caracteres)
+        if (justificativa.length < 10) {
+            exibirErroDesativar(textarea, "A justificativa é obrigatória e deve ter pelo menos 10 caracteres.");
+            return;
+        }
+
+        const submitBtn = formDesativar.querySelector("button[type='submit']");
+        const textoOriginal = submitBtn ? submitBtn.innerText : "Desativar";
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Processando...";
+        }
+
+        try {
+            const formData = new FormData(formDesativar);
+            const response = await fetch(formDesativar.action, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.sucesso) {
+                modalDesativar.close();
+                // Redireciona ou recarrega a página para atualizar as listas
+                window.location.href = data.redirect || window.location.href;
+            } else {
+                exibirErroDesativar(textarea, data.mensagem || "Não foi possível desativar. Verifique os dados.");
+            }
+        } catch (erro) {
+            console.error("Erro na requisição Ajax:", erro);
+            // Se a rota redirecionou HTML em vez de JSON, recarrega a página
+            window.location.reload();
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = textoOriginal;
+            }
+        }
+    });
+
+    function exibirErroDesativar(elemento, mensagem) {
+        elemento.classList.add("border-red-500");
+        const p = document.createElement("p");
+        p.className = "rd-error rd-error-ajax mt-1.5 text-xs text-red-400 font-bold";
+        p.textContent = mensagem;
+        elemento.insertAdjacentElement("afterend", p);
+        elemento.focus();
+    }
+}

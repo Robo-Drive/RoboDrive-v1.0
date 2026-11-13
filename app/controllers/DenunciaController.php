@@ -32,7 +32,8 @@ class DenunciaController extends Controller
         $motivo = trim(filter_input(INPUT_POST, 'motivo', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
         $descricao = trim(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
 
-        if ($tipo && $alvoId && $motivo) {
+        if ($tipo && $alvoId && $motivo)
+        {
             $usuarioLogadoId = $_SESSION["usuario_logado"]->getId();
             $this->repositorySql->salvar($tipo, $alvoId, $usuarioLogadoId, $motivo, $descricao);
         }
@@ -40,7 +41,7 @@ class DenunciaController extends Controller
         $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/');
     }
 
-    public function excluir()
+    public function desativar()
     {
         $this->loginRequired();
         $this->adminRequired();
@@ -48,7 +49,8 @@ class DenunciaController extends Controller
         $tipo = trim(filter_input(INPUT_POST, 'tipo', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
         $alvoId = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 
-        if ($tipo && $alvoId) {
+        if ($tipo && $alvoId)
+        {
             $this->repositorySql->dispensar($tipo, $alvoId);
         }
 

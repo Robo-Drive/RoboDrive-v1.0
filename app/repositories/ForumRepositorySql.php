@@ -95,11 +95,15 @@ class ForumRepositorySql implements ForumRepositoryInterface
     }
     public function buscarEquipe(int $id)
     {
-        $sql = "SELECT *, u.nome_usuario FROM postagem_forum f JOIN usuario u ON u.id = f.usuario_id WHERE f.equipe_id = :id AND f.status = true";
+        $sql = "SELECT f.*, u.nome, u.nome_usuario, u.imagem 
+                FROM postagem_forum f 
+                JOIN usuario u ON u.id = f.usuario_id 
+                WHERE f.equipe_id = :id AND f.status = true 
+                ORDER BY f.criado_em DESC";
         $stmt = $this->connection->prepare($sql);
-        $stmt->bindValue(":id",$id);
+        $stmt->bindValue(":id", $id, PDO::PARAM_INT);
         $stmt->execute();
-        return Forum::map($stmt->fetchAll());
+        return Forum::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
     public function buscarConteudo(Forum $forum): ?array
     {
@@ -122,12 +126,14 @@ class ForumRepositorySql implements ForumRepositoryInterface
     }
     public function listarTodos(): array
     {
-        $sql = "SELECT *, u.nome_usuario 
-        FROM postagem_forum f 
-        JOIN usuario u ON u.id = f.usuario_id WHERE f.visibilidade='publico' AND f.status = true";
+        $sql = "SELECT f.*, u.nome, u.nome_usuario, u.imagem 
+                FROM postagem_forum f 
+                JOIN usuario u ON u.id = f.usuario_id 
+                WHERE f.visibilidade = 'publico' AND f.status = true 
+                ORDER BY f.criado_em DESC";
         $stmt = $this->connection->prepare($sql);
         $stmt->execute();
-        return Forum::map($stmt->fetchAll());
+        return Forum::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
     public function desativar(int $forumId): bool
     {

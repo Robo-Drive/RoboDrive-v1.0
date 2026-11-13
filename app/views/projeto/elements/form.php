@@ -61,13 +61,18 @@
         <?php if (!isset($projeto)): ?>
             <div class="rd-field">
                 <label for="senha" class="rd-label">Senha de Entrada no Projeto</label>
-                <input
-                    type="password"
-                    id="senha"
-                    name="senha"
-                    placeholder="Defina a senha para novos membros entrarem..."
-                    class="rd-input"
-                >
+                <div class="password-container flex w-full border-2 border-[#07556A] transition-colors duration-200 focus-within:border-[#13F3F7]">
+                    <input
+                        type="password"
+                        name="senha"
+                        id="senha"
+                        placeholder="Defina a senha para novos membros entrarem..."
+                        class="password h-11 sm:h-12 min-w-0 flex-1 bg-[#000505] px-3.5 sm:px-4 text-sm sm:text-base text-[#F2FEFE] outline-none"
+                    >
+                    <button type="button" onclick="passowrdChange()" class="password-divider flex h-11 sm:h-12 items-center justify-center border-l-2 border-[#07556A] bg-[#000505] px-3 sm:px-4 text-[#F2FEFE] transition-colors duration-200 focus:outline-none" aria-label="Alternar visibilidade da senha">
+                        <img class="passwordButton h-4 w-4 sm:h-5 sm:w-5 transition-all duration-200" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
+                    </button>
+                </div>
                 <p class="mt-1 text-xs text-[#91B5BD]">Esta senha será exigida junto ao Hash para novos membros solicitarem entrada.</p>
                 <?php if (isset($erros['senha'])): ?>
                     <p class="rd-error"><?= $erros['senha'] ?></p>
@@ -77,19 +82,25 @@
             <!-- Confirmar Senha do Projeto -->
             <div class="rd-field">
                 <label for="confirmar_senha" class="rd-label">Confirmar Senha do Projeto</label>
-                <input
-                    type="password"
-                    id="confirmar_senha"
-                    name="confirmar_senha"
-                    placeholder="Repita a senha de acesso..."
-                    class="rd-input"
-                >
-                <?php if (isset($erros['confirmar_senha'])): ?>
-                    <p class="rd-error"><?= $erros['confirmar_senha'] ?></p>
-                <?php endif; ?>
+                <div class="password-container flex w-full border-2 border-[#07556A] transition-colors duration-200 focus-within:border-[#13F3F7]">
+                    <input
+                        type="password"
+                        name="confirmar_senha"
+                        id="confirmar_senha"
+                        placeholder="Repita a senha de acesso..."
+                        class="confirmarPassword h-11 sm:h-12 min-w-0 flex-1 bg-[#000505] px-3.5 sm:px-4 text-sm sm:text-base text-[#F2FEFE] outline-none"
+                    >
+                    <button type="button" onclick="confirmarPassowrdChange()" class="password-divider flex h-11 sm:h-12 items-center justify-center border-l-2 border-[#07556A] bg-[#000505] px-3 sm:px-4 text-[#F2FEFE] transition-colors duration-200 focus:outline-none" aria-label="Alternar visibilidade da confirmação de senha">
+                        <img class="confirmarPasswordButton h-4 w-4 sm:h-5 sm:w-5 transition-all duration-200" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
+                    </button>
+                </div>
+                <p class="confirmarErro mt-1.5 sm:mt-2 text-xs sm:text-sm font-medium text-[#13F3F7]">
+                    <?php if (isset($erros['confirmar_senha'])): ?>
+                        <?= $erros['confirmar_senha'] ?>
+                    <?php endif; ?>
+                </p>
             </div>
         <?php endif; ?>
-
         <!-- Categoria -->
         <div class="rd-field divCategoria">
             <?php
@@ -492,6 +503,69 @@
 
             <?php if (isset($erros['imagens'])): ?>
                 <p class="rd-error"><?= $erros['imagens'] ?></p>
+            <?php endif; ?>
+        </div>
+                <!-- EXTRAS ATUAIS DA VERSÃO (NA EDIÇÃO - DESMARQUE PARA RETIRAR) -->
+        <?php if (!empty($extrasAtuais)): ?>
+        <div class="mb-4">
+            <p class="text-xs font-bold text-[#13F3F7] uppercase tracking-wider mb-2 font-['Orbitron']">
+                Arquivos extras da versão <?= !empty($versaoAtual) ? 'v' . $versaoAtual['versao'] : 'atual' ?> (desmarque para retirar da nova versão):
+            </p>
+            <ul class="space-y-2">
+                <?php foreach ($extrasAtuais as $ext): ?>
+                    <li class="flex items-center justify-between border-2 border-[#07556A] bg-[#06141C] p-3 text-xs hover:border-[#13F3F7]/50 transition">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input 
+                                type="checkbox" 
+                                name="extras_manter[]" 
+                                value="<?= $ext->getId() ?>" 
+                                checked 
+                                class="accent-[#13F3F7] h-4 w-4"
+                            >
+                            <div>
+                                <span class="font-mono font-bold text-[#F2FEFE]">
+                                    <?= htmlspecialchars(html_entity_decode(basename($ext->getCaminho()))) ?>
+                                </span>
+                                <span class="block text-[.65rem] text-[#91B5BD]">
+                                    <?= htmlspecialchars(html_entity_decode($ext->getDescricao() ?? 'Sem descrição')) ?>
+                                </span>
+                            </div>
+                        </label>
+                        <span class="text-[.6rem] text-[#4E6B72] uppercase font-mono">
+                            Manter na versão
+                        </span>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+        <?php endif; ?>
+
+        <!-- ARQUIVOS EXTRAS E DOCUMENTAÇÕES (PDF, STL, ZIP, ETC) -->
+        <div class="rd-field">
+            <label for="extras" class="rd-label">Arquivos Extras e Documentações</label>
+            <button
+                type="button"
+                onclick="adicionarArquivosExtras()"
+                class="group flex w-full items-center gap-4 border-2 border-[#07556A] bg-[#000505] px-4 py-3 text-left transition-colors duration-200 hover:border-[#13F3F7] focus-visible:border-[#13F3F7] focus-visible:outline-none cursor-pointer"
+            >
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-[#07556A] text-[#13F3F7] transition-colors duration-200 group-hover:border-[#13F3F7]">
+                    📁
+                </span>
+                <span class="flex min-w-0 flex-1 flex-col">
+                    <span class="text-xs font-black uppercase tracking-[.08em] text-[#F2FEFE]">Adicionar arquivos extras</span>
+                    <span class="text-xs leading-snug text-[#91B5BD]">.pdf, .stl, .step, .zip, .csv, manuais, modelos 3D...</span>
+                </span>
+                <span class="text-2xl font-light leading-none text-[#13F3F7]" aria-hidden="true">+</span>
+            </button>
+
+            <input type="file" name="extras[]" id="extras" style="display:none;" multiple>
+            <ul id="listaExtras" class="mt-3 flex flex-col gap-2 empty:hidden"></ul>
+
+            <?php if (isset($erros['extras'])): ?>
+                <p class="rd-error"><?= htmlspecialchars(html_entity_decode($erros['extras'])) ?></p>
+            <?php endif; ?>
+            <?php if (isset($erros['extras_descricao'])): ?>
+                <p class="rd-error"><?= htmlspecialchars(html_entity_decode($erros['extras_descricao'])) ?></p>
             <?php endif; ?>
         </div>
     </fieldset>

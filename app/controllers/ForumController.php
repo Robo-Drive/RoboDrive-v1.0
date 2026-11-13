@@ -33,34 +33,38 @@ class ForumController extends Controller
         $this->loginRequired();
         $validador = new ValidadorHelper();
         
-        $validador->obrigatorio('conteudo',   trim($_POST["conteudo"]));
-        $validador->tamanho('conteudo', $_POST["conteudo"], 3,100);
+        $conteudo = trim($_POST["conteudo"] ?? '');
+        $validador->obrigatorio('conteudo', $conteudo);
+        $validador->tamanho('conteudo', $conteudo, 3, 2000);
         
-        $posts["conteudo"]   = filter_input(INPUT_POST, 'conteudo', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $posts["visibilidade"]   = is_numeric($_POST["visibilidade"]) ? "equipe" : filter_input(INPUT_POST, 'visibilidade', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        if(is_numeric($_POST["visibilidade"]))
-        {
-            $posts["equipe_id"] = $_POST["visibilidade"];
+        $posts["conteudo"]     = filter_input(INPUT_POST, 'conteudo', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $visibilidadePost      = $_POST["visibilidade"] ?? 'publico';
+        $posts["visibilidade"] = is_numeric($visibilidadePost) ? "equipe" : filter_input(INPUT_POST, 'visibilidade', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        
+        $equipeId = null;
+        if (is_numeric($visibilidadePost)) {
+            $equipeId = (int)$visibilidadePost;
+            $posts["equipe_id"] = $equipeId;
         }
+
         $forum = Forum::map([$posts])[0];
         
-        if($validador->temErros())
-        {
+        if ($validador->temErros()) {
             $data["forum"] = $posts;
             $data["erros"] = $validador->getErros();
-            $this->view('forum/create',$data);
-        }
-        else
-        {
-            if ($this->service->salvarForum($forum))
-            {
-                $this->redirect(URL_BASE . '/forum');
-            } 
-            else
-            {
+            $this->view('forum/create', $data);
+        } else {
+            if ($this->service->salvarForum($forum)) {
+                // Se a postagem pertence a uma equipe, volta para o perfil da equipe
+                if ($equipeId) {
+                    $this->redirect(URL_BASE . '/equipe/perfil?id=' . $equipeId);
+                } else {
+                    $this->redirect(URL_BASE . '/forum');
+                }
+            } else {
                 $data["forum"] = $forum;
-                $data["erros"]["forum"] = "Erro: Este forum já está cadastrado!";
-                $this->view('forum/create',$data);
+                $data["erros"]["forum"] = "Erro ao cadastrar postagem no fórum.";
+                $this->view('forum/create', $data);
             }
         }
     }
@@ -133,7 +137,7 @@ class ForumController extends Controller
             $this->redirect(URL_BASE . '/forum');
             return;
         }
-
+        $data['comentarios'] = (new \app\repositories\ComentarioRepositorySql())->buscarPorForum((int)$postagem->getId());
         $data["forum"] = $postagem;
         $this->view("forum/perfil", $data);
     }
@@ -187,7 +191,13 @@ class ForumController extends Controller
                 $mailHelper->enviarEmail($postagem->getUsuario()->getEmail(), null, '', '[RoboDrive] Sua postagem foi desativada', $mensagem);
             }
         }
+        // Se a postagem pertencia a uma equipe, volta para o perfil da equipe
+        $equipeId = $postagem?->getEquipe()?->getId();
+        if ($equipeId) {
+            $this->redirect(URL_BASE . '/equipe/perfil?id=' . $equipeId);
+            return;
+        }
 
-        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/forum');
+        $this->redirect(URL_BASE . '/forum');
     }
 }

@@ -7,12 +7,9 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
     $escapar = static function ($valor): string {
         return htmlspecialchars(
             html_entity_decode(
-                (string)($valor ?? ''),
-                ENT_QUOTES | ENT_HTML5,
-                'UTF-8'
-            ),
-            ENT_QUOTES | ENT_SUBSTITUTE,
-            'UTF-8'
+                (string)($valor ?? '')
+               
+            )
         );
     };
 
@@ -325,17 +322,22 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
             <div class="space-y-6">
 
                 <?php foreach ($codigos as $idx => $cod): ?>
-
                     <?php
-                    $caminho = $cod->getCaminho();
-                    $nomeArquivo = basename((string)$caminho);
+                    $caminhoRelativo = (string) $cod->getCaminho();
+                    $nomeArquivo = basename($caminhoRelativo);
 
-                    $conteudo = (
-                        is_string($caminho) &&
-                        is_file($caminho) &&
-                        is_readable($caminho)
-                    )
-                        ? file_get_contents($caminho)
+                    // Resolve o caminho físico absoluto no servidor
+                    $caminhoFisico = null;
+                    if (is_file($caminhoRelativo)) {
+                        $caminhoFisico = $caminhoRelativo;
+                    } elseif (str_starts_with($caminhoRelativo, 'store/')) {
+                        $caminhoFisico = realpath(STORE_PATH . '/' . substr($caminhoRelativo, 6));
+                    } elseif (file_exists(STORE_PATH . '/' . $caminhoRelativo)) {
+                        $caminhoFisico = realpath(STORE_PATH . '/' . $caminhoRelativo);
+                    }
+
+                    $conteudo = ($caminhoFisico && is_file($caminhoFisico) && is_readable($caminhoFisico))
+                        ? file_get_contents($caminhoFisico)
                         : false;
 
                     if ($conteudo === false) {
@@ -494,6 +496,50 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
         <?php endif; ?>
 
+    </div>
+        <!-- 7. ARQUIVOS EXTRAS E DOCUMENTAÇÕES PARA DOWNLOAD -->
+    <div class="border-2 border-[#07556A] bg-[#000505] p-5">
+        <div class="flex items-center justify-between border-b border-[#07556A] pb-3 mb-4">
+            <h2 class="text-xs font-black uppercase tracking-[.15em] text-[#13F3F7] font-['Orbitron']">
+                05. ARQUIVOS EXTRAS E DOCUMENTAÇÕES
+            </h2>
+            <span class="text-xs text-[#91B5BD]">Total: <?= count($extras ?? []) ?></span>
+        </div>
+
+        <?php if (!empty($extras)): ?>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <?php foreach ($extras as $ext): ?>
+                    <?php
+                        $caminhoExtra = $ext->getCaminho();
+                        $nomeArquivoExtra = basename((string)$caminhoExtra);
+                        $extensaoExtra = strtoupper(pathinfo($nomeArquivoExtra, PATHINFO_EXTENSION));
+                    ?>
+                    <div class="border-2 border-[#07556A] bg-[#06141C] p-4 flex flex-col justify-between gap-3 hover:border-[#13F3F7] transition group">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-2">
+                                <span class="px-2 py-0.5 text-[.65rem] font-black border border-[#07556A] text-[#13F3F7] bg-[#000505]">
+                                    <?= htmlspecialchars($extensaoExtra) ?>
+                                </span>
+                            </div>
+
+                            <p class="text-xs font-bold text-[#F2FEFE] line-clamp-2">
+                                <?= htmlspecialchars(html_entity_decode($ext->getDescricao() ?? $nomeArquivoExtra)) ?>
+                            </p>
+                        </div>
+
+                        <a 
+                            href="<?= URL_BASE ?>/arquivo?arquivo=<?= urlencode((string)$caminhoExtra) ?>" 
+                            download="<?= htmlspecialchars($nomeArquivoExtra) ?>"
+                            class="rd-btn rd-btn-secondary !py-1.5 !px-3 text-xs flex items-center justify-center gap-2 w-full text-center"
+                        >
+                            <span>📥 Baixar Arquivo</span>
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <p class="text-sm text-[#91B5BD]">Nenhum arquivo extra anexado a esta versão do projeto.</p>
+        <?php endif; ?>
     </div>
 
 
@@ -811,9 +857,97 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
         </div>
 
     </div>
+        <!-- 9. COMENTÁRIOS DO PROJETO -->
+    <div class="border-2 border-[#07556A] bg-[#000505] p-5 space-y-6">
+        <div class="flex items-center justify-between border-b border-[#07556A] pb-3">
+            <h2 class="text-xs font-black uppercase tracking-[.15em] text-[#13F3F7] font-['Orbitron']">
+                COMENTÁRIOS DO PROJETO (<?= count($comentarios ?? []) ?>)
+            </h2>
+        </div>
 
+        <!-- FORMULÁRIO DE NOVO COMENTÁRIO -->
+        <form action="<?= URL_BASE ?>/comentario/salvar" method="post" class="space-y-3">
+            <input type="hidden" name="tipo" value="projeto">
+            <input type="hidden" name="origem_id" value="<?= $projeto->getId() ?>">
+            
+            <div class="rd-field">
+                <label for="comentarioProjetoConteudo" class="rd-label">Deixe seu comentário ou feedback</label>
+                <textarea 
+                    id="comentarioProjetoConteudo" 
+                    name="conteudo" 
+                    rows="3" 
+                    required 
+                    maxlength="2000" 
+                    placeholder="Deixe um comentário sobre este projeto..." 
+                    class="rd-textarea !bg-[#06141C]"
+                ></textarea>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="rd-btn rd-btn-primary !py-2 !px-4 text-xs">
+                    Publicar Comentário
+                </button>
+            </div>
+        </form>
+
+        <!-- LISTAGEM DE COMENTÁRIOS DO PROJETO -->
+        <div class="space-y-4 pt-4 border-t border-[#07556A]/60">
+            <?php if (!empty($comentarios)): ?>
+                <?php foreach ($comentarios as $coment): ?>
+                    <div class="border border-[#07556A] bg-[#06141C] p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <img 
+                                    src="<?= $coment->getUsuario()->getImagem() ? URL_BASE . '/arquivo?arquivo=' . urlencode($coment->getUsuario()->getImagem()) : IMG_URL_BASE . '/perfil.png' ?>" 
+                                    alt="Foto" 
+                                    class="w-8 h-8 object-cover border border-[#07556A]"
+                                >
+                                <div>
+                                    <p class="text-xs font-bold text-[#F2FEFE]">
+                                        @<?= htmlspecialchars($coment->getUsuario()->getNomeUsuario()) ?>
+                                    </p>
+                                    <span class="text-[.6rem] text-[#91B5BD] font-mono">
+                                        <?= $coment->getCriadoEm() ? $coment->getCriadoEm()->format('d/m/Y H:i') : '' ?>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <?php if ($coment->getUsuario()->getId() === $usuarioLogadoId || $eAdmin): ?>
+                                    <form action="<?= URL_BASE ?>/comentario/desativar" method="post" onsubmit="return confirm('Deseja desativar este comentário?');">
+                                        <input type="hidden" name="id" value="<?= $coment->getId() ?>">
+                                        <input type="hidden" name="tipo" value="projeto">
+                                        <button type="submit" title="desativar" class="text-red-400 hover:text-red-300 text-xs px-2 py-1">
+                                            desativar
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+
+                                <?php
+                                // Botão de denúncia do comentário
+                                $denunciaAlvo = [
+                                    "tipo"    => "comentario",
+                                    "id"      => $coment->getId(),
+                                    "nome"    => mb_strimwidth($coment->getConteudo(), 0, 50, '...'),
+                                    "autores" => [$coment->getUsuario()->getId()],
+                                    "classe"  => "shrink-0"
+                                ];
+                                include(__DIR__ . "/../../elements/denunciaBotao.php");
+                                ?>
+                            </div>
+                        </div>
+
+                        <p class="text-sm text-[#F2FEFE] leading-relaxed whitespace-pre-line pl-11">
+                            <?= htmlspecialchars(html_entity_decode($coment->getConteudo())) ?>
+                        </p>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="text-xs text-[#91B5BD] text-center py-4">Nenhum comentário neste projeto ainda.</p>
+            <?php endif; ?>
+        </div>
+    </div>   
 </div>
-
 
 <!-- SCRIPT: COPIAR CÓDIGO -->
 <script>

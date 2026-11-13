@@ -17,9 +17,9 @@ include_once(__DIR__."/../elements/header.php");
             <?php include_once(__DIR__."/elements/form.php") ?>
         </form>
 
-        <form action="<?= URL_BASE ?>/usuario/excluir" autocomplete="off" method="post" class="mt-6">
+        <form action="<?= URL_BASE ?>/usuario/desativar" autocomplete="off" method="post" class="mt-6">
             <input type="hidden" name="id" value="<?= is_object($usuario) ? $usuario->getId() : ($usuario['id'] ?? '') ?>">
-            <button type="submit" class="rd-btn rd-btn-danger rd-btn-sm">Excluir conta</button>
+            <button type="submit" class="rd-btn rd-btn-danger rd-btn-sm">desativar conta</button>
         </form>
 
     </div>

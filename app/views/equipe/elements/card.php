@@ -133,27 +133,38 @@ $obterImagem = static function ($item) {
 
         <?php if (!empty($projetos)): ?>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <?php foreach ($projetos as $projeto): ?>
+                                <?php foreach ($projetos as $projeto): ?>
                     <?php
-                    $projetoImagem = $obterImagem($projeto);
-                    $projetoImagemUrl = $urlImagemEquipe($projetoImagem, IMG_URL_BASE . '/projeto-icon.png');
-                    $projetoNome = method_exists($projeto, 'getNome') ? $projeto->getNome() : 'Projeto';
-                    $projetoDescricao = method_exists($projeto, 'getDescricao') ? $projeto->getDescricao() : '';
+                    $projetoNome = method_exists($projeto, 'getNome') ? $projeto->getNome() : ($projeto['nome'] ?? 'Projeto');
+                    $projetoDescricao = method_exists($projeto, 'getDescricao') ? $projeto->getDescricao() : ($projeto['descricao'] ?? '');
+                    $pId = method_exists($projeto, 'getId') ? $projeto->getId() : ($projeto['id'] ?? null);
+                    $pCat = method_exists($projeto, 'getCategoria') ? $projeto->getCategoria()?->getNome() : 'Hardware';
                     ?>
-                    <div class="border-2 border-[#07556A] bg-[#06141C] p-4 hover:border-[#13F3F7] transition">
-                        <a href="<?= URL_BASE ?>/projeto/perfil?id=<?= (int) $projeto->getId() ?>" class="block">
-                            <img src="<?= htmlspecialchars($projetoImagemUrl) ?>"
-                                 alt="Imagem do projeto <?= htmlspecialchars($projetoNome) ?>"
-                                 class="w-full h-40 object-cover border border-[#07556A] mb-3"
-                                 loading="lazy"
-                                 onerror="this.onerror=null;this.src='<?= htmlspecialchars(IMG_URL_BASE . '/projeto-icon.png') ?>';">
-                            <span class="block font-['Orbitron'] text-sm font-bold text-[#F2FEFE] hover:text-[#13F3F7] truncate">
-                                <?= htmlspecialchars(html_entity_decode($projetoNome)) ?>
-                            </span>
-                        </a>
-                        <p class="text-xs text-[#91B5BD] line-clamp-2 mt-2">
-                            <?= htmlspecialchars(html_entity_decode((string) $projetoDescricao)) ?>
-                        </p>
+                    <div class="border-2 border-[#07556A] bg-[#06141C] p-4 hover:border-[#13F3F7] transition flex flex-col justify-between group shadow-[4px_4px_0_#000505]">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-2">
+                                <span class="text-[.6rem] font-bold uppercase tracking-wider px-2 py-0.5 border border-[#0795A5] text-[#13F3F7] bg-[#07556A]/20 font-mono">
+                                    <?= htmlspecialchars((string)($pCat ?? 'Geral')) ?>
+                                </span>
+                                <span class="text-[.65rem] text-[#91B5BD] uppercase font-mono">Projeto</span>
+                            </div>
+
+                            <a href="<?= URL_BASE ?>/projeto/perfil?id=<?= (int)$pId ?>" class="block mt-1">
+                                <h3 class="font-['Orbitron'] text-sm font-bold text-[#F2FEFE] group-hover:text-[#13F3F7] transition truncate">
+                                    <?= htmlspecialchars(html_entity_decode((string)$projetoNome)) ?>
+                                </h3>
+                            </a>
+
+                            <p class="text-xs text-[#91B5BD] line-clamp-3 mt-2 leading-relaxed">
+                                <?= htmlspecialchars(html_entity_decode((string)$projetoDescricao)) ?>
+                            </p>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-[#07556A]/60 flex justify-end">
+                            <a href="<?= URL_BASE ?>/projeto/perfil?id=<?= (int)$pId ?>" class="text-xs font-bold text-[#13F3F7] hover:underline flex items-center gap-1">
+                                Ver projeto →
+                            </a>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -173,27 +184,43 @@ $obterImagem = static function ($item) {
 
         <?php if (!empty($postsForum)): ?>
             <div class="space-y-3">
-                <?php foreach ($postsForum as $forum): ?>
+                 <?php foreach ($postsForum as $forum): ?>
                     <?php
                     $autorForum = method_exists($forum, 'getUsuario') ? $forum->getUsuario() : null;
                     $imagemAutor = $autorForum ? $obterImagem($autorForum) : null;
                     $imagemAutorUrl = $urlImagemEquipe($imagemAutor, IMG_URL_BASE . '/perfil.png');
                     $nomeUsuarioForum = $autorForum && method_exists($autorForum, 'getNomeUsuario') ? $autorForum->getNomeUsuario() : 'usuario';
-                    $conteudoForum = method_exists($forum, 'getConteudo') ? $forum->getConteudo() : '';
+                    $conteudoForum = method_exists($forum, 'getConteudo') ? htmlspecialchars(html_entity_decode($forum->getConteudo())) : '';
+                    $fId = method_exists($forum, 'getId') ? $forum->getId() : ($forum['id'] ?? null);
                     ?>
-                    <div class="border-2 border-[#07556A] bg-[#06141C] p-4">
-                        <div class="flex items-center gap-3 mb-3">
-                            <img src="<?= htmlspecialchars($imagemAutorUrl) ?>"
-                                 alt="Foto de <?= htmlspecialchars($nomeUsuarioForum) ?>"
-                                 class="w-10 h-10 object-cover border border-[#07556A] shrink-0"
-                                 loading="lazy"
-                                 onerror="this.onerror=null;this.src='<?= htmlspecialchars(IMG_URL_BASE . '/perfil.png') ?>';">
-                            <p class="text-xs text-[#13F3F7] font-bold">@<?= htmlspecialchars($nomeUsuarioForum) ?></p>
+                    <div class="border-2 border-[#07556A] bg-[#06141C] p-4 hover:border-[#13F3F7] transition flex flex-col justify-between group">
+                        <div>
+                            <div class="flex items-center gap-3 mb-3">
+                                <img src="<?= htmlspecialchars($imagemAutorUrl) ?>"
+                                     alt="Foto de <?= htmlspecialchars($nomeUsuarioForum) ?>"
+                                     class="w-10 h-10 object-cover border border-[#07556A] shrink-0"
+                                     loading="lazy"
+                                     onerror="this.onerror=null;this.src='<?= htmlspecialchars(IMG_URL_BASE . '/perfil.png') ?>';">
+                                <p class="text-xs text-[#13F3F7] font-bold">@<?= htmlspecialchars(html_entity_decode($nomeUsuarioForum)) ?></p>
+                            </div>
+                            
+                            <!-- Link no texto do fórum -->
+                            <a href="<?= URL_BASE ?>/forum/perfil?id=<?= (int)$fId ?>" class="block">
+                                <p class="text-sm text-[#F2FEFE] group-hover:text-[#13F3F7] transition whitespace-pre-line">
+                                    <?= nl2br((string)$conteudoForum) ?>
+                                </p>
+                            </a>
                         </div>
-                        <p class="text-sm text-[#F2FEFE] mt-1"><?= nl2br(htmlspecialchars((string) $conteudoForum)) ?></p>
+
+                        <!-- Botão de ir para a postagem e responder -->
+                        <div class="mt-4 pt-3 border-t border-[#07556A]/50 flex justify-end">
+                            <a href="<?= URL_BASE ?>/forum/perfil?id=<?= (int)$fId ?>" class="text-xs font-bold text-[#13F3F7] hover:underline flex items-center gap-1">
+                                💬 Ver discussão e comentários →
+                            </a>
+                        </div>
                     </div>
                 <?php endforeach; ?>
-            </div>
+             </div>
         <?php else: ?>
             <div class="border-2 border-dashed border-[#07556A] bg-[#000505] p-8 text-center text-[#91B5BD] text-xs">Nenhuma publicação no fórum desta equipe no momento.</div>
         <?php endif; ?>

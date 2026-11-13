@@ -18,6 +18,7 @@ include_once(__DIR__."/../elements/header.php");
     </div>
 </div>
 
+<script src="<?= JS_URL_BASE ?>/password.js"></script>
 <script src="<?= JS_URL_BASE ?>/categoria.js"></script>
 <script src="<?= JS_URL_BASE ?>/componente.js"></script>
 <script src="<?= JS_URL_BASE ?>/inputFiles.js"></script>

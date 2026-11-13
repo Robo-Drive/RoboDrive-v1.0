@@ -6,29 +6,22 @@ class ValidadorHelper
 {
     private array $erros = [];
 
-    private array $extensoesPermitidas = [
-        // Imagens
-        "jpg", "jpeg", "png", "gif", "svg", "webp",
-
-        // Documentos
+        // Extensões específicas por finalidade
+    private array $extensoesImagem = ["jpg", "jpeg", "png", "gif", "svg", "webp"];
+    private array $extensoesCodigo = ["ino", "py", "cpp", "c", "h", "java", "js", "html", "css", "json", "xml", "yaml", "yml"];
+    private array $extensoesExtra  = [
+        // Documentos / Manuais
         "pdf", "doc", "docx", "txt", "md", "odt",
-
         // Planilhas
         "xls", "xlsx", "csv", "ods",
-
         // Apresentações
         "ppt", "pptx", "odp",
-
-        // Código
-        "ino", "py", "cpp", "c", "h", "java", "js",
-        "html", "css", "json", "xml", "yaml", "yml",
-
-        // Modelagem 3D / CAD
+        // 3D / CAD / Modelagem
         "stl", "obj", "step", "stp",
-
         // Compactados
         "zip", "rar", "7z", "tar", "gz"
     ];
+
 
     private int $tamanhoMaximo = 5242880; // 5MB
 
@@ -83,7 +76,7 @@ class ValidadorHelper
         }
     }
 
-    public function validarArquivo(string $campo, array $arquivos)
+    /* public function validarArquivo(string $campo, array $arquivos)
     {
         if (empty($arquivos) || !isset($arquivos['name']))
         {
@@ -120,6 +113,54 @@ class ValidadorHelper
             if (($tamanhos[$i] ?? 0) > $this->tamanhoMaximo)
             {
                 $this->erros[$campo] = "O arquivo " . $nome . " excede 5MB";
+                break;
+            }
+        }
+
+        return $this;
+    } */
+    public function validarImagens(string $campo, array $arquivos)
+    {
+        return $this->validarGrupoArquivo($campo, $arquivos, $this->extensoesImagem, "imagem");
+    }
+
+    public function validarCodigos(string $campo, array $arquivos)
+    {
+        return $this->validarGrupoArquivo($campo, $arquivos, $this->extensoesCodigo, "código");
+    }
+
+    public function validarExtras(string $campo, array $arquivos)
+    {
+        return $this->validarGrupoArquivo($campo, $arquivos, $this->extensoesExtra, "arquivo extra/documentação");
+    }
+
+    private function validarGrupoArquivo(string $campo, array $arquivos, array $extensoesPermitidas, string $tipoNome)
+    {
+        if (empty($arquivos) || !isset($arquivos['name'])) {
+            return $this;
+        }
+
+        $nomes = is_array($arquivos['name']) ? $arquivos['name'] : [$arquivos['name']];
+        $tamanhos = is_array($arquivos['size']) ? $arquivos['size'] : [$arquivos['size']];
+        $errosUpload = is_array($arquivos['error']) ? $arquivos['error'] : [$arquivos['error']];
+
+        foreach ($nomes as $i => $nome) {
+            $erro = $errosUpload[$i] ?? UPLOAD_ERR_NO_FILE;
+            if ($erro === UPLOAD_ERR_NO_FILE || empty($nome)) {
+                continue;
+            }
+            if ($erro !== UPLOAD_ERR_OK) {
+                $this->erros[$campo] = "Falha no envio do arquivo: " . $nome;
+                break;
+            }
+
+            $ext = strtolower(pathinfo($nome, PATHINFO_EXTENSION));
+            if (!in_array($ext, $extensoesPermitidas, true)) {
+                $this->erros[$campo] = "O arquivo \"{$nome}\" não é um arquivo de {$tipoNome} válido permitida (. " . implode(', .', $extensoesPermitidas) . ").";
+                break;
+            }
+            if (($tamanhos[$i] ?? 0) > $this->tamanhoMaximo) {
+                $this->erros[$campo] = "O arquivo " . $nome . " excede o limite de 5MB.";
                 break;
             }
         }

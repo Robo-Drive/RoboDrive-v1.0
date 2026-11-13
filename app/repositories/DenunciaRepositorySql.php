@@ -115,6 +115,38 @@ class DenunciaRepositorySql
                         $respEmail = $item['email'] ?? '';
                     }
                 }
+                        } elseif ($tipo === 'comentario') {
+                // Tenta achar em comentario_postagem_forum primeiro
+                $stmtItem = $this->connection->prepare("
+                    SELECT c.conteudo, u.id as u_id, u.nome as u_nome, u.nome_usuario, u.email 
+                    FROM comentario_postagem_forum c 
+                    JOIN usuario u ON u.id = c.usuario_id 
+                    WHERE c.id = :id
+                ");
+                $stmtItem->bindValue(':id', $alvoId, PDO::PARAM_INT);
+                $stmtItem->execute();
+                $item = $stmtItem->fetch(PDO::FETCH_ASSOC);
+
+                // Se não for do fórum, procura em comentario_projeto
+                if (!$item) {
+                    $stmtItem = $this->connection->prepare("
+                        SELECT c.conteudo, u.id as u_id, u.nome as u_nome, u.nome_usuario, u.email 
+                        FROM comentario_projeto c 
+                        JOIN usuario u ON u.id = c.usuario_id 
+                        WHERE c.id = :id
+                    ");
+                    $stmtItem->bindValue(':id', $alvoId, PDO::PARAM_INT);
+                    $stmtItem->execute();
+                    $item = $stmtItem->fetch(PDO::FETCH_ASSOC);
+                }
+
+                if ($item) {
+                    $alvoNome = mb_strimwidth($item['conteudo'], 0, 80, '...');
+                    $respId = $item['u_id'];
+                    $respNome = $item['u_nome'];
+                    $respUser = $item['nome_usuario'];
+                    $respEmail = $item['email'];
+                }
             }
 
             $resultado[] = [

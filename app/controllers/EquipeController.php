@@ -25,38 +25,24 @@ class EquipeController extends Controller
         $this->forumRepositorySql = new ForumRepositorySql();
         $this->projetoRepositorySql = new ProjetoRepositorySql();
     }
-
-    // Verificar se o usuário é administrador
     private function ehAdmin(): bool
     {
-        return isset($_SESSION['usuario_logado']) &&
-            $_SESSION['usuario_logado']->getRegra() === 'admin';
+        return isset($_SESSION['usuario_logado']) && $_SESSION['usuario_logado']->getRegra() === 'admin';
     }
 
-    // Verificar se o usuário pode gerenciar uma equipe
     private function podeGerenciarEquipe(int $equipeId): bool
     {
-        if ($this->ehAdmin()) {
+        if ($this->ehAdmin())
+        {
             return true;
         }
-
         $usuarioId = $_SESSION['usuario_logado']->getId();
-
-        return $this->repositorySql->usuarioECoordenador(
-            $equipeId,
-            $usuarioId
-        );
+        return $this->repositorySql->usuarioECoordenador($equipeId,$usuarioId);
     }
-
-    // Redirecionar para o perfil da equipe
     private function voltarPerfil(int $equipeId): void
     {
-        $this->redirect(
-            URL_BASE . '/equipe/perfil?id=' . $equipeId
-        );
+        $this->redirect(URL_BASE . '/equipe/perfil?id=' . $equipeId);
     }
-
-    // Listar equipes
     public function listar()
     {
         $this->loginRequired();
@@ -66,20 +52,14 @@ class EquipeController extends Controller
 
         $this->view("equipe/list", $data);
     }
-
-    // Formulário de cadastro
     public function cadastrar()
     {
         $this->loginRequired();
-
         $this->view("equipe/create");
     }
-
-    // Salvar equipe
     public function salvar()
     {
         $this->loginRequired();
-
         $validador = new ValidadorHelper();
 
         $nome = trim($_POST["nome"] ?? '');
@@ -87,55 +67,17 @@ class EquipeController extends Controller
         $senha = $_POST["senha"] ?? '';
         $confirmarSenha = $_POST["confirmar_senha"] ?? '';
 
-        $validador->obrigatorio(
-            'nome',
-            $nome,
-            'O nome da equipe é obrigatório'
-        );
+        $validador->obrigatorio('nome',$nome,'O nome da equipe é obrigatório');
+        $validador->tamanho('nome',$nome,3,100,'Nome da equipe');
 
-        $validador->tamanho(
-            'nome',
-            $nome,
-            3,
-            100,
-            'Nome da equipe'
-        );
+        $validador->obrigatorio('descricao',$descricao,'A descrição da equipe é obrigatória');
+        $validador->tamanho('descricao',$descricao,3,2000,'Descrição da equipe');
 
-        $validador->obrigatorio(
-            'descricao',
-            $descricao,
-            'A descrição da equipe é obrigatória'
-        );
+        $validador->obrigatorio('senha',$senha,'A senha da equipe é obrigatória');
+        $validador->tamanho('senha',$senha,8,100,'Senha da equipe');
 
-        $validador->tamanho(
-            'descricao',
-            $descricao,
-            3,
-            2000,
-            'Descrição da equipe'
-        );
-
-        $validador->obrigatorio(
-            'senha',
-            $senha,
-            'A senha da equipe é obrigatória'
-        );
-
-        $validador->tamanho(
-            'senha',
-            $senha,
-            6,
-            100,
-            'Senha da equipe'
-        );
-
-        if ($senha !== $confirmarSenha) {
-            $validador->obrigatorio(
-                'confirmar_senha',
-                '',
-                'As senhas não conferem'
-            );
-        }
+        $validador->confirmarValor($senha,$confirmarSenha,'confirmar_senha',"As senhas não são parecidas");
+        
 
         $posts = [
             "nome" => $nome,
@@ -154,20 +96,18 @@ class EquipeController extends Controller
 
         $equipe = Equipe::map([$posts])[0];
 
-        if ($this->service->salvarEquipe($equipe)) {
-
+        if ($this->service->salvarEquipe($equipe))
+        {
             $this->redirect(URL_BASE . '/usuario/perfil');
             return;
         }
 
         $data["equipe"] = $posts;
-        $data["erros"]["equipe"] =
-            "Não foi possível cadastrar a equipe. Verifique os dados e tente novamente.";
+        $data["erros"]["equipe"] = "Não foi possível cadastrar a equipe. Verifique os dados e tente novamente.";
 
         $this->view('equipe/create', $data);
     }
 
-    // Alterar papel de um membro
     public function alterarPapel()
     {
         $this->loginRequired();
@@ -454,32 +394,6 @@ class EquipeController extends Controller
 
         $this->view("equipe/perfil", $data);
     }
-
-    // Excluir equipe
-    public function excluir()
-    {
-        $this->loginRequired();
-        $this->adminRequired();
-
-        $id = filter_input(
-            INPUT_POST,
-            'id',
-            FILTER_VALIDATE_INT
-        );
-
-        if (!$id) {
-            $this->redirect(URL_BASE . '/equipe/listar');
-            return;
-        }
-
-        $equipe = new Equipe();
-        $equipe->setId($id);
-
-        $this->repositorySql->deletar($equipe);
-
-        $this->redirect(URL_BASE . '/equipe/listar');
-    }
-
     // Desativar equipe
     public function desativar()
     {
@@ -492,8 +406,9 @@ class EquipeController extends Controller
             FILTER_VALIDATE_INT
         );
 
-        if (!$id) {
-            $this->redirect(URL_BASE . '/equipe/listar');
+        if (!$id)
+        {        
+            $this->redirect(URL_BASE . '/usuario/perfil');
             return;
         }
 
@@ -501,8 +416,7 @@ class EquipeController extends Controller
         $equipe->setId($id);
 
         $this->repositorySql->deletar($equipe);
-
-        $this->redirect(URL_BASE . '/equipe/listar');
+        $this->redirect(URL_BASE . '/usuario/perfil');
     }
 
     // Adicionar membro

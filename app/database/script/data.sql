@@ -297,6 +297,23 @@ CREATE TABLE IF NOT EXISTS recuperacao_senha (
         ON DELETE CASCADE
 )
 
+-- TABELA: extra
+CREATE TABLE IF NOT EXISTS extra (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    caminho VARCHAR(255) NOT NULL,
+    descricao VARCHAR(255),
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+-- TABELA: extra_versao
+CREATE TABLE IF NOT EXISTS extra_versao (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    extra_id INT NOT NULL,
+    projeto_versao_id INT NOT NULL,
+    FOREIGN KEY (projeto_versao_id) REFERENCES projeto_versao(id),
+    FOREIGN KEY (extra_id) REFERENCES extra(id)
+);
 -- --------------------------------------------------
 -- DADOS INICIAIS
 -- CADASTRO DE USUÁRIOS

@@ -77,11 +77,13 @@ class AutenticacaoController extends Controller
         $email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL) ?? '');
         $validador = new ValidadorHelper();
         $validador->obrigatorio('email', $email, 'Informe seu e-mail');
-        if (!isset($validador->getErros()['email'])) {
+        if (!isset($validador->getErros()['email']))
+        {
             $validador->email($email);
         }
 
-        if ($validador->temErros()) {
+        if ($validador->temErros())
+        {
             $this->view('login/recuperarSenha', ['erros' => $validador->getErros(), 'email' => $email]);
             return;
         }
@@ -90,7 +92,8 @@ class AutenticacaoController extends Controller
         $usuarioModel->setEmail($email);
         $usuarioEncontrado = $this->repositorySql->buscarEmail($usuarioModel);
 
-        if ($usuarioEncontrado) {
+        if ($usuarioEncontrado)
+        {
             $token = bin2hex(random_bytes(32));
             $expiraEm = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
@@ -125,7 +128,8 @@ class AutenticacaoController extends Controller
         $token = trim($_GET['token'] ?? '');
         $tokenValido = $this->repositorySql->buscarTokenValido($token);
 
-        if (!$tokenValido) {
+        if (!$tokenValido)
+        {
             $this->view('login/recuperarSenha', ['erro_geral' => 'Este link de recuperação é inválido ou já expirou.']);
             return;
         }
@@ -143,18 +147,23 @@ class AutenticacaoController extends Controller
         $validador->obrigatorio('senha', $senha, 'Digite a nova senha');
         $validador->tamanho('senha', $senha, 8, 100, 'Senha');
 
-        if ($senha !== $confirmarSenha) {
+        if ($senha !== $confirmarSenha)
+        {
             $validador->obrigatorio('confirmar_senha', '', 'As senhas não conferem');
         }
 
-        if ($validador->temErros()) {
+        if ($validador->temErros())
+        {
             $this->view('login/redefinirSenha', ['token' => $token, 'erros' => $validador->getErros()]);
             return;
         }
 
-        if ($this->repositorySql->redefinirSenhaComToken($token, $senha)) {
+        if ($this->repositorySql->redefinirSenhaComToken($token, $senha))
+        {
             $this->view('login/login', ['sucesso' => 'Senha alterada com sucesso! Faça login com a nova senha.']);
-        } else {
+        }
+        else
+        {
             $this->view('login/recuperarSenha', ['erro_geral' => 'Token expirado ou inválido. Solicite novamente.']);
         }
     }

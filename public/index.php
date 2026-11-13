@@ -20,7 +20,7 @@ $router->post('/projeto/remover-membro', 'ProjetoController@removerMembro');
 
 $router->get('/denuncia', 'DenunciaController@listar');
 $router->post('/denuncia/salvar', 'DenunciaController@salvar');
-$router->post('/denuncia/excluir', 'DenunciaController@excluir');
+$router->post('/denuncia/desativar', 'DenunciaController@desativar');
 
 $router->get('/recuperar-senha', 'AutenticacaoController@formularioRecuperarSenha');
 $router->post('/recuperar-senha', 'AutenticacaoController@enviarLinkRecuperacao');
@@ -47,6 +47,10 @@ $router->get('/projeto/entrar', 'ProjetoController@formularioEntrar');
 $router->post('/projeto/entrar', 'ProjetoController@entrar');
 $router->post('/projeto/aprovar-solicitacao', 'ProjetoController@aprovarSolicitacao');
 $router->post('/projeto/rejeitar-solicitacao', 'ProjetoController@rejeitarSolicitacao');
+// Comentários
+$router->post('/comentario/salvar', 'ComentarioController@salvar');
+$router->post('/comentario/desativar', 'ComentarioController@desativar');
+$router->post('/comentario/desativar', 'ComentarioController@desativar');
 
 $crudsPrincipais = ["usuario","equipe","projeto","componente","forum"];
 
@@ -59,7 +63,7 @@ foreach($crudsPrincipais as $cp)
 
     $router->post('/'.$cp.'/editar', ucfirst($cp).'Controller@editar');
     $router->post('/'.$cp.'/atualizar', ucfirst($cp).'Controller@atualizar');
-    $router->post('/'.$cp.'/excluir', ucfirst($cp).'Controller@excluir');
+    $router->post('/'.$cp.'/desativar', ucfirst($cp).'Controller@desativar');
     $router->post('/'.$cp.'/desativar', ucfirst($cp).'Controller@desativar');
 }
 
