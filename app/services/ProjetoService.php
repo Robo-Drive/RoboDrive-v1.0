@@ -4,58 +4,59 @@ namespace app\services;
 
 use app\models\Projeto;
 use app\repositories\ProjetoRepositorySql;
-
-use app\services\CodigoService;
-use app\services\ImagemService;
-use app\services\UploadService;
 use Exception;
 
 class ProjetoService
 {
-
-    private CodigoService $codigoService;
-    private ImagemService $imagemService;
-    private UploadService $imagensUploadService;
-    private UploadService $codigosUploadService;
     private ProjetoRepositorySql $repositorySql;
 
-    
     public function __construct()
     {
         $this->repositorySql = new ProjetoRepositorySql();
-        $this->imagemService = new ImagemService();
-        $this->codigoService = new CodigoService();
-
     }
-    public function salvarProjeto(array $posts): bool
+
+    public function salvarProjeto(array $posts): array
     {
+        if ($this->repositorySql->existeNome(trim($posts["nome"] ?? ""))) 
+        {
+            throw new Exception("Já existe um projeto cadastrado com esse nome.");
+        }
+
+        // RN13: Visibilidade de equipe requer equipe vinculada
+        if (($posts["visibilidade"] ?? "") === "equipe" && empty($posts["equipe_id"])) 
+        {
+            throw new Exception("A visibilidade para equipe requer vínculo com uma equipe.");
+        }
+
         $projeto = Projeto::map([$posts])[0];
-        $projeto = $this->repositorySql->cadastrar($projeto);
-        if(!empty($posts["codigos"]))
+        return $this->repositorySql->cadastrar($projeto);
+    }
+
+    public function editarProjeto(Projeto $projeto): bool
+    {
+        if ($this->repositorySql->existeNome($projeto->getNome(), $projeto->getId())) 
         {
-            $this->codigoService->transformarObjetoArquivo($posts["codigos"],$projeto);
-            
-            $this->codigosUploadService = new UploadService("/users/user-".$_SESSION["usuario_logado"]->getId()."/projects/project-".$projeto->getId()."/code");
+            throw new Exception("Já existe um projeto cadastrado com esse nome.");
         }
-        if(!empty($posts["imagens"]))
-        {
-            $this->imagemService->transformarObjetoArquivo($posts["imagens"],$projeto);
-            
-            $this->imagensUploadService = new UploadService("/users/user-".$_SESSION["usuario_logado"]->getId()."/projects/project-".$projeto->getId()."/img");
-            
-        }
+
+        $this->repositorySql->editar($projeto);
         return true;
     }
-    public function editarProjeto(Projeto $projeto):bool
+
+    public function validarSaidaCoordenador($projetoId, $usuarioId): bool
     {
-        try
+        $membros = $this->repositorySql->listarMembros($projetoId);
+        $coordenadores = array_filter($membros, fn($m) => $m["papel"] === "coordenador");
+
+        foreach ($membros as $m) 
         {
-            $this->repositorySql->editar($projeto);
+            if ($m["id"] == $usuarioId && $m["papel"] === "coordenador" && count($coordenadores) <= 1) 
+            {
+                // RN25: Não pode sair se for o último coordenador
+                return false;
+            }
         }
-        catch(Exception $e)
-        {
-            return false;
-        }
+
         return true;
     }
 }

@@ -49,7 +49,7 @@
 
       <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 sm:gap-8">
         <p class="max-w-[42ch] border-l-4 border-[#13F3F7] pl-4 text-sm leading-[1.55] text-[#91B5BD] sm:pl-5 sm:text-base lg:text-[clamp(1rem,2vw,1.4rem)]">
-          Repositório central de projetos de robótica educacional do IFPR. Centralize código, componentes, equipes e conhecimento — tudo em um lugar.
+          Repositório central de projetos de robótica educacional. Centralize código, componentes, equipes e conhecimento — tudo em um lugar.
         </p>
         <div class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 w-full lg:w-auto">
           <a href="<?= URL_BASE ?>/login" class="inline-flex w-full items-center justify-center gap-3 border-[3px] border-[#13F3F7] bg-[#13F3F7] px-6 py-3 text-center text-sm font-black uppercase tracking-[.06em] text-[#000505] no-underline transition-[filter,transform] duration-200 hover:translate-y-[-2px] hover:bg-[#54FBFE] sm:w-auto sm:px-10 sm:py-[1.1rem] sm:text-base">

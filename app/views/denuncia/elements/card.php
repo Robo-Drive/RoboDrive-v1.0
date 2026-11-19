@@ -1,4 +1,4 @@
-<?php if(isset($denuncia)):
+<?php if(isset($denuncia) && isset($tiposDenuncia)):
 $tipoDenuncia = $tiposDenuncia[$denuncia["tipo"]];
 $primeiraDenuncia = new DateTimeImmutable($denuncia["primeira_denuncia"]);
 $diasPendente = $primeiraDenuncia->diff(new DateTimeImmutable())->days;
@@ -59,7 +59,7 @@ $diasPendente = $primeiraDenuncia->diff(new DateTimeImmutable())->days;
                 data-nome="<?= $denuncia["responsavel_nome"] ?>"
                 data-email="<?= $denuncia["responsavel_email"] ?>"
             >Enviar e-mail</button>
-            <form action="<?= URL_BASE ?>/denuncia/excluir" method="post" data-confirmar="Descartar as denúncias deste item? Ele continuará ativo na plataforma.">
+            <form action="<?= URL_BASE ?>/denuncia/desativar" method="post" data-confirmar="Descartar as denúncias deste item? Ele continuará ativo na plataforma.">
                 <input type="hidden" name="tipo" value="<?= $denuncia["tipo"] ?>">
                 <input type="hidden" name="id" value="<?= $denuncia["alvo_id"] ?>">
                 <button type="submit" class="rd-btn rd-btn-ghost rd-btn-sm w-full">Descartar</button>

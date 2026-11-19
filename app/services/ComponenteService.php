@@ -4,7 +4,6 @@ namespace app\services;
 
 use app\models\Componente;
 use app\repositories\ComponenteRepositorySql;
-use Exception;
 
 class ComponenteService
 {
@@ -14,23 +13,38 @@ class ComponenteService
     {
         $this->repositorySql = new ComponenteRepositorySql();
     }
+    public function listarTodos() : array|null
+    {
+        return $this->repositorySql->listarTodos();
+    }
     public function salvarComponente(Componente $equipe): bool
     {
         $this->repositorySql->cadastrar($equipe);
         return true;
     }
-    public function editarComponente(Componente $equipe):bool
+    public function editarComponente(Componente $componente): bool
     {
         try
         {
-            $this->repositorySql->editar($equipe);
+            $this->repositorySql->editar($componente);
+            return true;
         }
-        catch(Exception $e)
+        catch (\Throwable $e)
         {
-            print_r($e);
-            die;
+            error_log($e->getMessage());
             return false;
         }
-        return true;
+    }
+    public function associar(array $posts)
+    {
+        $this->repositorySql->associar($posts);
+    }
+    public function buscarProjeto(int $id): array  
+    {
+        return $this->repositorySql->buscarProjeto($id);
+    }
+    public function desativar()
+    {
+
     }
 }

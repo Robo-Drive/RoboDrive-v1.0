@@ -6,17 +6,17 @@ $list = [
         "icon" => "home-icon.png"
     ],
     [
-        "route" => URL_BASE."/forum",
+        "route" => URL_BASE."/forum/listar",
         "nome" => "Fórum",
         "icon" => "forum-icon.png"
     ],
     [
-        "route" => URL_BASE."/projeto",
+        "route" => URL_BASE."/projeto/listar",
         "nome" => "Projetos públicos",
         "icon" => "projeto-icon.png"
     ],
     [
-        "route" => URL_BASE."/componente",
+        "route" => URL_BASE."/componente/listar",
         "nome" => "Componentes",
         "icon" => "componente-icon.png"
     ]
@@ -29,14 +29,24 @@ $listAdmin = [
         "icon" => "denuncia-icon.svg"
     ],
     [
-        "route" => URL_BASE."/usuario",
+        "route" => URL_BASE."/usuario/listar",
         "nome" => "Usuários",
         "icon" => "usuarios-icon.svg"
+    ],
+    [
+        "route" => URL_BASE."/equipe/listar",
+        "nome" => "Equipes",
+        "icon" => "usuarios-icon.svg"
+    ],
+    [
+        "route" => URL_BASE."/projeto/listar/admin",
+        "nome" => "Projetos",
+        "icon" => "projeto-icon.png"
     ]
 ];
 
 $secoes = [["titulo" => null, "links" => $list]];
-if($_SESSION["usuario_logado"]->getRegra() == "admin")
+if(isset($_SESSION["usuario_logado"]) && $_SESSION["usuario_logado"]->getRegra() == "admin")
 {
     $secoes[] = ["titulo" => "Administração", "links" => $listAdmin];
 }
@@ -60,21 +70,29 @@ if($_SESSION["usuario_logado"]->getRegra() == "admin")
         </nav>
     <?php endforeach; ?>
 
-    <div class="mt-auto flex w-full flex-col gap-2">
-        <form action="<?= URL_BASE ?>/usuario/editar" method="post" class="w-full">
-            <input name="id" type="hidden" value="<?= $_SESSION["usuario_logado"]->getId() ?>">
-            <button type="submit" class="rd-nav-link w-full">
-                <img src="<?= IMG_URL_BASE."/settings-icon.png"?>" alt="">
-                <span class="truncate">Configurações</span>
-            </button>
-        </form>
-        <form action="<?= URL_BASE ?>/logout" method="post" class="w-full">
-            <button type="submit" class="rd-nav-link rd-nav-danger w-full">
-                <img src="<?= IMG_URL_BASE."/logout-icon.png"?>" alt="">
-                <span class="truncate">Sair</span>
-            </button>
-        </form>
-    </div>
+    <?php if(isset($_SESSION["usuario_logado"])): ?>
+        <div class="mt-auto flex w-full flex-col gap-2">
+            <form action="<?= URL_BASE ?>/usuario/editar" method="post" class="w-full">
+                <input name="id" type="hidden" value="<?= $_SESSION["usuario_logado"]->getId() ?>">
+                <button type="submit" class="rd-nav-link w-full">
+                    <img src="<?= IMG_URL_BASE."/settings-icon.png"?>" alt="">
+                    <span class="truncate">Configurações</span>
+                </button>
+            </form>
+            <form action="<?= URL_BASE ?>/logout" method="post" class="w-full">
+                <button type="submit" class="rd-nav-link rd-nav-danger w-full">
+                    <img src="<?= IMG_URL_BASE."/logout-icon.png"?>" alt="">
+                    <span class="truncate">Sair</span>
+                </button>
+            </form>
+        </div>
+    <?php else: ?>
+        <div class="mt-auto flex w-full flex-col gap-2">
+            <a href="<?= URL_BASE ?>/login" class="rd-nav-link rd-btn-primary w-full text-center">
+                <span class="truncate">Entrar</span>
+            </a>
+        </div>
+    <?php endif; ?>
 
 </aside>
 <script src="<?= JS_URL_BASE ?>/sidebar.js"></script>

@@ -1,6 +1,7 @@
 <?php 
 
-spl_autoload_register(function($class){
+spl_autoload_register(function($class)
+{
 
     $prefix = 'app\\';
     $baseDir = __DIR__ . '/../';

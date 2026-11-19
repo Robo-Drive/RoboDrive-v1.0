@@ -1,0 +1,7 @@
+{
+    "name": "robodrive/phpmailer",
+    "description": "Dependências de email do RoboDrive",
+    "require": {
+        "phpmailer/phpmailer": "^7.1"
+    }
+}

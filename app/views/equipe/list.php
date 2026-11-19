@@ -1,42 +1,41 @@
 <?php
-$titulo = "Listagem de Equipes";
-$header = "Equipes";
-$menu = [
-    [
-        "rota" => URL_BASE,
-        "nome" => "Home"
-    ],
-    [
-        "rota" => URL_BASE."/equipe/cadastrar",
-        "nome" => "Cadastro"
-    ]
-];
+$titulo = "Projetos públicos";
+
 include_once(__DIR__."/../elements/header.php");
 ?>
-<div class="h-[80dvh] w-full ">
-    <table class="w-full ">
-        <tr>
-            <th class="bg-blue-500 text-center">Id</th>
-            <th class="bg-red-500 text-white text-center">Nome</th>
-            <th class="bg-blue-500 text-center">Senha</th>
-            <th class="bg-red-500 text-white text-center">Visualizar</th>
-            <th class="bg-blue-500 text-center">Editar</th>
-            <th class="bg-red-500 text-white text-center">Excluir</th>
-        </tr>
-        <?php if(isset($equipes)):?>
-        <?php foreach($equipes as $e):?>
-        <tr class="hover:[&>td]:bg-black hover:[&>td]:text-white">
-            <td class="bg-blue-500 text-center"><?= $e->getId() ?></td>
-            <td class="bg-red-500 text-white text-center"><?= $e->getNome() ?></td>
-            <td class="bg-blue-500 text-center"><?= $e->getSenha() ?></td>
-            <td class="bg-red-500 text-white text-center"><form action="<?= URL_BASE ?>/equipe/perfil" method="post" class="w-full h-full"><input  class="w-full h-full" type="hidden" name="id" value="<?= $e->getId() ?>"><button type="submit" class="w-full h-full">Visualizar</button></form></td>
-            <td class="bg-blue-500 text-center"><form action="<?= URL_BASE ?>/equipe/editar" method="post" class="w-full h-full"><input  class="w-full h-full" type="hidden" name="id" value="<?= $e->getId() ?>"><button type="submit" class="w-full h-full">Editar</button></form></td>
-            <td class="bg-red-500 text-white text-center"><form action="<?= URL_BASE ?>/equipe/excluir" method="post" class="w-full h-full"><input  class="w-full h-full" type="hidden" name="id" value="<?= $e->getId() ?>"><button type="submit" class="w-full h-full">Excluir</button></form></td>
-        </tr>
-        <?php endforeach;?>
-        <?php endif; ?>
-    </table>
+<div class="h-[90dvh] w-full grid grid-cols-12 grid-rows-12">
+    <?php include_once(__DIR__."/../elements/sidebar.php") ?>
+    <div class="main usa overflow-y-auto col-span-12 lg:col-span-10 row-span-12 bg-black">
+        <section class="rd-section flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <p class="rd-eyebrow">ADMINISTRAÇÃO</p>
+                <h1 class="rd-heading text-[clamp(1.8rem,4vw,2.8rem)]">EQUIPES</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <form method="get" action="<?= URL_BASE ?>/equipe/listar" class="flex items-center gap-2">
+                    <label for="status" class="text-xs text-[#91B5BD] uppercase font-bold">Status:</label>
+                    <select name="status" id="status" onchange="this.form.submit()" class="rd-select !h-9 text-xs">
+                        <option value="1" <?= ($statusFiltro ?? '1') === '1' ? 'selected' : '' ?>>Ativos</option>
+                        <option value="0" <?= ($statusFiltro ?? '1') === '0' ? 'selected' : '' ?>>Desativados</option>
+                        <option value="todos" <?= ($statusFiltro ?? '1') === 'todos' ? 'selected' : '' ?>>Todos</option>
+                    </select>
+                </form>
+                <a href="<?= URL_BASE ?>/equipe/cadastro" class="rd-btn rd-btn-primary w-fit">Adicionar equipe</a>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 gap-5 p-5 md:grid-cols-2 lg:grid-cols-4">
+            <?php if(isset($equipes) && count($equipes) > 0):?>
+                <?php foreach($equipes as $equipe):?>
+                    <?php include(__DIR__."/elements/cardLista.php")?>
+                <?php endforeach;?>
+            <?php else: ?>
+                <p class="rd-empty w-full">Nenhum projeto cadastrado ainda</p>
+            <?php endif; ?>
+        </section>
+
+    </div>
 </div>
 <?php
-$marquee = "Listagem de equipes do projeto Robo Drive";
+include_once(__DIR__."/../elements/denunciaModal.php");
 include_once(__DIR__."/../elements/footer.php");

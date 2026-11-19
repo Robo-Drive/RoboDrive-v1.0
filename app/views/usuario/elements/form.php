@@ -97,9 +97,41 @@
         </p>
     </div>
 
+        <!-- Foto Atual com opção de retirar (estilo projetos) -->
+    <?php 
+        if(isset($usuario))
+        {
+            $fotoAtual = is_object($usuario) ? $usuario->getImagem() : ($usuario['imagem'] ?? null);
+        }
+    ?>
+    <?php if (!empty($fotoAtual)): ?>
+        <div class="rd-field mb-4">
+            <label class="rd-label">Foto de Perfil Atual</label>
+            <div class="flex items-center gap-4 border-2 border-[#07556A] bg-[#06141C] p-3">
+                <img 
+                    src="<?= URL_BASE ?>/arquivo?arquivo=<?= urlencode($fotoAtual) ?>" 
+                    alt="Foto de Perfil" 
+                    class="h-16 w-16 object-cover border-2 border-[#13F3F7]"
+                >
+                <label class="flex items-center gap-2 cursor-pointer bg-[#000505] p-2 border border-[#07556A] text-xs">
+                    <input 
+                        type="checkbox" 
+                        name="remover_imagem" 
+                        value="1" 
+                        class="accent-[#13F3F7] h-4 w-4"
+                    >
+                    <span class="text-xs text-rose-400 font-bold uppercase select-none">
+                        Remover foto de perfil
+                    </span>
+                </label>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <!-- Nova Imagem -->
     <div class="rd-field">
-        <label for="imagem" class="rd-label">Imagem</label>
-        <button type="button" onclick="adicionarImagens()" class="rd-file-btn">Adicionar imagens</button>
+        <label for="imagem" class="rd-label"><?= !empty($fotoAtual) ? 'Alterar foto de perfil' : 'Foto de perfil' ?></label>
+        <button type="button" onclick="adicionarImagens()" class="rd-file-btn">Selecionar imagem</button>
         <input type="file" name="imagem" id="imagens" accept="image/*" style="display:none;">
         <ul id="listaImagens" class="rd-file-list"></ul>
         <?php if (isset($erros['imagem'])): ?>

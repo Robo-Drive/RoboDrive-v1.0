@@ -8,33 +8,48 @@ class ArquivoController extends Controller
 {
     public function visualizar()
     {
-        $this->loginRequired();
-
-        if (!isset($_GET['arquivo']) || empty($_GET['arquivo'])) {
+        if (!isset($_GET["arquivo"]) || empty($_GET["arquivo"]))
+        {
             http_response_code(400);
             echo "Arquivo não especificado.";
             return;
         }
 
-        $arquivo = $_GET['arquivo'];
-        $storagePath = realpath(STORE_PATH);
+        $arquivo = trim($_GET["arquivo"]);
+        $storageRoot = realpath(STORE_PATH);
 
-        // Constrói o caminho completo e resolve o caminho real do arquivo
-        $caminhoCompleto = realpath($arquivo);
+        if (str_starts_with($arquivo, "store/"))
+        {
+            $caminhoRelativo = substr($arquivo, 6);
+            $caminhoCompleto = realpath(STORE_PATH . "/" . $caminhoRelativo);
+        }
+        elseif (str_starts_with($arquivo, "store\\"))
+        {
+            $caminhoRelativo = substr($arquivo, 6);
+            $caminhoCompleto = realpath(STORE_PATH . "/" . $caminhoRelativo);
+        }
+        else
+        {
+            $caminhoCompleto = realpath($arquivo); 
+            if (!$caminhoCompleto && ($pos = strpos($arquivo, "/store/")) !== false)
+            {
+                $subPath = substr($arquivo, $pos + 7);
+                $caminhoCompleto = realpath(STORE_PATH . "/" . $subPath);
+            }
+        }
 
-        // Verifica se o arquivo existe e se está dentro do diretório de storage permitido (evita Directory Traversal)
-        if ($caminhoCompleto && is_file($caminhoCompleto) && strpos($caminhoCompleto, $storagePath) === 0) {
-            // Obtém o tipo do arquivo (MIME type)
-            $mimeType = mime_content_type($caminhoCompleto);
+        if ($caminhoCompleto && is_file($caminhoCompleto) && str_starts_with($caminhoCompleto, $storageRoot))
+        {
+            $mimeType = mime_content_type($caminhoCompleto) ?: "application/octet-stream";
 
-            // Define os cabeçalhos para exibir a imagem corretamente
-            header('Content-Type: ' . $mimeType);
-            header('Content-Length: ' . filesize($caminhoCompleto));
+            header("Content-Type: " . $mimeType);
+            header("Content-Length: " . filesize($caminhoCompleto));
 
-            // Lê e envia o conteúdo do arquivo para o navegador
             readfile($caminhoCompleto);
             exit;
-        } else {
+        } 
+        else
+        {
             http_response_code(404);
             echo "Arquivo não encontrado ou acesso negado.";
         }

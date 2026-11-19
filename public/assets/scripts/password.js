@@ -1,64 +1,55 @@
 function passowrdChange() {
-    let password = document.querySelector(".password");
-    let passwordButton = document.querySelector(".passwordButton");
+    const password = document.querySelector(".password");
+    const passwordButton = document.querySelector(".passwordButton");
 
-    passwordButton.src = passwordButton.src === "http://127.0.0.1:8080/assets/images/visibility.png"
-        ? "http://127.0.0.1:8080/assets/images/visibility-off.png"
-        : "http://127.0.0.1:8080/assets/images/visibility.png";
+    if (!password || !passwordButton) return;
 
-    password.type =
-        password.type === "password"
-            ? "text"
-            : "password";
+    if (password.type === "password") {
+        password.type = "text";
+        passwordButton.src = passwordButton.src.replace("visibility.png", "visibility-off.png");
+    } else {
+        password.type = "password";
+        passwordButton.src = passwordButton.src.replace("visibility-off.png", "visibility.png");
+    }
 }
+
 function confirmarPassowrdChange() {
-    let password = document.querySelector(".confirmarPassword");
-    let confirmarPasswordButton = document.querySelector(".confirmarPasswordButton");
+    const password = document.querySelector(".confirmarPassword");
+    const confirmarPasswordButton = document.querySelector(".confirmarPasswordButton");
 
-    confirmarPasswordButton.src = confirmarPasswordButton.src === "http://127.0.0.1:8080/assets/images/visibility.png"
-        ? "http://127.0.0.1:8080/assets/images/visibility-off.png"
-        : "http://127.0.0.1:8080/assets/images/visibility.png";
+    if (!password || !confirmarPasswordButton) return;
 
-    password.type =
-        password.type === "password"
-            ? "text"
-            : "password";
+    if (password.type === "password") {
+        password.type = "text";
+        confirmarPasswordButton.src = confirmarPasswordButton.src.replace("visibility.png", "visibility-off.png");
+    } else {
+        password.type = "password";
+        confirmarPasswordButton.src = confirmarPasswordButton.src.replace("visibility-off.png", "visibility.png");
+    }
 }
-let confirmarPassowrd =
-    document.querySelector(
-        ".confirmarPassword"
-    );
 
 let timeout;
 
 function verificarSenha() {
-    let password =
-        document.querySelector(
-            ".password"
-        );
+    const password = document.querySelector(".password");
+    const confirmarPassowrd = document.querySelector(".confirmarPassword");
+    const erro = document.querySelector(".confirmarErro");
 
-    let erro =
-        document.querySelector(
-            ".confirmarErro"
-        );
+    if (!confirmarPassowrd || !password || !erro) return;
 
-    if (confirmarPassowrd.value != password.value) {
-        erro.textContent =
-            "A senha digitada é diferente.";
-    }
-    else {
-        erro.textContent =
-            "";
+    if (confirmarPassowrd.value !== password.value) {
+        erro.textContent = "A senha digitada é diferente.";
+    } else {
+        erro.textContent = "";
     }
 }
 
-confirmarPassowrd.addEventListener(
-    "input",
-    function () {
+const campoConfirmar = document.querySelector(".confirmarPassword");
+if (campoConfirmar) {
+    campoConfirmar.addEventListener("input", function () {
         clearTimeout(timeout);
-
         timeout = setTimeout(() => {
             verificarSenha();
         }, 500);
-    }
-);
+    });
+}

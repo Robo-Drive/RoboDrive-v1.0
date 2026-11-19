@@ -22,8 +22,7 @@ class ComponenteController extends Controller
     }
     public function listar()
     {
-        $this->loginRequired();
-        $data['componentes'] = $this->repositorySql->listarTodos();
+        $data["componentes"] = $this->repositorySql->listarTodos();
         $this->view("componente/list",$data);
     }
     public function cadastrar()
@@ -31,51 +30,7 @@ class ComponenteController extends Controller
         $this->loginRequired();
         $this->view("componente/create");
     }
-    public function salvar()
-    {
-        $this->loginRequired();
-        $validador = new ValidadorHelper();
-        $validador->obrigatorio('nome',   trim($_POST["nome"]));
-        $validador->obrigatorio('descricao',  trim($_POST["descricao"]));
-        $validador->tamanho('nome', trim($_POST["nome"]), 3,100);
-        $validador->tamanho('descricao', trim($_POST["descricao"]), 3,2000);
-        
-        $posts["nome"]   = trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-        $posts["descricao"]   = trim(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-        $respostaImagem = $validador->temImagem($_FILES);
-        if($respostaImagem["status"])
-        {
-            $resposta = $this->uploadService->upload($_FILES["imagem"]);
-            if($resposta["status"])
-            {
-                $posts["imagem"] = $resposta["mensagem"];
-            }
-            else
-            {
-                $validador->setErroImagem($resposta["mensagem"]);
-            }
-        }
-        $componente = Componente::map([$posts])[0];
-        if($validador->temErros())
-        {
-            $data["componente"] = $posts;
-            $data["erros"] = $validador->getErros();
-            $this->view('componente/create',$data);
-        }
-        else
-        {
-            if ($this->service->salvarComponente($componente))
-            {
-                $this->redirect(URL_BASE . '/componente');
-            } 
-            else
-            {
-                $data["componente"] = $componente;
-                $data["erros"]["componente"] = "Erro: Este componente já está cadastrado!";
-                $this->view('componente/create',$data);
-            }
-        }
-    }
+   
     public function editar()
     {
         $this->loginRequired();
@@ -91,26 +46,25 @@ class ComponenteController extends Controller
             $this->view("componente/list");    
         }
     }
-    public function atualizar()
+    public function salvar()
     {
         $this->loginRequired();
-        $validador = new ValidadorHelper();
-        
-        $validador->obrigatorio('nome',   trim($_POST["nome"]));
-        $validador->obrigatorio('descricao',   trim($_POST["descricao"]));
-        $validador->tamanho('nome', trim($_POST["nome"]), 3,100);
-        
-        $posts["id"]  = $_POST["id"];
-        $posts["nome"]   = trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-        $posts["descricao"]  =  trim(filter_input(INPUT_POST, 'descricao', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-        
-        $respostaImagem = $validador->temImagem($_FILES,false);
-        
-        if($respostaImagem["status"])
-        {
 
+        $validador = new ValidadorHelper();
+        $validador->obrigatorio("nome", trim($_POST["nome"] ?? ""), "O nome do componente é obrigatório.");
+        $validador->tamanho("nome", trim($_POST["nome"] ?? ""), 3, 100, "Nome");
+        $validador->obrigatorio("descricao", trim($_POST["descricao"] ?? ""), "A descrição é obrigatória.");
+        $validador->tamanho("descricao", trim($_POST["descricao"] ?? ""), 3, 2000, "Descrição");
+        
+        $posts["nome"] = trim(filter_input(INPUT_POST, "nome", FILTER_SANITIZE_FULL_SPECIAL_CHARS));
+        $posts["descricao"] = trim(filter_input(INPUT_POST, "descricao", FILTER_SANITIZE_FULL_SPECIAL_CHARS));
+
+        $respostaImagem = $validador->temImagem($_FILES);
+
+        if ($respostaImagem["status"])
+        {
             $resposta = $this->uploadService->upload($_FILES["imagem"]);
-            if($resposta["status"])
+            if ($resposta["status"])
             {
                 $posts["imagem"] = $resposta["mensagem"];
             }
@@ -118,37 +72,168 @@ class ComponenteController extends Controller
             {
                 $validador->setErroImagem($resposta["mensagem"]);
             }
-            
+        }
+
+        if ($validador->temErros())
+        {
+            if ($this->requisicaoAjax())
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "erros" => $validador->getErros()
+                ], 422);
+            }
+
+            $data["componente"] = $_POST;
+            $data["erros"] = $validador->getErros();
+            $this->view("componente/create", $data);
+            return;
+        }
+
+        $componente = Componente::map([$posts])[0];
+
+        try
+        {
+            if ($this->service->salvarComponente($componente))
+            {
+                if ($this->requisicaoAjax())
+                {
+                    $this->responderJson([
+                        "sucesso" => true,
+                        "mensagem" => "Componente cadastrado com sucesso!",
+                        "redirect" => URL_BASE . "/componente/listar"
+                    ]);
+                }
+
+                $this->redirect(URL_BASE . "/componente/listar");
+                return;
+            }
+
+            if ($this->requisicaoAjax())
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "mensagem" => "Erro: Este componente já está cadastrado!"
+                ], 422);
+            }
+
+            $data["componente"] = $componente;
+            $data["erros"]["componente"] = "Erro: Este componente já está cadastrado!";
+            $this->view("componente/create", $data);
+        }
+        catch (\Throwable $e)
+        {
+            if ($this->requisicaoAjax())
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "mensagem" => "Erro interno ao cadastrar componente."
+                ], 500);
+            }
+
+            $data["componente"] = $componente;
+            $data["erros"]["componente"] = "Erro interno ao cadastrar componente.";
+            $this->view("componente/create", $data);
+        }
+    }
+
+    public function atualizar()
+    {
+        $this->loginRequired();
+
+        $validador = new ValidadorHelper();
+        $validador->obrigatorio("nome", trim($_POST["nome"] ?? ""), "O nome do componente é obrigatório.");
+        $validador->tamanho("nome", trim($_POST["nome"] ?? ""), 3, 100, "Nome");
+        $validador->obrigatorio("descricao", trim($_POST["descricao"] ?? ""), "A descrição é obrigatória.");
+        $validador->tamanho("descricao", trim($_POST["descricao"] ?? ""), 3, 2000, "Descrição");
+        
+        $posts["id"] = $_POST["id"] ?? null;
+        $posts["nome"] = trim(filter_input(INPUT_POST, "nome", FILTER_SANITIZE_FULL_SPECIAL_CHARS));
+        $posts["descricao"] = trim(filter_input(INPUT_POST, "descricao", FILTER_SANITIZE_FULL_SPECIAL_CHARS));
+        
+        $respostaImagem = $validador->temImagem($_FILES, false);
+        
+        if ($respostaImagem["status"])
+        {
+            $resposta = $this->uploadService->upload($_FILES["imagem"]);
+            if ($resposta["status"])
+            {
+                $posts["imagem"] = $resposta["mensagem"];
+            }
+            else
+            {
+                $validador->setErroImagem($resposta["mensagem"]);
+            }  
         }
         
-        $componente = Componente::map([$posts])[0];
-        if($validador->temErros())
+        if ($validador->temErros())
         {
-            $data["componente"] = $posts;
+            if ($this->requisicaoAjax())
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "erros" => $validador->getErros()
+                ], 422);
+            }
+
+            $data["componente"] = $_POST;
             $data["erros"] = $validador->getErros();
-            $this->view('componente/edit',$data);
+            $this->view("componente/edit", $data);
+            return;
         }
-        else
+
+        $componente = Componente::map([$posts])[0];
+
+        try
         {
             if ($this->service->editarComponente($componente))
             {
-                $this->redirect(URL_BASE . '/componente');
-            } 
-            else
-            {
-                $data["componente"] = $componente;
-                $data["erros"]["componente"] = "Erro: Este componente já está cadastrado!";
-                $this->view('componente/edit',$data);
+                if ($this->requisicaoAjax())
+                {
+                    $this->responderJson([
+                        "sucesso" => true,
+                        "mensagem" => "Componente atualizado com sucesso!",
+                        "redirect" => URL_BASE . "/componente/perfil?id=" . $posts["id"]
+                    ]);
+                }
+
+                $this->redirect(URL_BASE . "/componente/listar");
+                return;
             }
+
+            if ($this->requisicaoAjax())
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "mensagem" => "Não foi possível atualizar o componente."
+                ], 500);
+            }
+
+            $data["componente"] = $componente;
+            $data["erros"]["componente"] = "Erro ao atualizar o componente.";
+            $this->view("componente/edit", $data);
+        }
+        catch (\Throwable $e)
+        {
+            if ($this->requisicaoAjax())
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "mensagem" => "Erro interno ao atualizar o componente."
+                ], 500);
+            }
+
+            $data["componente"] = $componente;
+            $data["erros"]["componente"] = "Erro interno ao atualizar o componente.";
+            $this->view("componente/edit", $data);
         }
     }
     public function perfil()
     {
-        $this->loginRequired();
         $componente = new Componente();
-        $componente->setId($_GET["id"]);
+        $componente->setId($_GET["id"] ?? null);
         $data["componente"] = $this->repositorySql->buscarId($componente);
-        if($data["componente"]->getNome() != null)
+        if($data["componente"] && $data["componente"]->getNome() != null)
         {
             $this->view("componente/perfil",$data);
         }
@@ -156,19 +241,14 @@ class ComponenteController extends Controller
         {
             $this->view("componente/list");    
         }
-
-    }
-    public function excluir()
-    {
-        $this->loginRequired();
-        $componente = new Componente();
-        $componente->setId($_POST["id"]);
-        $this->repositorySql->deletar($componente);
-        $this->listar();
     }
     public function desativar()
     {
         $this->loginRequired();
-        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/componente');
+        $componente = new Componente();
+        $componente->setId($_POST["id"]);
+        $this->repositorySql->desativar($componente);
+        $this->listar();
     }
+    
 }

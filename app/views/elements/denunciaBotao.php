@@ -4,7 +4,7 @@
  * "tipo" segue as rotas do sistema (usuario, projeto, forum, comentario, componente, equipe).
  * Não aparece para os autores do conteúdo.
  */
-if(isset($denunciaAlvo) && !in_array($_SESSION["usuario_logado"]->getId(), $denunciaAlvo["autores"] ?? [])):
+if(isset($denunciaAlvo) && isset($_SESSION["usuario_logado"]) && !in_array($_SESSION["usuario_logado"]->getId(), $denunciaAlvo["autores"] ?? [])):
 ?>
 <div class="<?= $denunciaAlvo["classe"] ?? "" ?>">
     <button

@@ -17,20 +17,28 @@ class Forum
 
     public static function map(?array $foruns): array
     {
-        if ($foruns == null) {
+        if ($foruns == null)
+        {
             return [];
         }
         $forunsObj = array();
-        foreach ($foruns as $forum) {
+        foreach ($foruns as $forum)
+        {
             $forumObj = new Forum();
             $forumObj->setId($forum["id"]??null);
             $forumObj->setConteudo($forum["conteudo"]??null);
             $forumObj->setVisibilidade($forum["visibilidade"]??null);
-            $forumObj->setUsuario((new Usuario)->setId($forum["usuario_id"]??null)->setNomeUsuario($forum["nome_usuario"]));
-            $forumObj->setEquipe(isset($forum["usuario_id"]) ? (new Equipe)->setId($forum["usuario_id"]??null)->setNome($forum["nome_equipe"]??null):null);
-            $forumObj->setCriadoEm(isset($forum["criado_em"])
-                ? new DateTimeImmutable($forum["criado_em"]??null)
-                : null);
+
+            $usuarioObj = new Usuario();
+            $usuarioObj->setId($forum["usuario_id"] ?? ($_SESSION["usuario_logado"]->getId() ?? null));
+            $usuarioObj->setNome($forum["nome"] ?? '');
+            $usuarioObj->setNomeUsuario($forum["nome_usuario"] ?? null);
+            $usuarioObj->setImagem($forum['imagem'] ?? null);
+            $usuarioObj->setRegra($forum["regra"] ?? null);
+            
+            $forumObj->setUsuario($usuarioObj);
+            $forumObj->setEquipe(isset($forum["equipe_id"]) ? (new Equipe)->setId($forum["equipe_id"]??null):null);
+            $forumObj->setCriadoEm(isset($forum["criado_em"])? new DateTimeImmutable($forum["criado_em"] ?? null) : null);
             $forunsObj[] = $forumObj;
         }
         return $forunsObj;
@@ -42,7 +50,6 @@ class Forum
     public function setId(?int $id): self
     {
         $this->id = $id;
-
         return $this;
     }
 

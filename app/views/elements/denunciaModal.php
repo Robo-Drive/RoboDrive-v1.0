@@ -2,7 +2,7 @@
 
 <dialog id="modalDenunciar" aria-labelledby="modalDenunciarTitulo" class="rd-scroll-hidden m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto border-[3px] border-[#07556A] bg-[#06141C] p-0 text-[#F2FEFE] shadow-[8px_8px_0_#07556A] backdrop:bg-[#000505]/85">
     <div class="h-[3px] w-full bg-[#F0ED06]"></div>
-    <form action="<?= URL_BASE ?>/denuncia/salvar" method="post" class="flex flex-col">
+    <form action="<?= URL_BASE ?>/denuncia/salvar" autocomplete="off" method="post" class="flex flex-col">
         <input type="hidden" name="tipo" data-campo="tipo">
         <input type="hidden" name="id" data-campo="id">
 
@@ -24,7 +24,7 @@
 
             <div class="rd-field">
                 <label for="denunciaMotivo" class="rd-label">Motivo</label>
-                <select id="denunciaMotivo" name="motivo" required class="rd-select">
+                <select id="denunciaMotivo" name="motivo" class="rd-select">
                     <option value="">Selecione o motivo</option>
                     <option value="Spam">Spam</option>
                     <option value="Conteúdo ofensivo">Conteúdo ofensivo</option>

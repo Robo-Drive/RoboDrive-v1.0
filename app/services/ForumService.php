@@ -4,7 +4,7 @@ namespace app\services;
 
 use app\models\Forum;
 use app\repositories\ForumRepositorySql;
-use Exception;
+
 
 class ForumService
 {
@@ -19,18 +19,17 @@ class ForumService
         $this->repositorySql->cadastrar($forum);
         return true;
     }
-    public function editarForum(Forum $forum):bool
+    public function editarForum(Forum $forum): bool
     {
         try
         {
             $this->repositorySql->editar($forum);
+            return true;
         }
-        catch(Exception $e)
+        catch (\Throwable $e)
         {
-            print_r($e);
-            die;
+            error_log($e->getMessage());
             return false;
         }
-        return true;
     }
 }

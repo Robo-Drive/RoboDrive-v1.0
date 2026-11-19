@@ -1,14 +1,13 @@
 <?php
-$titulo = "Perfil da equipe";
+$titulo = "Perfil do equipe";
 if(isset($equipe)):
-$header = "Equipe";
 include_once(__DIR__."/../elements/header.php");
 ?>
-<div class="h-[80dvh] w-full flex flex-col justify-center items-center">
+<div class="h-[90dvh] w-full grid grid-cols-12 grid-rows-12 bg-black">
+    <?php include_once(__DIR__."/../elements/sidebar.php") ?>
     <?php include_once(__DIR__."/elements/card.php")?>
 </div>
+
 <?php
-$marquee = "{$equipe->getNome()}";
-include_once(__DIR__."/../elements/denunciaModal.php");
 include_once(__DIR__."/../elements/footer.php");
 endif;
