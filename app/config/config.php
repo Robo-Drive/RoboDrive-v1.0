@@ -15,6 +15,32 @@ if (DEV_ENVIRONMENT)
     error_reporting(E_ALL);
 }
 
+// Carrega variáveis do .env (raiz do repositório), se o arquivo existir
+$envFile = __DIR__ . '/../../.env';
+if (is_readable($envFile)) 
+{
+    foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) 
+    {
+        
+        $line = trim($line);
+        
+        if ($line === '' || $line[0] === '#' || strpos($line, '=') === false) 
+        {
+            continue;
+        }
+        
+        [$key, $value] = explode('=', $line, 2);
+        $key   = trim($key);
+        $value = trim(trim($value), "\"'");
+        
+        if (getenv($key) === false) 
+        {   
+            // não sobrescreve o que já vem do sistema
+            putenv("$key=$value");
+        }
+    }
+}
+
 //Configuração do Sistema
 define('APP_NAME', 'RoboDrive');
 define('URL_BASE', 'http://localhost:8080');

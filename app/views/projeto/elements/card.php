@@ -156,14 +156,6 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                 <?php endif; ?>
             <?php endif; ?>
 
-            <!-- Voltar -->
-            <a
-                href="<?= URL_BASE ?>/projeto"
-                class="border-2 border-[#07556A] px-4 py-2 text-xs font-bold text-[#F2FEFE] hover:border-[#13F3F7] transition"
-            >
-                Voltar
-            </a>
-
             <!-- Denunciar projeto -->
             <?php
             $denunciaAlvo = [

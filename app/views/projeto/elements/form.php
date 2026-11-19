@@ -239,11 +239,11 @@
                 aria-describedby="visibilidadeAjuda"
                 class="rd-select"
             >
-                <option value="privado" <?= $visibilidadeAtual === 'privado' ? 'selected' : '' ?>>
-                    Privado
-                </option>
                 <option value="publico" <?= $visibilidadeAtual === 'publico' ? 'selected' : '' ?>>
                     Público
+                </option>
+                <option value="privado" <?= $visibilidadeAtual === 'privado' ? 'selected' : '' ?>>
+                    Privado
                 </option>
                 <?php if (!empty($equipeIdVisibilidade)): ?>
                     <option value="equipe" <?= $visibilidadeAtual === 'equipe' ? 'selected' : '' ?>>
@@ -253,8 +253,7 @@
             </select>
 
             <p id="visibilidadeAjuda" class="mt-2 text-xs text-[#91B5BD]">
-                Privado: somente os responsáveis pelo projeto podem visualizar.
-                Público: todos os usuários da plataforma.
+                Com púlico todos os usuários da plataforma podem ver, se privado somente os responsáveis pelo projeto.
                 <?php if (!empty($equipeIdVisibilidade)): ?>
                     Visível para equipe: somente os integrantes da equipe vinculada.
                 <?php endif; ?>
@@ -269,7 +268,7 @@
     </fieldset>
 
     <fieldset class="min-w-0 space-y-6">
-        <legend class="mb-6 w-full">
+        <legend class="mt-6 w-full">
             <span class="flex items-center gap-3 text-[.65rem] font-bold uppercase tracking-[.25em] text-[#91B5BD]">
                 <span class="font-['Orbitron'] font-black text-[#13F3F7]">03</span>
                 Componentes

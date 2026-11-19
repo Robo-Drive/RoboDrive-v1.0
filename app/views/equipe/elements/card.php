@@ -119,10 +119,6 @@ $obterImagem = static function ($item) {
                 <?php endif; ?>
             <?php endif; ?>
 
-            <a href="<?= URL_BASE ?>/usuario/perfil" class="border-2 border-[#07556A] px-4 py-2 text-xs font-bold text-[#F2FEFE] hover:border-[#13F3F7] transition">
-                Voltar
-            </a>
-
             <?php
             $idsMembros = !empty($usuarios) ? array_map(function($u) {
                 return is_object($u) ? $u->getId() : ($u['id'] ?? null);

@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS robo_drive
+CREATE DATABASE IF NOT EXISTS robo_drive;
 
 USE robo_drive;
 
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS usuario (
     regra ENUM('admin', 'usuario') NOT NULL,
     status BOOLEAN NOT NULL DEFAULT TRUE,
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
+);
 
 -- --------------------------------------------------
 -- TABELA: equipe
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS equipe (
     descricao VARCHAR(2000) NOT NULL,
     senha VARCHAR(255) NOT NULL,
     status BOOLEAN NOT NULL DEFAULT TRUE
-)
+);
 
 -- --------------------------------------------------
 -- TABELA: categoria
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS categoria (
 
     FOREIGN KEY (usuario_id)
         REFERENCES usuario(id)
-)
+);
 
 -- --------------------------------------------------
 -- TABELA: projeto
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS projeto (
 
     FOREIGN KEY (equipe_id)
         REFERENCES equipe(id)
-)
+);
 
 -- --------------------------------------------------
 -- TABELA: postagem_forum
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS postagem_forum (
 
     FOREIGN KEY (equipe_id)
         REFERENCES equipe(id)
-)
+);
 
 -- --------------------------------------------------
 -- TABELA: comentario_postagem_forum
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS comentario_postagem_forum (
 
     FOREIGN KEY (usuario_id)
         REFERENCES usuario(id)
-)
+);
 
 -- --------------------------------------------------
 -- TABELA: comentario_projeto
@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS comentario_projeto (
 
     FOREIGN KEY (usuario_id)
         REFERENCES usuario(id)
-)
+);
 
 -- --------------------------------------------------
 -- TABELA: componente
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS componente (
 
     FOREIGN KEY (usuario_id)
         REFERENCES usuario(id)
-)
+);
 
 -- --------------------------------------------------
 -- TABELA: imagem_projeto
@@ -159,7 +159,7 @@ CREATE TABLE IF NOT EXISTS imagem_projeto (
 
     FOREIGN KEY (projeto_id)
         REFERENCES projeto(id)
-)
+);
 
 -- --------------------------------------------------
 -- TABELA: codigo
@@ -171,7 +171,7 @@ CREATE TABLE IF NOT EXISTS codigo (
     descricao VARCHAR(255),
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status BOOLEAN NOT NULL DEFAULT TRUE
-)
+);
 
 -- --------------------------------------------------
 -- TABELA: projeto_versao
@@ -190,7 +190,7 @@ CREATE TABLE IF NOT EXISTS projeto_versao (
 
     FOREIGN KEY (usuario_id)
         REFERENCES usuario(id)
-)
+);
 
 -- --------------------------------------------------
 -- TABELA: codigo_versao
@@ -206,7 +206,7 @@ CREATE TABLE IF NOT EXISTS codigo_versao (
 
     FOREIGN KEY (codigo_id)
         REFERENCES codigo(id)
-)
+);
 
 -- --------------------------------------------------
 -- TABELA: projeto_versao_componente
@@ -223,7 +223,7 @@ CREATE TABLE IF NOT EXISTS projeto_versao_componente (
 
     FOREIGN KEY (projeto_versao_id)
         REFERENCES projeto_versao(id)
-)
+);
 
 -- --------------------------------------------------
 -- TABELA: projeto_usuario
@@ -241,7 +241,7 @@ CREATE TABLE IF NOT EXISTS projeto_usuario (
 
     FOREIGN KEY (usuario_id)
         REFERENCES usuario(id)
-)
+);
 
 -- --------------------------------------------------
 -- TABELA: equipe_usuario
@@ -259,7 +259,7 @@ CREATE TABLE IF NOT EXISTS equipe_usuario (
 
     FOREIGN KEY (usuario_id)
         REFERENCES usuario(id)
-)
+);
 
 -- --------------------------------------------------
 -- TABELA: denuncia
@@ -278,7 +278,7 @@ CREATE TABLE IF NOT EXISTS denuncia (
     FOREIGN KEY (usuario_id)
         REFERENCES usuario(id)
         ON DELETE CASCADE
-)
+);
 
 -- --------------------------------------------------
 -- TABELA: recuperacao_senha
@@ -295,7 +295,7 @@ CREATE TABLE IF NOT EXISTS recuperacao_senha (
     FOREIGN KEY (usuario_id)
         REFERENCES usuario(id)
         ON DELETE CASCADE
-)
+);
 
 -- TABELA: extra
 CREATE TABLE IF NOT EXISTS extra (
