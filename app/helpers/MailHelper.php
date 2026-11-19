@@ -40,14 +40,16 @@ class MailHelper
             $mail->addAddress($destinatario);
             $mail->addReplyTo($this->seuEmail, $this->seuNome);
 
-            if ($anexo !== null && file_exists($anexo)) {
+            if ($anexo !== null && file_exists($anexo))
+            {
                 $mail->addAttachment($anexo, $formato);
             }
 
             $mail->isHTML(true);
             $mail->Subject = $assunto;
             $mail->Body    = $mensagem;
-            if (!empty($altmensage)) {
+            if (!empty($altmensage))
+            {
                 $mail->AltBody = $altmensage;
             }
 

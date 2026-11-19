@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\models\Categoria;
 use app\models\Equipe;
+use app\models\Usuario;
 use DateTimeImmutable;
 
 class Projeto
@@ -14,19 +15,22 @@ class Projeto
     private ?string $visibilidade = null;
     private ?Categoria $categoria = null;
     private ?Equipe $equipe = null;
+    private ?Usuario $usuario = null;
     private ?DateTimeImmutable $criadoEm = null;
     private ?string $hashAcesso = null;
     private ?string $senha = null;
 
     public static function map(?array $projetos): array
     {
-        if ($projetos === null) {
+        if ($projetos === null)
+        {
             return [];
         }
 
         $projetosObj = [];
 
-        foreach ($projetos as $projeto) {
+        foreach ($projetos as $projeto)
+        {
             $projetoObj = new Projeto();
 
             $projetoObj->setId($projeto["id"] ?? null);
@@ -39,25 +43,48 @@ class Projeto
             $projetoObj->setSenha($projeto["senha"] ?? null);
 
             // Categoria: somente cria o objeto se existir ID
-            if (!empty($projeto["categoria_id"])) {
+            if (!empty($projeto["categoria_id"]))
+            {
                 $categoria = new Categoria();
                 $categoria->setId($projeto["categoria_id"]);
                 $categoria->setNome($projeto["categoria_nome"] ?? null);
 
                 $projetoObj->setCategoria($categoria);
-            } else {
+            }
+            else
+            {
                 $projetoObj->setCategoria(null);
             }
 
             // Equipe: somente cria o objeto se existir ID
-            if (!empty($projeto["equipe_id"])) {
+            if (!empty($projeto["equipe_id"]))
+            {
                 $equipe = new Equipe();
                 $equipe->setId($projeto["equipe_id"]);
                 $equipe->setNome($projeto["equipe_nome"] ?? null);
 
                 $projetoObj->setEquipe($equipe);
-            } else {
+            }
+            else
+            {
                 $projetoObj->setEquipe(null);
+            }
+
+            // Usuario: cria o objeto se existir usuario_id
+            if (!empty($projeto["usuario_id"]))
+            {
+                $usuario = new Usuario();
+                $usuario->setId($projeto["usuario_id"]);
+                if (!empty($projeto["usuario_nome"]))
+                {
+                    $usuario->setNome($projeto["usuario_nome"]);
+                }
+
+                $projetoObj->setUsuario($usuario);
+            }
+            else
+            {
+                $projetoObj->setUsuario(null);
             }
 
             $projetoObj->setCriadoEm(
@@ -168,6 +195,17 @@ class Projeto
     public function setSenha(?string $senha): self
     {
         $this->senha = $senha;
+        return $this;
+    }
+
+    public function getUsuario(): ?Usuario
+    {
+        return $this->usuario;
+    }
+
+    public function setUsuario(?Usuario $usuario): self
+    {
+        $this->usuario = $usuario;
         return $this;
     }
 }

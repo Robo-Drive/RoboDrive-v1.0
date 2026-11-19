@@ -40,8 +40,10 @@ class ImagemService
 
         $imagensObj = [];
 
-        foreach ($destinos as $destino) {
-            if (!$destino['status']) {
+        foreach ($destinos as $destino)
+        {
+            if (!$destino['status'])
+            {
                 throw new \RuntimeException($destino['mensagem']);
             }
 

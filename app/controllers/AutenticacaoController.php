@@ -12,159 +12,294 @@ class AutenticacaoController extends Controller
 {
     private AutenticacaoService $service;
     private UsuarioRepositorySql $repositorySql;
+    private MailController $mailController;
 
     public function __construct()
     {
         $this->service = new AutenticacaoService();
         $this->repositorySql = new UsuarioRepositorySql();
+        $this->mailController = new MailController();
     }
+
     public function login()
     {
         $this->view("login/login");
     }
+
     public function logar()
     {
         $validador = new ValidadorHelper();
 
-        $validador->obrigatorio('email',  $_POST["email"]);
-        $validador->obrigatorio('senha',  $_POST["senha"]);
-        if(!isset($validador->getErros()["email"]))
+        $validador->obrigatorio("email", trim($_POST["email"] ?? ""));
+        $validador->obrigatorio("senha", $_POST["senha"] ?? "");
+
+        if (!isset($validador->getErros()["email"]))
         {
-            $validador->email($_POST["email"]);
+            $validador->email(trim($_POST["email"]));
         }
 
-        $posts["email"]  = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
-        $posts["senha"]  = $_POST["senha"];
-        
-        $usuario = Usuario::map([$posts])[0];
-        if($validador->temErros())
+        if ($validador->temErros())
         {
-            $data["usuario"] = $posts;
-            $data["erros"] = $validador->getErros();
-            $this->view('login/login',$data);
-        }
-        else
-        {
-            $resposta = $this->service->logar($usuario->getEmail(),$usuario->getSenha());
-            if(is_bool($resposta))
+            if ($this->requisicaoAjax())
             {
-                $this->redirect(URL_BASE . '/usuario/perfil');
-            } 
-            else
-            {
-                $data["usuario"] = $posts;
-                $data["erros"]["login"] = $resposta;
-                $this->view('login/login',$data);
+                $this->responderJson([
+                    "sucesso" => false,
+                    "erros" => $validador->getErros()
+                ], 422);
             }
+
+            $data["usuario"] = [
+                "email" => $_POST["email"] ?? "",
+                "senha" => $_POST["senha"] ?? ""
+            ];
+
+            $data["erros"] = $validador->getErros();
+
+            $this->view("login/login", $data);
+            return;
         }
+
+        $posts["email"] = filter_var($_POST["email"], FILTER_SANITIZE_EMAIL);
+        $posts["senha"] = $_POST["senha"];
+
+        $usuario = Usuario::map([$posts])[0];
+
+        $resposta = $this->service->logar($usuario->getEmail(),$usuario->getSenha());
+
+        if (is_bool($resposta) && $resposta)
+        {
+            if ($this->requisicaoAjax())
+            {
+                $this->responderJson([
+                    "sucesso" => true,
+                    "mensagem" => "Login realizado com sucesso!",
+                    "redirect" => URL_BASE . "/usuario/perfil"
+                ]);
+            }
+
+            $this->redirect(URL_BASE . "/usuario/perfil");
+            return;
+        }
+
+        if ($this->requisicaoAjax())
+        {
+            $this->responderJson([
+                "sucesso" => false,
+                "mensagem" => $resposta,
+                "erros" => [
+                    "email" => $resposta
+                ]
+            ], 422);
+        }
+
+        $data["usuario"] = $posts;
+        $data["erros"]["login"] = $resposta;
+
+        $this->view("login/login", $data);
     }
+
+
     public function cadastro()
     {
         $this->view("cadastro/cadastro");
     }
+
+
     public function logout()
     {
         $this->service->logout();
+
+        if ($this->requisicaoAjax())
+        {
+            $this->responderJson([
+                "sucesso" => true,
+                "mensagem" => "Sessão encerrada com sucesso!",
+                "redirect" => URL_BASE
+            ]);
+        }
+
         $this->redirect(URL_BASE);
     }
-        public function formularioRecuperarSenha()
+
+
+    public function formularioRecuperarSenha()
     {
         $this->view("login/recuperarSenha");
     }
 
     public function enviarLinkRecuperacao()
     {
-        $email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL) ?? '');
         $validador = new ValidadorHelper();
-        $validador->obrigatorio('email', $email, 'Informe seu e-mail');
-        if (!isset($validador->getErros()['email']))
+
+        $validador->obrigatorio("email",trim($_POST["email"] ?? ""),"Informe seu e-mail");
+
+        if (!isset($validador->getErros()["email"]))
         {
-            $validador->email($email);
+            $validador->email(trim($_POST["email"]));
         }
 
         if ($validador->temErros())
         {
-            $this->view('login/recuperarSenha', ['erros' => $validador->getErros(), 'email' => $email]);
+            if ($this->requisicaoAjax())
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "erros" => $validador->getErros()
+                ], 422);
+            }
+
+            $data["erros"] = $validador->getErros();
+            $data["email"] = $_POST["email"] ?? "";
+
+            $this->view("login/recuperarSenha", $data);
             return;
         }
 
-        $usuarioModel = new Usuario();
-        $usuarioModel->setEmail($email);
-        $usuarioEncontrado = $this->repositorySql->buscarEmail($usuarioModel);
+        $posts["email"] = filter_var($_POST["email"],FILTER_SANITIZE_EMAIL);
+
+        $usuario = new Usuario();
+        $usuario->setEmail($posts["email"]);
+
+        $usuarioEncontrado = $this->repositorySql->buscarEmail($usuario);
 
         if ($usuarioEncontrado)
         {
             $token = bin2hex(random_bytes(32));
-            $expiraEm = date('Y-m-d H:i:s', strtotime('+1 hour'));
+            $expiraEm = date("Y-m-d H:i:s", strtotime("+1 hour"));
 
-            $this->repositorySql->salvarTokenRecuperacao($usuarioEncontrado->getId(), $token, $expiraEm);
+            $this->repositorySql->salvarTokenRecuperacao(
+                $usuarioEncontrado->getId(),
+                $token,
+                $expiraEm
+            );
 
             $link = URL_BASE . "/redefinir-senha?token=" . $token;
 
-            $mensagem = "
-                <div style='font-family: Arial, sans-serif; background-color: #06141C; color: #F2FEFE; padding: 20px; border: 2px solid #07556A;'>
-                    <h2 style='color: #13F3F7;'>RoboDrive - Recuperação de Senha</h2>
-                    <p>Olá, <strong>" . htmlspecialchars($usuarioEncontrado->getNome()) . "</strong>,</p>
-                    <p>Recebemos uma solicitação para redefinir a senha da sua conta.</p>
-                    <p>Clique no botão abaixo para cadastrar uma nova senha (link válido por 1 hora):</p>
-                    <p style='margin: 24px 0;'>
-                        <a href='{$link}' style='background-color: #13F3F7; color: #000505; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 4px; text-transform: uppercase;'>Redefinir Minha Senha</a>
-                    </p>
-                    <p style='font-size: 12px; color: #91B5BD;'>Se você não solicitou a alteração, ignore este e-mail.</p>
-                </div>
-            ";
-
-            $mailHelper = new \app\helpers\MailHelper();
-            $mailHelper->enviarEmail($email, null, '', '[RoboDrive] Recuperação de Senha', $mensagem);
+            try
+            {
+                $this->mailController->enviarRecuperacaoSenha(
+                    $usuario->getEmail(),
+                    $usuarioEncontrado->getNome(),
+                    $link
+                );
+            }
+            catch (\Throwable $e)
+            {
+                error_log(
+                    "Erro ao enviar e-mail de recuperação: " . $e->getMessage()
+                );
+            }
         }
 
-        $this->view('login/recuperarSenha', [
-            'sucesso' => 'Se o e-mail informado estiver cadastrado, um link de recuperação foi enviado para ele.'
-        ]);
+        // Mensagem genérica para não revelar se o e-mail existe
+        $mensagem = "Se o e-mail informado estiver cadastrado, um link de recuperação foi enviado para ele.";
+
+        if ($this->requisicaoAjax())
+        {
+            $this->responderJson([
+                "sucesso" => true,
+                "mensagem" => $mensagem
+            ]);
+        }
+
+        $data["sucesso"] = $mensagem;
+
+        $this->view("login/recuperarSenha", $data);
     }
+
+    // =========================================================
+    // REDEFINIÇÃO DE SENHA
+    // =========================================================
 
     public function formularioRedefinirSenha()
     {
-        $token = trim($_GET['token'] ?? '');
+        $token = trim($_GET["token"] ?? "");
+
         $tokenValido = $this->repositorySql->buscarTokenValido($token);
 
         if (!$tokenValido)
         {
-            $this->view('login/recuperarSenha', ['erro_geral' => 'Este link de recuperação é inválido ou já expirou.']);
+            $data["erro_geral"] = "Este link de recuperação é inválido ou já expirou.";
+
+            $this->view("login/recuperarSenha", $data);
             return;
         }
 
-        $this->view('login/redefinirSenha', ['token' => $token]);
+        $data["token"] = $token;
+
+        $this->view("login/redefinirSenha", $data);
     }
 
     public function atualizarSenhaRecuperada()
     {
-        $token = trim($_POST['token'] ?? '');
-        $senha = $_POST['senha'] ?? '';
-        $confirmarSenha = $_POST['confirmar_senha'] ?? '';
+        // Validação
+        $token = trim($_POST["token"] ?? "");
+        $senha = $_POST["senha"] ?? "";
+        $confirmarSenha = $_POST["confirmar_senha"] ?? "";
 
         $validador = new ValidadorHelper();
-        $validador->obrigatorio('senha', $senha, 'Digite a nova senha');
-        $validador->tamanho('senha', $senha, 8, 100, 'Senha');
 
-        if ($senha !== $confirmarSenha)
+        $validador->obrigatorio("senha",$senha,"Digite a nova senha");
+
+        $validador->obrigatorio("confirmar_senha",$confirmarSenha,"Confirme a nova senha");
+
+        if (!isset($validador->getErros()["senha"]))
         {
-            $validador->obrigatorio('confirmar_senha', '', 'As senhas não conferem');
+            $validador->tamanho("senha",$senha,8,100,"senha"
+            );
         }
+
+        $validador->confirmarValor($senha,$confirmarSenha,"confirmar_senha","As senhas não são iguais");
 
         if ($validador->temErros())
         {
-            $this->view('login/redefinirSenha', ['token' => $token, 'erros' => $validador->getErros()]);
+            if ($this->requisicaoAjax())
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "erros" => $validador->getErros()
+                ], 422);
+            }
+
+            $this->view("login/redefinirSenha", [
+                "token" => $token,
+                "erros" => $validador->getErros()
+            ]);
+
             return;
         }
 
         if ($this->repositorySql->redefinirSenhaComToken($token, $senha))
         {
-            $this->view('login/login', ['sucesso' => 'Senha alterada com sucesso! Faça login com a nova senha.']);
+            $mensagem = "Senha alterada com sucesso! Faça login com a nova senha.";
+
+            if ($this->requisicaoAjax())
+            {
+                $this->responderJson([
+                    "sucesso" => true,
+                    "mensagem" => $mensagem,
+                    "redirect" => URL_BASE
+                ]);
+            }
+
+            $data["sucesso"] = $mensagem;
+
+            $this->view("login/login", $data);
+            return;
         }
-        else
+
+        $mensagem = "Token expirado ou inválido. Solicite novamente.";
+
+        if ($this->requisicaoAjax())
         {
-            $this->view('login/recuperarSenha', ['erro_geral' => 'Token expirado ou inválido. Solicite novamente.']);
+            $this->responderJson([
+                "sucesso" => false,
+                "mensagem" => $mensagem
+            ], 400);
         }
+
+        $data["erro_geral"] = $mensagem;
+
+        $this->view("login/recuperarSenha", $data);
     }
 }

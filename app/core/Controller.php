@@ -24,6 +24,20 @@ class Controller
         header('location: ' . $url);
         exit();
     }
+    public function requisicaoAjax(): bool
+    {
+        return isset($_SERVER["HTTP_X_REQUESTED_WITH"]) &&
+            strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]) === "xmlhttprequest";
+    }
+
+    public function responderJson(array $dados, int $status = 200): void
+    {
+        http_response_code($status);
+        header("Content-Type: application/json; charset=utf-8");
+        echo json_encode($dados, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        exit;
+    }
+
     public function loginRequired()
     {
         if(!isset($_SESSION["usuario_logado"]))

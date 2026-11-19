@@ -126,10 +126,10 @@ document.addEventListener('DOMContentLoaded', () =>
                 document.querySelector(`[name="${campo}"]`);
 
             // Mapeamentos para campos com seletores especiais ou arrays
-            if (campo === 'novaCategoria')
+            if (campo === 'nova_categoria')
             {
                 inputElement =
-                    document.getElementById('novaCategoria') ||
+                    document.getElementById('nova_categoria') ||
                     document.getElementById('categoria');
             }
             else if (campo === 'componentes')

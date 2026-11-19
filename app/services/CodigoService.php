@@ -20,8 +20,10 @@ class CodigoService
     {
         $arquivos = [];
 
-        for ($i = 0; $i < count($codigos['name']); $i++) {
-            foreach ($codigos as $key => $valor) {
+        for ($i = 0; $i < count($codigos['name']); $i++)
+        {
+            foreach ($codigos as $key => $valor)
+            {
                 $arquivos[$i][$key] = $valor[$i];
             }
         }
@@ -40,8 +42,10 @@ class CodigoService
 
         $codigosObj = [];
 
-        foreach ($destinos as $i => $destino) {
-            if (!$destino['status']) {
+        foreach ($destinos as $i => $destino)
+        {
+            if (!$destino['status'])
+            {
                 throw new \RuntimeException($destino['mensagem']);
             }
 

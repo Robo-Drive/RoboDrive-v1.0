@@ -27,7 +27,8 @@ class ComponenteRepositorySql implements ComponenteRepositoryInterface
         $stmt->bindValue(':imagem', $componente->getImagem());
         $stmt->bindValue(':usuario_id', $_SESSION["usuario_logado"]->getId());
         
-        if ($stmt->execute()) {
+        if ($stmt->execute())
+        {
             $componente->setId($this->connection->lastInsertId());
             return $componente;
         }
@@ -68,7 +69,8 @@ class ComponenteRepositorySql implements ComponenteRepositoryInterface
         }
         $stmt->bindValue(':id', $componente->getId(), PDO::PARAM_INT);
         
-        if ($stmt->execute()) {
+        if ($stmt->execute())
+        {
             return $componente;
         }
 

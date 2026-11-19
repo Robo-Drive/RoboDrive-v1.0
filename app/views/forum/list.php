@@ -15,9 +15,21 @@ include_once(__DIR__."/../elements/header.php");
                     <h1 class="rd-heading text-[clamp(1.8rem,4vw,2.8rem)]">FÓRUM <span>GERAL</span></h1>
                     <p class="text-xs text-[#91B5BD] mt-1">Discussões, dúvidas e projetos da comunidade RoboDrive</p>
                 </div>
-                <a href="<?= URL_BASE ?>/forum/cadastro" class="rd-btn rd-btn-primary w-fit">
-                    + Nova publicação
-                </a>
+                <div class="flex items-center gap-3">
+                    <?php if (isset($_SESSION["usuario_logado"]) && $_SESSION["usuario_logado"]->getRegra() === 'admin'): ?>
+                        <form method="get" action="<?= URL_BASE ?>/forum/listar" class="flex items-center gap-2">
+                            <label for="status" class="text-xs text-[#91B5BD] uppercase font-bold">Status:</label>
+                            <select name="status" id="status" onchange="this.form.submit()" class="rd-select !h-9 text-xs">
+                                <option value="1" <?= ($statusFiltro ?? '1') === '1' ? 'selected' : '' ?>>Ativos</option>
+                                <option value="0" <?= ($statusFiltro ?? '1') === '0' ? 'selected' : '' ?>>Desativados</option>
+                                <option value="todos" <?= ($statusFiltro ?? '1') === 'todos' ? 'selected' : '' ?>>Todos</option>
+                            </select>
+                        </form>
+                    <?php endif; ?>
+                    <a href="<?= URL_BASE ?>/forum/cadastro" class="rd-btn rd-btn-primary w-fit">
+                        + Nova publicação
+                    </a>
+                </div>
             </section>
 
             <!-- FEED DE POSTAGENS (ESTILO LINHA / LISTA DA EQUIPE) -->

@@ -19,12 +19,12 @@ class AutenticacaoService
         {
             return "Usuário desativado";
         }
-        if($usuario != false && password_verify($senha,$usuario->getSenha()))
+        if ($usuario != false && password_verify($senha, $usuario->getSenha()))
         {
             $_SESSION["usuario_logado"] = $usuario;
-            print_r($_SESSION);
             return true;
         }
+        return "Usuário ou senha incorretos";
         return "Usuário ou senha incorretos" ;
     }
     public function logout()

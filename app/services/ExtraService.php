@@ -20,9 +20,11 @@ class ExtraService
         $arquivos = [];
         $total = count($extras['name'] ?? []);
 
-        for ($i = 0; $i < $total; $i++) {
+        for ($i = 0; $i < $total; $i++)
+        {
             if (empty($extras['name'][$i])) continue;
-            foreach ($extras as $key => $valor) {
+            foreach ($extras as $key => $valor)
+            {
                 $arquivos[$i][$key] = $valor[$i];
             }
         }
@@ -36,8 +38,10 @@ class ExtraService
         $destinos = $this->uploadService->uploadArray($arquivos);
 
         $salvos = [];
-        foreach ($destinos as $i => $destino) {
-            if (!$destino['status']) {
+        foreach ($destinos as $i => $destino)
+        {
+            if (!$destino['status'])
+            {
                 throw new \RuntimeException($destino['mensagem']);
             }
             $extra = new Extra();

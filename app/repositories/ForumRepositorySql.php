@@ -23,13 +23,15 @@ class ForumRepositorySql implements ForumRepositoryInterface
         // Monta a consulta SQL
         $sql = "INSERT INTO postagem_forum (conteudo, visibilidade, usuario_id";
 
-        if ($equipeId !== null) {
+        if ($equipeId !== null)
+        {
             $sql .= ", equipe_id";
         }
 
         $sql .= ") VALUES (:conteudo, :visibilidade, :usuario_id";
 
-        if ($equipeId !== null) {
+        if ($equipeId !== null)
+        {
             $sql .= ", :equipe_id";
         }
 
@@ -44,12 +46,14 @@ class ForumRepositorySql implements ForumRepositoryInterface
         $stmt->bindValue(':usuario_id', $_SESSION["usuario_logado"]->getId());
 
         // Vincula a equipe somente quando existir
-        if ($equipeId !== null) {
+        if ($equipeId !== null)
+        {
             $stmt->bindValue(':equipe_id', $equipeId, PDO::PARAM_INT);
         }
 
         // Executa a consulta
-        if ($stmt->execute()) {
+        if ($stmt->execute())
+        {
             $forum->setId($this->connection->lastInsertId());
             return $forum;
         }
@@ -58,23 +62,24 @@ class ForumRepositorySql implements ForumRepositoryInterface
     }
     public function editar(Forum $forum): ?Forum
     {
-           $sql = "UPDATE postagem_forum
-                    SET 
-                    conteudo = :conteudo,
-                    visibilidade = :visibilidade,
-                    usuario_id = :usuario_id
-                    equipe_id = :equipe_id
-                    WHERE id = :id";
+        $sql = "UPDATE postagem_forum
+                SET 
+                conteudo = :conteudo,
+                visibilidade = :visibilidade,
+                usuario_id = :usuario_id,
+                equipe_id = :equipe_id
+                WHERE id = :id";
+
+        $stmt = $this->connection->prepare($sql);
+
+        $stmt->bindValue(':conteudo', $forum->getConteudo());
+        $stmt->bindValue(':visibilidade', $forum->getVisibilidade());
+        $stmt->bindValue(':usuario_id', $_SESSION["usuario_logado"]->getId());
+        $stmt->bindValue(':equipe_id', $forum->getEquipe()?->getId() ?? null, PDO::PARAM_INT);
+        $stmt->bindValue(':id', $forum->getId(), PDO::PARAM_INT);
     
-            $stmt = $this->connection->prepare($sql);
-    
-            $stmt->bindValue(':conteudo', $forum->getConteudo());
-            $stmt->bindValue(':visibilidade', $forum->getVisibilidade());
-            $stmt->bindValue(':usuario_id', $_SESSION["usuario_logado"]->getId());
-            $stmt->bindValue(':equipe_id', $forum->getEquipe()->getId()??null);
-            $stmt->bindValue(':id', $forum->getId(), PDO::PARAM_INT);
-        
-        if ($stmt->execute()) {
+        if ($stmt->execute())
+        {
             return $forum;
         }
 
@@ -107,23 +112,28 @@ class ForumRepositorySql implements ForumRepositoryInterface
     }
     public function buscarConteudo(Forum $forum): ?array
     {
-        $palavras = explode(" ", strtolower($forum->getConteudo()));
+        $conteudo = trim($forum->getConteudo() ?? "");
 
-        $condicoes = [];
-        $params = [];
-
-        foreach ($palavras as $p)
+        if (empty($conteudo))
         {
-            $condicoes[] = "conteudo LIKE ?";
-            $params[] = "%$p%";
+            return $this->listarTodos();
         }
 
-        $sql = "SELECT * FROM postagem_forum WHERE " . implode(" OR ", $condicoes);
+        $sql = "SELECT f.*, u.nome, u.nome_usuario, u.imagem 
+                FROM postagem_forum f 
+                JOIN usuario u ON u.id = f.usuario_id 
+                WHERE f.visibilidade = 'publico' 
+                  AND f.status = true 
+                  AND (f.titulo LIKE :busca OR f.conteudo LIKE :busca)
+                ORDER BY f.criado_em DESC";
 
         $stmt = $this->connection->prepare($sql);
-        $stmt->execute($params);
-        return Forum::map($stmt->fetchAll());
+        $stmt->bindValue(':busca', '%' . $conteudo . '%');
+        $stmt->execute();
+
+        return Forum::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
+    
     public function listarTodos(): array
     {
         $sql = "SELECT f.*, u.nome, u.nome_usuario, u.imagem 
@@ -132,6 +142,28 @@ class ForumRepositorySql implements ForumRepositoryInterface
                 WHERE f.visibilidade = 'publico' AND f.status = true 
                 ORDER BY f.criado_em DESC";
         $stmt = $this->connection->prepare($sql);
+        $stmt->execute();
+        return Forum::map($stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+    public function listarAdminTodos(): array
+    {
+        $sql = "SELECT f.*, u.nome, u.nome_usuario, u.imagem 
+                FROM postagem_forum f 
+                JOIN usuario u ON u.id = f.usuario_id 
+                ORDER BY f.criado_em DESC";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute();
+        return Forum::map($stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+    public function listarPorStatus(bool $status): array
+    {
+        $sql = "SELECT f.*, u.nome, u.nome_usuario, u.imagem 
+                FROM postagem_forum f 
+                JOIN usuario u ON u.id = f.usuario_id 
+                WHERE f.status = :status 
+                ORDER BY f.criado_em DESC";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':status', $status, PDO::PARAM_BOOL);
         $stmt->execute();
         return Forum::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }

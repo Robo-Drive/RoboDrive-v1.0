@@ -18,22 +18,42 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
     $eAdmin = $usuarioLogado?->getRegra() === 'admin';
 
     // Verificação dos integrantes e seus cargos.
-    $eIntegrante = $eAdmin;
+    $eIntegrante = false;
     $eCoordenador = $eAdmin;
+    $papelUsuarioLogado = null;
+    $totalCoordenadores = 0;
+    $totalMembros = count($usuarios ?? []);
+    $outrosMembros = [];
 
-    if (!empty($usuarios) && $usuarioLogadoId !== null) {
+    if (!empty($usuarios)) {
         foreach ($usuarios as $membro) {
-            if ((int)$membro->getId() === (int)$usuarioLogadoId) {
-                $eIntegrante = true;
+            $mId = (int)$membro->getId();
+            $mPapel = $membro->getPapelProjeto() ?? 'participante';
 
-                if ($membro->getPapelProjeto() === 'coordenador') {
+            if ($mPapel === 'coordenador') {
+                $totalCoordenadores++;
+            }
+
+            if ($usuarioLogadoId !== null && $mId === (int)$usuarioLogadoId) {
+                $eIntegrante = true;
+                $papelUsuarioLogado = $mPapel;
+                if ($mPapel === 'coordenador') {
                     $eCoordenador = true;
                 }
-
-                break;
+            } else {
+                $outrosMembros[] = [
+                    'id' => $mId,
+                    'nome' => $membro->getNome(),
+                    'papel' => $mPapel
+                ];
             }
         }
     }
+
+    $ehDonoDoProjeto = ($projeto->getUsuario() && (int)$projeto->getUsuario()->getId() === (int)$usuarioLogadoId);
+    $ehUnicoCoordenador = ($papelUsuarioLogado === 'coordenador' && $totalCoordenadores <= 1);
+    $precisaTransferir = ($ehDonoDoProjeto || $ehUnicoCoordenador);
+    $podeSairProjeto = ($eIntegrante && $totalMembros > 1);
 
     // Somente coordenadores e administradores gerenciam o projeto.
     $podeGerenciar = $eCoordenador;
@@ -117,6 +137,23 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
                 </form>
 
+            <?php endif; ?>
+
+            <!-- Sair do Projeto -->
+            <?php if ($podeSairProjeto): ?>
+                <?php if ($precisaTransferir): ?>
+                    <button type="button" onclick="document.getElementById('modalSairProjeto').showModal()" class="border-2 border-red-500/80 text-red-400 hover:bg-red-500/10 px-4 py-2 text-xs font-bold transition">
+                        Sair do Projeto
+                    </button>
+                <?php else: ?>
+                    <form action="<?= URL_BASE ?>/projeto/remover-membro" method="post" onsubmit="return confirm('Deseja realmente sair deste projeto?');">
+                        <input type="hidden" name="projeto_id" value="<?= (int)$projeto->getId() ?>">
+                        <input type="hidden" name="usuario_id" value="<?= (int)$usuarioLogadoId ?>">
+                        <button type="submit" class="border-2 border-red-500/80 text-red-400 hover:bg-red-500/10 px-4 py-2 text-xs font-bold transition">
+                            Sair do Projeto
+                        </button>
+                    </form>
+                <?php endif; ?>
             <?php endif; ?>
 
             <!-- Voltar -->
@@ -950,6 +987,55 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 </div>
 
 <!-- SCRIPT: COPIAR CÓDIGO -->
+<?php if ($podeSairProjeto && $precisaTransferir): ?>
+<dialog id="modalSairProjeto" aria-labelledby="modalSairProjetoTitulo" class="rd-scroll-hidden m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto border-[3px] border-[#07556A] bg-[#06141C] p-0 text-[#F2FEFE] shadow-[8px_8px_0_#07556A] backdrop:bg-[#000505]/85">
+    <div class="h-[3px] w-full bg-red-500"></div>
+    <form action="<?= URL_BASE ?>/projeto/remover-membro" method="post" class="flex flex-col">
+        <input type="hidden" name="projeto_id" value="<?= (int)$projeto->getId() ?>">
+        <input type="hidden" name="usuario_id" value="<?= (int)$usuarioLogadoId ?>">
+
+        <div class="flex items-start justify-between gap-4 border-b-[3px] border-[#07556A] p-5 sm:p-6">
+            <div>
+                <p class="rd-eyebrow !text-red-400">Transferência de Responsabilidade</p>
+                <h2 id="modalSairProjetoTitulo" class="rd-heading text-xl uppercase sm:text-2xl">SAIR DO <span>PROJETO</span></h2>
+            </div>
+            <button type="button" onclick="document.getElementById('modalSairProjeto').close()" aria-label="Fechar" class="flex h-10 w-10 shrink-0 items-center justify-center border-[3px] border-[#07556A] transition-colors duration-200 hover:border-[#13F3F7]">
+                <img src="<?= IMG_URL_BASE ?>/close-icon.png" alt="" class="h-4 w-4">
+            </button>
+        </div>
+
+        <div class="flex flex-col gap-6 p-5 sm:p-6">
+            <p class="border-l-4 border-red-500 pl-4 text-sm leading-relaxed text-[#91B5BD]">
+                <?php if ($ehDonoDoProjeto && $ehUnicoCoordenador): ?>
+                    Você é o <strong>proprietário e único coordenador</strong> deste projeto. Para sair, é obrigatório selecionar outro integrante para assumir a titularidade e a coordenação do projeto.
+                <?php elseif ($ehDonoDoProjeto): ?>
+                    Você é o <strong>proprietário (criador)</strong> deste projeto. Para sair, selecione outro integrante para assumir a titularidade do projeto.
+                <?php else: ?>
+                    Você é o <strong>único coordenador</strong> deste projeto. Para sair, é obrigatório selecionar outro integrante para se tornar o novo coordenador.
+                <?php endif; ?>
+            </p>
+
+            <div class="rd-field">
+                <label for="novoCoordenadorProjeto" class="rd-label">Novo Responsável / Coordenador</label>
+                <select id="novoCoordenadorProjeto" name="novo_coordenador_id" required class="rd-select">
+                    <option value="">Selecione um integrante</option>
+                    <?php foreach ($outrosMembros as $outro): ?>
+                        <option value="<?= (int)$outro['id'] ?>">
+                            <?= htmlspecialchars($outro['nome']) ?> (<?= htmlspecialchars(ucfirst($outro['papel'])) ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </div>
+
+        <div class="flex flex-col-reverse gap-3 border-t-[3px] border-[#07556A] p-5 sm:flex-row sm:justify-end sm:p-6">
+            <button type="button" onclick="document.getElementById('modalSairProjeto').close()" class="rd-btn rd-btn-ghost">Cancelar</button>
+            <button type="submit" class="rd-btn border-red-500 bg-red-600 text-white hover:bg-red-500">Transferir e Sair</button>
+        </div>
+    </form>
+</dialog>
+<?php endif; ?>
+
 <script>
 function copiarCodigo(elementId, btn) {
 

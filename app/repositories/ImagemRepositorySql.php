@@ -41,7 +41,8 @@ class ImagemRepositorySql implements ImagemRepositoryInterface
     }
     public function desativarImagensExceto(int $projetoId, array $idsManter): bool
     {
-        if (empty($idsManter)) {
+        if (empty($idsManter))
+        {
            $sql = "UPDATE imagem_projeto SET status = false WHERE projeto_id = :projeto_id";
             $stmt = $this->connection->prepare($sql);
             $stmt->bindValue(':projeto_id', $projetoId, \PDO::PARAM_INT);

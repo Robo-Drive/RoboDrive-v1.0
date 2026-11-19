@@ -22,11 +22,13 @@ class Usuario
 
     public static function map(?array $usuarios): array
     {
-        if ($usuarios == null) {
+        if ($usuarios == null)
+        {
             return [];
         }
         $usuariosObj = array();
-        foreach ($usuarios as $usuario) {
+        foreach ($usuarios as $usuario)
+        {
             $usuarioObj = new Usuario();
             $usuarioObj->setId($usuario["id"] ?? null);
             $usuarioObj->setNome($usuario["nome"] ?? null);
@@ -37,11 +39,10 @@ class Usuario
             $usuarioObj->setBiografia($usuario["biografia"] ?? null);
             $usuarioObj->setImagem($usuario["imagem"] ?? null);
             $usuarioObj->setRegra($usuario["regra"] ?? null);
-            $usuarioObj->setPapelProjeto($usuario["papel"] ?? $usuario["papelProjeto"] ?? null);
+            $usuarioObj->setPapelProjeto($usuario["papelProjeto"] ?? $usuario["papel_projeto"] ?? ($usuario["papel"] ?? null));
+            $usuarioObj->setPapelEquipe($usuario["papelEquipe"] ?? $usuario["papel_equipe"] ?? ($usuario["papel"] ?? null));
             $usuarioObj->setCategoria($usuario["categoria"] ?? null);
-            $usuarioObj->setCriadoEm(isset($usuario["criado_em"])
-                ? new DateTimeImmutable($usuario["criado_em"])
-                : null);
+            $usuarioObj->setCriadoEm(isset($usuario["criado_em"]) ? new DateTimeImmutable($usuario["criado_em"]) : null);
             $usuariosObj[] = $usuarioObj;
         }
         return $usuariosObj;
@@ -167,6 +168,16 @@ class Usuario
     public function setStatus(?bool $status): self
     {
         $this->status = $status;
+        return $this;
+    }
+
+    public function getPapelEquipe(): ?string
+    {
+        return $this->papelEquipe;
+    }
+    public function setPapelEquipe(?string $papelEquipe): self
+    {
+        $this->papelEquipe = $papelEquipe;
         return $this;
     }
 }

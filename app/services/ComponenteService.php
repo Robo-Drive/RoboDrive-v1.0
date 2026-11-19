@@ -4,7 +4,6 @@ namespace app\services;
 
 use app\models\Componente;
 use app\repositories\ComponenteRepositorySql;
-use Exception;
 
 class ComponenteService
 {
@@ -23,19 +22,18 @@ class ComponenteService
         $this->repositorySql->cadastrar($equipe);
         return true;
     }
-    public function editarComponente(Componente $equipe):bool
+    public function editarComponente(Componente $componente): bool
     {
         try
         {
-            $this->repositorySql->editar($equipe);
+            $this->repositorySql->editar($componente);
+            return true;
         }
-        catch(Exception $e)
+        catch (\Throwable $e)
         {
-            print_r($e);
-            die;
+            error_log($e->getMessage());
             return false;
         }
-        return true;
     }
     public function associar(array $posts)
     {

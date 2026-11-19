@@ -23,6 +23,5 @@ include_once(__DIR__."/../elements/header.php");
 <script src="<?= JS_URL_BASE ?>/componente.js"></script>
 <script src="<?= JS_URL_BASE ?>/inputFiles.js"></script>
 <script src="<?= JS_URL_BASE ?>/images.js"></script>
-<script src="<?= JS_URL_BASE ?>/projetoFormAjax.js"></script>
 <?php
 include_once(__DIR__."/../elements/footer.php");

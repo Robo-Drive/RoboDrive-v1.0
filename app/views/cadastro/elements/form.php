@@ -75,8 +75,8 @@
         </p>
         
     </div>
-    <?php if(isset($erros["login"])): ?>
-        <p class="text-xs sm:text-sm font-medium text-[#13F3F7]"><?= $erros["login"] ?></p>
+    <?php if(isset($erros["cadastro"])): ?>
+        <p class="text-xs sm:text-sm font-medium text-[#13F3F7]"><?= $erros["cadastro"] ?></p>
     <?php endif;?>    
 </div>
 

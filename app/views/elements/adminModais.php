@@ -25,7 +25,7 @@
 
             <div class="rd-field">
                 <label for="comunicadoMensagem" class="rd-label">Mensagem</label>
-                <textarea id="comunicadoMensagem" name="mensagem" rows="6" required minlength="10" maxlength="2000" data-contar data-preview="comunicadoPreview" placeholder="Escreva aqui o conteúdo do comunicado..." class="rd-textarea"></textarea>
+                <textarea id="comunicadoMensagem" name="mensagem" rows="6" data-contar data-preview="comunicadoPreview" placeholder="Escreva aqui o conteúdo do comunicado..." class="rd-textarea"></textarea>
                 <p class="mt-2 text-right text-[.65rem] font-bold tracking-[.1em] text-[#4E6B72]"><span data-contador>0</span>/2000</p>
             </div>
 

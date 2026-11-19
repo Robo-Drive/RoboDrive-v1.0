@@ -75,50 +75,14 @@ class ValidadorHelper
             $this->erros[$campo] = $mensagem;
         }
     }
-
-    /* public function validarArquivo(string $campo, array $arquivos)
+    public function visibilidadeValida(string $visibilidade)
     {
-        if (empty($arquivos) || !isset($arquivos['name']))
+        if(!in_array($visibilidade,['privado', 'publico', 'equipe'],true))
         {
-            return $this;
+            $this->erros["visibilidade"] = "Selecione uma visibilidade válida";
         }
-
-        $nomes = is_array($arquivos['name']) ? $arquivos['name']: [$arquivos['name']];
-
-        $tamanhos = is_array($arquivos['size']) ? $arquivos['size'] : [$arquivos['size']];
-
-        $errosUpload = is_array($arquivos['error']) ? $arquivos['error'] : [$arquivos['error']];
-
-        foreach ($nomes as $i => $nome)
-        {
-            $erro = $errosUpload[$i] ?? UPLOAD_ERR_NO_FILE;
-
-            if ($erro === UPLOAD_ERR_NO_FILE)
-            {
-                continue;
-            }
-            if ($erro !== UPLOAD_ERR_OK)
-            {
-                $this->erros[$campo] = "Falha no envio do arquivo: " . $nome;
-                break;
-            }
-
-            $ext = strtolower(pathinfo($nome, PATHINFO_EXTENSION));
-
-            if (!in_array($ext, $this->extensoesPermitidas, true))
-            {
-                $this->erros[$campo] = "Extensão de arquivo não permitida: " . $nome;
-                break;
-            }
-            if (($tamanhos[$i] ?? 0) > $this->tamanhoMaximo)
-            {
-                $this->erros[$campo] = "O arquivo " . $nome . " excede 5MB";
-                break;
-            }
-        }
-
-        return $this;
-    } */
+    }
+    
     public function validarImagens(string $campo, array $arquivos)
     {
         return $this->validarGrupoArquivo($campo, $arquivos, $this->extensoesImagem, "imagem");
@@ -134,9 +98,66 @@ class ValidadorHelper
         return $this->validarGrupoArquivo($campo, $arquivos, $this->extensoesExtra, "arquivo extra/documentação");
     }
 
+    public function validarVisibilidade(string $campo, $visibilidade, $equipeId): void
+    {
+        $permitidos = ["time", "publico", "equipe"];
+        if (!in_array($visibilidade, $permitidos, true)) 
+        {
+            $this->erros[$campo] = "Visibilidade inválida.";
+            return;
+        }
+
+        // RN13: Visibilidade para equipe somente se o projeto estiver vinculado a uma equipe
+        if ($visibilidade === "equipe" && empty($equipeId)) 
+        {
+            $this->erros[$campo] = "A visibilidade para equipe só é permitida quando o projeto pertencer a uma equipe.";
+        }
+    }
+
+    public function validarHash(string $campo, $hash): void
+    {
+        if (empty($hash) || strlen(trim($hash)) < 4) 
+        {
+            $this->erros[$campo] = "O código hash é obrigatório e deve ser válido.";
+        }
+    }
+
+    public function tipoComentario(string $campo, mixed $valor)
+    {
+        if (!in_array($valor, ["forum", "projeto"], true))
+        {
+            $this->erros[$campo] = "Selecione um tipo de comentário válido";
+        }
+
+        return $this;
+    }
+
+    public function idPositivo(string $campo, mixed $valor)
+    {
+        if (!is_scalar($valor) || filter_var($valor, FILTER_VALIDATE_INT) === false || filter_var($valor, FILTER_VALIDATE_INT) <= 0)
+        {
+            $this->erros[$campo] = "O identificador informado é inválido";
+        }
+
+        return $this;
+    }
+
+    public function papelEquipe(string $papel)
+    {
+        if (!in_array($papel, ["coordenador", "participante"], true))
+        {
+            $this->erros["papel"] = "Selecione um papel válido para a equipe";
+        }
+
+        return $this;
+    }
+
+
+
     private function validarGrupoArquivo(string $campo, array $arquivos, array $extensoesPermitidas, string $tipoNome)
     {
-        if (empty($arquivos) || !isset($arquivos['name'])) {
+        if (empty($arquivos) || !isset($arquivos['name']))
+        {
             return $this;
         }
 
@@ -144,22 +165,27 @@ class ValidadorHelper
         $tamanhos = is_array($arquivos['size']) ? $arquivos['size'] : [$arquivos['size']];
         $errosUpload = is_array($arquivos['error']) ? $arquivos['error'] : [$arquivos['error']];
 
-        foreach ($nomes as $i => $nome) {
+        foreach ($nomes as $i => $nome)
+        {
             $erro = $errosUpload[$i] ?? UPLOAD_ERR_NO_FILE;
-            if ($erro === UPLOAD_ERR_NO_FILE || empty($nome)) {
+            if ($erro === UPLOAD_ERR_NO_FILE || empty($nome))
+            {
                 continue;
             }
-            if ($erro !== UPLOAD_ERR_OK) {
+            if ($erro !== UPLOAD_ERR_OK)
+            {
                 $this->erros[$campo] = "Falha no envio do arquivo: " . $nome;
                 break;
             }
 
             $ext = strtolower(pathinfo($nome, PATHINFO_EXTENSION));
-            if (!in_array($ext, $extensoesPermitidas, true)) {
+            if (!in_array($ext, $extensoesPermitidas, true))
+            {
                 $this->erros[$campo] = "O arquivo \"{$nome}\" não é um arquivo de {$tipoNome} válido permitida (. " . implode(', .', $extensoesPermitidas) . ").";
                 break;
             }
-            if (($tamanhos[$i] ?? 0) > $this->tamanhoMaximo) {
+            if (($tamanhos[$i] ?? 0) > $this->tamanhoMaximo)
+            {
                 $this->erros[$campo] = "O arquivo " . $nome . " excede o limite de 5MB.";
                 break;
             }

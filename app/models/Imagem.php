@@ -23,9 +23,7 @@ class Imagem
             $imagemObj = new Imagem();
             $imagemObj->setId($imagem["id"]);
             $imagemObj->setCaminho($imagem["caminho"]);
-            $imagemObj->setCriadoEm(isset($projeto["criado_em"])
-            ? new DateTimeImmutable($projeto["criado_em"])
-            : null);
+            $imagemObj->setCriadoEm(isset($projeto["criado_em"]) ? new DateTimeImmutable($projeto["criado_em"]) : null);
             $imagensObj[] = $imagemObj;
         }
         return $imagensObj;

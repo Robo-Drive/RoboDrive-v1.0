@@ -18,7 +18,12 @@
 
     <!-- Visibilidade -->
     <div class="rd-field">
-        <input name="visibilidade" type="hidden" value="<?= isset($_GET["equipe_id"]) ? $_GET["equipe_id"] : "publico" ?>">
+        <?php
+            $visibilidadeAtual = isset($forum) 
+                ? (is_object($forum) ? $forum->getVisibilidade() : ($forum["visibilidade"] ?? "publico"))
+                : ($_GET["equipe_id"] ?? "publico");
+        ?>
+        <input name="visibilidade" type="hidden" value="<?= htmlspecialchars($visibilidadeAtual) ?>">
     </div>
 
     <!-- ID oculto -->

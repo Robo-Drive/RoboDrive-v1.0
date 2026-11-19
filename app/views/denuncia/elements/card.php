@@ -1,4 +1,4 @@
-<?php if(isset($denuncia)):
+<?php if(isset($denuncia) && isset($tiposDenuncia)):
 $tipoDenuncia = $tiposDenuncia[$denuncia["tipo"]];
 $primeiraDenuncia = new DateTimeImmutable($denuncia["primeira_denuncia"]);
 $diasPendente = $primeiraDenuncia->diff(new DateTimeImmutable())->days;

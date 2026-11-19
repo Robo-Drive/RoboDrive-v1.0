@@ -34,4 +34,3 @@ define('MAIL_USER', getenv('PHP_MAILER_TCC_EMAIL'));
 define('MAIL_PASS', getenv('PHP_MAILER_TCC_PASS'));
 define('MAIL_NAME', 'RoboDrive');
 
-//Configurações de gmail

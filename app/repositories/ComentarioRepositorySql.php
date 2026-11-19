@@ -4,11 +4,9 @@ namespace app\repositories;
 
 use app\database\ConnectionFactory;
 use app\models\Comentario;
-use app\models\Usuario;
-use DateTimeImmutable;
 use PDO;
 
-class ComentarioRepositorySql
+class ComentarioRepositorySql implements ComentarioRepositoryInterface
 {
     private PDO $connection;
 
@@ -49,7 +47,7 @@ class ComentarioRepositorySql
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':forum_id', $forumId, PDO::PARAM_INT);
         $stmt->execute();
-        return $this->hidratar($stmt->fetchAll(PDO::FETCH_ASSOC), 'postagem_forum_id');
+        return (new Comentario)::map($stmt->fetchAll(PDO::FETCH_ASSOC), 'postagem_forum_id');
     }
 
     public function buscarPorProjeto(int $projetoId): array
@@ -62,37 +60,44 @@ class ComentarioRepositorySql
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':projeto_id', $projetoId, PDO::PARAM_INT);
         $stmt->execute();
-        return $this->hidratar($stmt->fetchAll(PDO::FETCH_ASSOC), 'projeto_id');
+        return (new Comentario)::map($stmt->fetchAll(PDO::FETCH_ASSOC), 'projeto_id');
     }
 
-    public function buscarPorId(string $tipo, int $id): ?array
+    public function buscarPorId(string $tipo, int $id): ?Comentario
     {
         $tabela = ($tipo === 'projeto') ? 'comentario_projeto' : 'comentario_postagem_forum';
+        $chaveOrigem = ($tipo === 'projeto') ? 'projeto_id' : 'postagem_forum_id';
         $sql = "SELECT * FROM {$tabela} WHERE id = :id";
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
         $dados = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $dados ?: null;
+        if (!$dados)
+        {
+            return null;
+        }
+        $comentarios = (new Comentario)::map([$dados], $chaveOrigem);
+        return $comentarios[0] ?? null;
     }
 
     public function desativar(int $id, ?string $tipo = null): bool
     {
-        if ($tipo === 'projeto') {
+        if ($tipo === 'projeto')
+        {
             $sql = "UPDATE comentario_projeto SET status = false WHERE id = :id";
             $stmt = $this->connection->prepare($sql);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             return $stmt->execute();
         }
 
-        if ($tipo === 'forum') {
+        if ($tipo === 'forum')
+        {
             $sql = "UPDATE comentario_postagem_forum SET status = false WHERE id = :id";
             $stmt = $this->connection->prepare($sql);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             return $stmt->execute();
         }
 
-        // Caso o tipo não venha explícito, tenta atualizar em ambas
         $sql1 = "UPDATE comentario_postagem_forum SET status = false WHERE id = :id";
         $stmt1 = $this->connection->prepare($sql1);
         $stmt1->bindValue(':id', $id, PDO::PARAM_INT);
@@ -104,29 +109,5 @@ class ComentarioRepositorySql
         $stmt2->execute();
 
         return true;
-    }
-
-    private function hidratar(array $linhas, string $campoOrigem): array
-    {
-        $comentarios = [];
-        foreach ($linhas as $dado) {
-            $c = new Comentario();
-            $c->setId((int)$dado['id']);
-            $c->setConteudo($dado['conteudo']);
-            $c->setOrigemId((int)$dado[$campoOrigem]);
-            $c->setStatus((bool)$dado['status']);
-            $c->setCriadoEm(isset($dado['criado_em']) ? new DateTimeImmutable($dado['criado_em']) : null);
-
-            $u = new Usuario();
-            $u->setId((int)$dado['usuario_id']);
-            $u->setNome($dado['nome'] ?? '');
-            $u->setNomeUsuario($dado['nome_usuario'] ?? '');
-            $u->setImagem($dado['imagem'] ?? null);
-            $u->setRegra($dado['regra'] ?? 'usuario');
-
-            $c->setUsuario($u);
-            $comentarios[] = $c;
-        }
-        return $comentarios;
     }
 }

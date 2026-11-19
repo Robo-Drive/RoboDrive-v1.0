@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\controllers\MailController;
 use app\core\Controller;
 use app\helpers\ValidadorHelper;
 use app\models\Forum;
@@ -12,15 +13,32 @@ class ForumController extends Controller
 {
     private ForumRepositorySql $repositorySql;
     private ForumService $service;
+    private MailController $mailController;
+
     public function __construct()
     {
         $this->service = new ForumService();
         $this->repositorySql = new ForumRepositorySql();
+        $this->mailController = new MailController();
     }
     public function listar()
     {
-        $this->loginRequired();
-        $data['foruns'] = $this->repositorySql->listarTodos();
+        $status = $_GET["status"] ?? null;
+        $usuarioLogado = $_SESSION["usuario_logado"] ?? null;
+        $eAdmin = ($usuarioLogado && method_exists($usuarioLogado, 'getRegra') && $usuarioLogado->getRegra() === 'admin');
+
+        if ($eAdmin && $status !== null)
+        {
+            $data["statusFiltro"] = $status;
+            $data["foruns"] = ($status === "todos")
+                ? $this->repositorySql->listarAdminTodos()
+                : $this->repositorySql->listarPorStatus($status === "1");
+        }
+        else
+        {
+            $data['foruns'] = $this->repositorySql->listarTodos();
+        }
+
         $this->view("forum/list",$data);
     }
     public function cadastrar()
@@ -28,44 +46,172 @@ class ForumController extends Controller
         $this->loginRequired();
         $this->view("forum/create");
     }
-    public function salvar()
+        public function salvar()
     {
         $this->loginRequired();
+
         $validador = new ValidadorHelper();
         
         $conteudo = trim($_POST["conteudo"] ?? '');
-        $validador->obrigatorio('conteudo', $conteudo);
-        $validador->tamanho('conteudo', $conteudo, 3, 2000);
+        $validador->obrigatorio('conteudo', $conteudo, 'O conteúdo da postagem é obrigatório.');
+        $validador->tamanho('conteudo', $conteudo, 3, 2000, 'Conteúdo');
         
-        $posts["conteudo"]     = filter_input(INPUT_POST, 'conteudo', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $visibilidadePost      = $_POST["visibilidade"] ?? 'publico';
+        if ($validador->temErros())
+        {
+            if ($this->requisicaoAjax())
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "erros" => $validador->getErros()
+                ], 422);
+            }
+
+            $data["forum"] = $_POST;
+            $data["erros"] = $validador->getErros();
+            $this->view('forum/create', $data);
+            return;
+        }
+
+        $posts["conteudo"] = filter_input(INPUT_POST, 'conteudo', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $visibilidadePost = $_POST["visibilidade"] ?? 'publico';
         $posts["visibilidade"] = is_numeric($visibilidadePost) ? "equipe" : filter_input(INPUT_POST, 'visibilidade', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         
         $equipeId = null;
-        if (is_numeric($visibilidadePost)) {
+        if (is_numeric($visibilidadePost))
+        {
             $equipeId = (int)$visibilidadePost;
             $posts["equipe_id"] = $equipeId;
         }
 
         $forum = Forum::map([$posts])[0];
-        
-        if ($validador->temErros()) {
-            $data["forum"] = $posts;
-            $data["erros"] = $validador->getErros();
-            $this->view('forum/create', $data);
-        } else {
-            if ($this->service->salvarForum($forum)) {
-                // Se a postagem pertence a uma equipe, volta para o perfil da equipe
-                if ($equipeId) {
-                    $this->redirect(URL_BASE . '/equipe/perfil?id=' . $equipeId);
-                } else {
-                    $this->redirect(URL_BASE . '/forum');
+
+        try
+        {
+            if ($this->service->salvarForum($forum))
+            {
+                $redirectUrl = $equipeId ? (URL_BASE . '/equipe/perfil?id=' . $equipeId) : (URL_BASE . '/forum/listar');
+
+                if ($this->requisicaoAjax())
+                {
+                    $this->responderJson([
+                        "sucesso" => true,
+                        "mensagem" => "Postagem criada com sucesso!",
+                        "redirect" => $redirectUrl
+                    ]);
                 }
-            } else {
-                $data["forum"] = $forum;
-                $data["erros"]["forum"] = "Erro ao cadastrar postagem no fórum.";
-                $this->view('forum/create', $data);
+
+                $this->redirect($redirectUrl);
+                return;
             }
+
+            if ($this->requisicaoAjax())
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "mensagem" => "Não foi possível criar a publicação."
+                ], 500);
+            }
+
+            $data["forum"] = $posts;
+            $data["erros"]["forum"] = "Erro ao cadastrar postagem no fórum.";
+            $this->view('forum/create', $data);
+        }
+        catch (\Throwable $e)
+        {
+            if ($this->requisicaoAjax())
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "mensagem" => "Erro interno ao cadastrar postagem."
+                ], 500);
+            }
+
+            $data["forum"] = $posts;
+            $data["erros"]["forum"] = "Erro ao cadastrar postagem no fórum.";
+            $this->view('forum/create', $data);
+        }
+    }
+
+    public function atualizar()
+    {
+        $this->loginRequired();
+
+        $validador = new ValidadorHelper();
+        
+        $conteudo = trim($_POST["conteudo"] ?? '');
+        $validador->obrigatorio('conteudo', $conteudo, 'O conteúdo da postagem é obrigatório.');
+        $validador->tamanho('conteudo', $conteudo, 3, 2000, 'Conteúdo');
+        
+        if ($validador->temErros())
+        {
+            if ($this->requisicaoAjax())
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "erros" => $validador->getErros()
+                ], 422);
+            }
+
+            $data["forum"] = $_POST;
+            $data["erros"] = $validador->getErros();
+            $this->view('forum/edit', $data);
+            return;
+        }
+
+        $posts["id"] = $_POST["id"];
+        $posts["conteudo"] = filter_input(INPUT_POST, 'conteudo', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $visibilidadePost = $_POST["visibilidade"] ?? 'publico';
+        $posts["visibilidade"] = is_numeric($visibilidadePost) ? "equipe" : filter_input(INPUT_POST, 'visibilidade', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        
+        if (is_numeric($visibilidadePost))
+        {
+            $posts["equipe_id"] = (int)$visibilidadePost;
+        }
+
+        $forum = Forum::map([$posts])[0];
+
+        try
+        {
+            if ($this->service->editarForum($forum))
+            {
+                if ($this->requisicaoAjax())
+                {
+                    $this->responderJson([
+                        "sucesso" => true,
+                        "mensagem" => "Postagem atualizada com sucesso!",
+                        "redirect" => URL_BASE . '/forum/perfil?id=' . $posts["id"]
+                    ]);
+                }
+
+                $this->redirect(URL_BASE . '/forum/listar');
+                return;
+            }
+
+            if ($this->requisicaoAjax())
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "mensagem" => "Não foi possível atualizar a publicação."
+                ], 500);
+            }
+
+            $data["forum"] = $posts;
+            $data["erros"]["forum"] = "Erro ao atualizar postagem no fórum.";
+            $this->view('forum/edit', $data);
+        }
+        catch (\Throwable $e)
+        {
+            if ($this->requisicaoAjax())
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "mensagem" => "Erro interno ao atualizar postagem."
+                ], 500);
+            }
+
+            $data["forum"] = $posts;
+            $data["erros"]["forum"] = "Erro ao atualizar postagem no fórum.";
+            $this->view('forum/edit', $data);
         }
     }
     public function editar()
@@ -83,48 +229,12 @@ class ForumController extends Controller
             $this->view("forum/list");    
         }
     }
-    public function atualizar()
-    {
-        $this->loginRequired();
-        $validador = new ValidadorHelper();
-        
-        $validador->obrigatorio('conteudo',   $_POST["conteudo"]);
-        $validador->tamanho('conteudo', $_POST["conteudo"], 3,100);
-        
-        $posts["id"]  = $_POST["id"];
-        $posts["conteudo"]   = filter_input(INPUT_POST, 'conteudo', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $posts["visibilidade"] = is_numeric($_POST["visibilidade"]) ? "equipe" : filter_input(INPUT_POST, 'visibilidade', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        if(is_numeric($_POST["visibilidade"]))
-        {
-            $posts["equipe_id"] = $_POST["visibilidade"];
-        }
-        $forum = Forum::map([$posts])[0];
-        if($validador->temErros())
-        {
-            $data["forum"] = $posts;
-            $data["erros"] = $validador->getErros();
-            $this->view('forum/edit',$data);
-        }
-        else
-        {
-            if ($this->service->editarForum($forum))
-            {
-                $this->redirect(URL_BASE . '/forum/listar');
-            } 
-            else
-            {
-                $data["forum"] = $forum;
-                $data["erros"]["forum"] = "Erro: Este forum já está cadastrado!";
-                $this->view('forum/edit',$data);
-            }
-        }
-    }
+    
     public function perfil()
     {
-        $this->loginRequired();
-
         $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-        if (!$id) {
+        if (!$id)
+        {
             $this->redirect(URL_BASE . '/forum');
             return;
         }
@@ -133,10 +243,17 @@ class ForumController extends Controller
         $forumModel->setId($id);
         $postagem = $this->repositorySql->buscarId($forumModel);
 
-        if (!$postagem || $postagem->getConteudo() === null) {
+        if (!$postagem || $postagem->getConteudo() === null)
+        {
             $this->redirect(URL_BASE . '/forum');
             return;
         }
+
+        if ($postagem->getVisibilidade() === 'equipe')
+        {
+            $this->loginRequired();
+        }
+
         $data['comentarios'] = (new \app\repositories\ComentarioRepositorySql())->buscarPorForum((int)$postagem->getId());
         $data["forum"] = $postagem;
         $this->view("forum/perfil", $data);
@@ -149,7 +266,8 @@ class ForumController extends Controller
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
         $justificativa = trim(filter_input(INPUT_POST, 'justificativa', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
 
-        if (!$id) {
+        if (!$id)
+        {
             $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/forum');
             return;
         }
@@ -162,38 +280,35 @@ class ForumController extends Controller
         $eAdmin = ($usuarioLogado->getRegra() === 'admin');
 
         // Permite se for admin ou o próprio autor
-        if ($postagem && ($eAdmin || $postagem->getUsuario()->getId() === $usuarioLogado->getId())) {
+        if ($postagem && ($eAdmin || $postagem->getUsuario()->getId() === $usuarioLogado->getId()))
+        {
             $this->repositorySql->desativar($id);
 
             // Se houver denúncia pendente para este fórum, dispensa
             (new \app\repositories\DenunciaRepositorySql())->dispensar('forum', $id);
 
             // Notifica o autor por e-mail caso o admin tenha colocado justificativa
-            if (!empty($postagem->getUsuario()->getEmail())) {
-                $mailHelper = new \app\helpers\MailHelper();
-                $motivoHtml = !empty($justificativa) ? nl2br(htmlspecialchars($justificativa)) : 'Sem justificativa detalhada informada.';
-                $conteudoTrecho = htmlspecialchars(mb_strimwidth($postagem->getConteudo(), 0, 100, '...'));
-
-                $mensagem = "
-                    <div style='font-family: Arial, sans-serif; background-color: #06141C; color: #F2FEFE; padding: 20px; border: 2px solid #07556A;'>
-                        <h2 style='color: #F2A058;'>RoboDrive - Postagem Desativada</h2>
-                        <p>Olá, <strong>" . htmlspecialchars($postagem->getUsuario()->getNome()) . "</strong>,</p>
-                        <p>Informamos que sua postagem no fórum (<em>\"{$conteudoTrecho}\"</em>) foi desativada pela administração pelo seguinte motivo:</p>
-                        <blockquote style='background-color: #000505; border-left: 4px solid #F2A058; padding: 12px; margin: 15px 0; color: #F2FEFE;'>
-                            {$motivoHtml}
-                        </blockquote>
-                        <p>Caso discorde desta decisão, responda a este e-mail para solicitar revisão.</p>
-                        <hr style='border: 0; border-top: 1px solid #07556A; margin: 20px 0;'>
-                        <p style='font-size: 12px; color: #91B5BD;'>Atenciosamente,<br><strong>Administração RoboDrive</strong></p>
-                    </div>
-                ";
-
-                $mailHelper->enviarEmail($postagem->getUsuario()->getEmail(), null, '', '[RoboDrive] Sua postagem foi desativada', $mensagem);
+            if (!empty($postagem->getUsuario()->getEmail()))
+            {
+                try
+                {
+                    $this->mailController->enviarDesativacaoPostagem(
+                        $postagem->getUsuario()->getEmail(),
+                        $postagem->getUsuario()->getNome(),
+                        $postagem->getConteudo(),
+                        $justificativa ?? ''
+                    );
+                }
+                catch (\Throwable $e)
+                {
+                    error_log('Erro ao enviar e-mail de desativação de postagem: ' . $e->getMessage());
+                }
             }
         }
         // Se a postagem pertencia a uma equipe, volta para o perfil da equipe
         $equipeId = $postagem?->getEquipe()?->getId();
-        if ($equipeId) {
+        if ($equipeId)
+        {
             $this->redirect(URL_BASE . '/equipe/perfil?id=' . $equipeId);
             return;
         }

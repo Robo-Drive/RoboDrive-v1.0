@@ -70,7 +70,7 @@ class Equipe
         return $this;
     }
 
-        public function getHashAcesso(): ?string
+    public function getHashAcesso(): ?string
     {
         return $this->hashAcesso;
     }

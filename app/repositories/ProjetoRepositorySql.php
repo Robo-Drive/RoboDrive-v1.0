@@ -19,7 +19,8 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
 
     public function cadastrar(Projeto $projeto): ?array
     {
-        try {
+        try
+        {
             $this->connection->beginTransaction();
 
             $hash = strtoupper(bin2hex(random_bytes(6)));
@@ -82,8 +83,11 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
             $this->connection->commit();
 
             return [$projeto, $projetoVersao];
-        } catch (Throwable $e) {
-            if ($this->connection->inTransaction()) {
+        }
+        catch (Throwable $e)
+        {
+            if ($this->connection->inTransaction())
+            {
                 $this->connection->rollBack();
             }
 
@@ -122,8 +126,10 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
 
         $existente = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($existente) {
-            if ($existente['status'] === 'ativo') {
+        if ($existente)
+        {
+            if ($existente['status'] === 'ativo')
+            {
                 return false;
             }
 
@@ -292,24 +298,44 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
         return Projeto::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    public function buscarEquipe(int $id): ?array
+    public function buscarEquipe(int $id, ?string $busca = null): ?array
     {
         $sql = "SELECT p.*, c.nome AS categoria_nome
                 FROM projeto p
                 LEFT JOIN categoria c ON c.id = p.categoria_id
                 WHERE p.equipe_id = :id
-                  AND p.status = 1
-                ORDER BY p.id DESC";
+                  AND p.status = 1";
+
+        if (!empty($busca))
+        {
+            $sql .= " AND (p.nome LIKE :busca OR p.descricao LIKE :busca)";
+        }
+
+        $sql .= " ORDER BY p.id DESC";
 
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+        if (!empty($busca))
+        {
+            $stmt->bindValue(':busca', '%' . $busca . '%');
+        }
+
         $stmt->execute();
 
         $resultado = Projeto::map($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-        return $resultado ?: null;
+        return $resultado ?: [];
     }
+    public function transferirProprietario(int $projetoId, int $novoDonoId): bool
+    {
+        $sql = "UPDATE projeto SET usuario_id = :novo_dono_id WHERE id = :projeto_id";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':novo_dono_id', $novoDonoId, PDO::PARAM_INT);
+        $stmt->bindValue(':projeto_id', $projetoId, PDO::PARAM_INT);
 
+        return $stmt->execute();
+    }
     public function buscarNome(Projeto $projeto): ?array
     {
         $sql = "SELECT *
@@ -330,14 +356,16 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
                 FROM projeto
                 WHERE nome = :nome";
 
-        if ($id !== null) {
+        if ($id !== null)
+        {
             $sql .= " AND id <> :id";
         }
 
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':nome', trim($nome));
 
-        if ($id !== null) {
+        if ($id !== null)
+        {
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         }
 
@@ -379,12 +407,8 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function criarVersao(
-        int $projetoId,
-        int $usuarioId,
-        int $versao,
-        string $descricaoAlteracao
-    ): int {
+    public function criarVersao(int $projetoId, int $usuarioId, int $versao, string $descricaoAlteracao): int
+    {
         $sql = "INSERT INTO projeto_versao
                     (projeto_id, usuario_id, versao, descricao_alteracao)
                 VALUES
@@ -400,11 +424,8 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
         return (int) $this->connection->lastInsertId();
     }
 
-    public function adicionarMembro(
-        int $projetoId,
-        int $usuarioId,
-        string $papel = 'participante'
-    ): bool {
+    public function adicionarMembro(int $projetoId, int $usuarioId, string $papel = 'participante'): bool
+    {
         $sqlChecar = "SELECT id
                       FROM projeto_usuario
                       WHERE projeto_id = :projeto_id
@@ -417,7 +438,8 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
 
         $registroId = $stmtChecar->fetchColumn();
 
-        if ($registroId) {
+        if ($registroId)
+        {
             $sql = "UPDATE projeto_usuario
                     SET status = 'ativo', papel = :papel
                     WHERE id = :id";
@@ -464,6 +486,23 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
         $stmt = $this->connection->prepare($sql);
         $stmt->execute();
 
+        return Projeto::map($stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+
+    public function listarAdminTodos(): array
+    {
+        $sql = "SELECT * FROM projeto ORDER BY id DESC";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute();
+        return Projeto::map($stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+
+    public function listarPorStatus(bool $status): array
+    {
+        $sql = "SELECT * FROM projeto WHERE status = :status ORDER BY id DESC";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':status', $status ? 1 : 0, PDO::PARAM_INT);
+        $stmt->execute();
         return Projeto::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
@@ -536,5 +575,93 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
         $stmt->bindValue(':id', $projetoId, PDO::PARAM_INT);
 
         return $stmt->execute();
+    }
+    public function listarMembros(int $projetoId): array
+    {
+        $sql = "SELECT
+                    u.id,
+                    u.nome,
+                    u.nome_usuario,
+                    u.imagem,
+                    pu.papel
+                FROM usuario u
+                INNER JOIN projeto_usuario pu
+                    ON pu.usuario_id = u.id
+                WHERE pu.projeto_id = :projeto_id
+                  AND pu.status = 'ativo'";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':projeto_id', $projetoId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function buscarPublicoFiltrado($busca = null, $categoriaId = null): array
+    {
+        $sql = "SELECT p.* FROM projeto p WHERE p.visibilidade = 'publico' AND p.status = 1";
+
+        if (!empty($busca)) 
+        {
+            $sql .= " AND (p.nome LIKE :busca OR p.descricao LIKE :busca)";
+        }
+
+        if (!empty($categoriaId)) 
+        {
+            $sql .= " AND p.categoria_id = :categoria_id";
+        }
+
+        $sql .= " ORDER BY p.id DESC";
+
+        $stmt = $this->connection->prepare($sql);
+
+        if (!empty($busca)) 
+        {
+            $stmt->bindValue(':busca', '%' . $busca . '%');
+        }
+
+        if (!empty($categoriaId)) 
+        {
+            $stmt->bindValue(':categoria_id', $categoriaId, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        return Projeto::map($stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+    public function buscarUsuarioFiltrado(int $usuarioId, $busca = null, $categoriaId = null): array
+    {
+        $sql = "SELECT p.*
+                FROM projeto p
+                INNER JOIN projeto_usuario pu ON pu.projeto_id = p.id
+                WHERE pu.usuario_id = :usuario_id
+                  AND pu.status = 'ativo'
+                  AND p.status = 1";
+
+        if (!empty($busca)) 
+        {
+            $sql .= " AND (p.nome LIKE :busca OR p.descricao LIKE :busca)";
+        }
+
+        if (!empty($categoriaId)) 
+        {
+            $sql .= " AND p.categoria_id = :categoria_id";
+        }
+
+        $sql .= " ORDER BY p.id DESC";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
+
+        if (!empty($busca)) 
+        {
+            $stmt->bindValue(':busca', '%' . $busca . '%');
+        }
+
+        if (!empty($categoriaId)) 
+        {
+            $stmt->bindValue(':categoria_id', $categoriaId, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        return Projeto::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 }

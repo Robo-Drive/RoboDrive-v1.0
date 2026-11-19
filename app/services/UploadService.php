@@ -70,14 +70,16 @@ class UploadService
         $this->uploadPath = STORE_PATH . $pathFormatado;
         $this->relativePath = 'store' . $pathFormatado;
 
-        if (!is_dir($this->uploadPath)) {
+        if (!is_dir($this->uploadPath))
+        {
             mkdir($this->uploadPath, 0777, true);
         }
     }
 
     public function upload(array $file): array
     {
-        if ($file["size"] > $this->tamanhoMaximo) {
+        if ($file["size"] > $this->tamanhoMaximo)
+        {
             return [
                 "status" => false,
                 "mensagem" => "Arquivo muito grande. Tamanho máximo permitido é de: 5MB"
@@ -85,7 +87,8 @@ class UploadService
         }
 
         $extensao = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
-        if (!in_array($extensao, $this->extensoesPermitidas)) {
+        if (!in_array($extensao, $this->extensoesPermitidas))
+        {
             return [
                 "status" => false,
                 "mensagem" => "Extensão de arquivo não permitido"
@@ -97,7 +100,8 @@ class UploadService
         $destinoFisico = $this->uploadPath . "/" . $novaImagem;
         $destinoRelativo = $this->relativePath . "/" . $novaImagem;
 
-        if (move_uploaded_file($file["tmp_name"], $destinoFisico)) {
+        if (move_uploaded_file($file["tmp_name"], $destinoFisico))
+        {
             return [
                 "status" => true,
                 "mensagem" => $destinoRelativo // <-- Agora retorna "store/users/user-X/img/..." para salvar no banco!

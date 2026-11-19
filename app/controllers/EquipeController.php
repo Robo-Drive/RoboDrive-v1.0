@@ -8,7 +8,6 @@ use app\models\Equipe;
 use app\repositories\EquipeRepositorySql;
 use app\repositories\ForumRepositorySql;
 use app\repositories\ProjetoRepositorySql;
-use app\repositories\UsuarioRepositorySql;
 use app\services\EquipeService;
 
 class EquipeController extends Controller
@@ -25,667 +24,670 @@ class EquipeController extends Controller
         $this->forumRepositorySql = new ForumRepositorySql();
         $this->projetoRepositorySql = new ProjetoRepositorySql();
     }
-    private function ehAdmin(): bool
+
+    private function usuarioEhAdmin(): bool
     {
-        return isset($_SESSION['usuario_logado']) && $_SESSION['usuario_logado']->getRegra() === 'admin';
+        return isset($_SESSION["usuario_logado"]) && $_SESSION["usuario_logado"]->getRegra() === "admin";
     }
 
-    private function podeGerenciarEquipe(int $equipeId): bool
+    private function usuarioEhCoordenadorOuAdmin(int $equipeId): bool
     {
-        if ($this->ehAdmin())
+        if ($this->usuarioEhAdmin())
         {
             return true;
         }
-        $usuarioId = $_SESSION['usuario_logado']->getId();
-        return $this->repositorySql->usuarioECoordenador($equipeId,$usuarioId);
+
+        if (!isset($_SESSION["usuario_logado"]))
+        {
+            return false;
+        }
+
+        return $this->repositorySql->usuarioECoordenador($equipeId, $_SESSION["usuario_logado"]->getId());
     }
-    private function voltarPerfil(int $equipeId): void
+
+    private function usuarioEhMembroOuAdmin(int $equipeId): bool
     {
-        $this->redirect(URL_BASE . '/equipe/perfil?id=' . $equipeId);
+        if ($this->usuarioEhAdmin())
+        {
+            return true;
+        }
+
+        if (!isset($_SESSION["usuario_logado"]))
+        {
+            return false;
+        }
+
+        return $this->repositorySql->usuarioPertenceAEquipe($equipeId, $_SESSION["usuario_logado"]->getId());
     }
+
+    private function validarId(string $campo, mixed $valor): int|false
+    {
+        $id = filter_var($valor, FILTER_VALIDATE_INT);
+
+        if ($id === false || $id <= 0)
+        {
+            return false;
+        }
+
+        return $id;
+    }
+
     public function listar()
     {
         $this->loginRequired();
         $this->adminRequired();
 
-        $data['equipes'] = $this->repositorySql->listarTodos();
+        $status = $_GET["status"] ?? "1";
+
+        $data["statusFiltro"] = $status;
+        $data["equipes"] = ($status === "todos")
+            ? $this->repositorySql->listarAdminTodos()
+            : $this->repositorySql->listarPorStatus($status === "1");
 
         $this->view("equipe/list", $data);
     }
+
     public function cadastrar()
     {
         $this->loginRequired();
+
         $this->view("equipe/create");
     }
+
     public function salvar()
     {
         $this->loginRequired();
+
         $validador = new ValidadorHelper();
 
-        $nome = trim($_POST["nome"] ?? '');
-        $descricao = trim($_POST["descricao"] ?? '');
-        $senha = $_POST["senha"] ?? '';
-        $confirmarSenha = $_POST["confirmar_senha"] ?? '';
+        $validador->obrigatorio("nome", trim($_POST["nome"] ?? ""), "O nome da equipe é obrigatório.");
+        $validador->tamanho("nome", trim($_POST["nome"] ?? ""), 3, 100, "Nome da equipe");
 
-        $validador->obrigatorio('nome',$nome,'O nome da equipe é obrigatório');
-        $validador->tamanho('nome',$nome,3,100,'Nome da equipe');
+        $validador->obrigatorio("descricao", trim($_POST["descricao"] ?? ""), "A descrição da equipe é obrigatória.");
+        $validador->tamanho("descricao", trim($_POST["descricao"] ?? ""), 3, 2000, "Descrição");
 
-        $validador->obrigatorio('descricao',$descricao,'A descrição da equipe é obrigatória');
-        $validador->tamanho('descricao',$descricao,3,2000,'Descrição da equipe');
+        $validador->obrigatorio("senha", trim($_POST["senha"] ?? ""), "A senha de entrada é obrigatória.");
+        $validador->tamanho("senha", trim($_POST["senha"] ?? ""), 8, 100, "Senha");
 
-        $validador->obrigatorio('senha',$senha,'A senha da equipe é obrigatória');
-        $validador->tamanho('senha',$senha,8,100,'Senha da equipe');
+        $validador->confirmarValor(trim($_POST["senha"] ?? ""), trim($_POST["confirmar_senha"] ?? ""), "confirmar_senha", "As senhas não são iguais.");
 
-        $validador->confirmarValor($senha,$confirmarSenha,'confirmar_senha',"As senhas não são parecidas");
-        
-
-        $posts = [
-            "nome" => $nome,
-            "descricao" => $descricao,
-            "senha" => $senha
-        ];
-
-        if ($validador->temErros()) {
-
-            $data["equipe"] = $posts;
-            $data["erros"] = $validador->getErros();
-
-            $this->view('equipe/create', $data);
-            return;
-        }
-
-        $equipe = Equipe::map([$posts])[0];
-
-        if ($this->service->salvarEquipe($equipe))
+        if ($validador->temErros())
         {
-            $this->redirect(URL_BASE . '/usuario/perfil');
-            return;
+            $this->responderJson(["sucesso" => false, "erros" => $validador->getErros()], 422);
         }
 
-        $data["equipe"] = $posts;
-        $data["erros"]["equipe"] = "Não foi possível cadastrar a equipe. Verifique os dados e tente novamente.";
+        try
+        {
+            $equipe = new Equipe();
+            $equipe->setNome(trim($_POST["nome"]));
+            $equipe->setDescricao(trim($_POST["descricao"]));
+            $equipe->setSenha(trim($_POST["senha"]));
 
-        $this->view('equipe/create', $data);
+            $equipeCriada = $this->service->salvarEquipe($equipe);
+
+            if (!$equipeCriada)
+            {
+                $this->responderJson(["sucesso" => false, "mensagem" => "Não foi possível criar a equipe."], 500);
+            }
+
+            $this->responderJson([
+                "sucesso" => true,
+                "mensagem" => "Equipe criada com sucesso!",
+                "redirect" => URL_BASE . "/equipe/perfil?id=" . $equipeCriada->getId()
+            ]);
+        }
+        catch (\Throwable $e)
+        {
+            error_log($e->getMessage());
+
+            $this->responderJson(["sucesso" => false, "mensagem" => "Erro ao cadastrar equipe."], 500);
+        }
     }
 
     public function alterarPapel()
     {
         $this->loginRequired();
 
-        $equipeId = filter_input(
-            INPUT_POST,
-            'equipe_id',
-            FILTER_VALIDATE_INT
-        );
+        $validador = new ValidadorHelper();
 
-        $usuarioId = filter_input(
-            INPUT_POST,
-            'usuario_id',
-            FILTER_VALIDATE_INT
-        );
+        $validador->idPositivo("equipe_id", $_POST["equipe_id"] ?? "");
+        $validador->idPositivo("usuario_id", $_POST["usuario_id"] ?? "");
+        $validador->papelEquipe(trim($_POST["papel"] ?? ""));
 
-        $papel = trim($_POST['papel'] ?? '');
-
-        if (!$equipeId || !$usuarioId) {
-            $this->redirect(URL_BASE . '/equipe/listar');
-            return;
+        if ($validador->temErros())
+        {
+            $this->responderJson(["sucesso" => false, "erros" => $validador->getErros()], 422);
         }
 
-        if (!in_array(
-            $papel,
-            ['coordenador', 'participante'],
-            true
-        )) {
-            $this->voltarPerfil($equipeId);
-            return;
+        $equipeId = $this->validarId("equipe_id", $_POST["equipe_id"]);
+        $usuarioId = $this->validarId("usuario_id", $_POST["usuario_id"]);
+        $papel = trim($_POST["papel"]);
+
+        if (!$this->usuarioEhCoordenadorOuAdmin($equipeId))
+        {
+            $this->responderJson(["sucesso" => false, "mensagem" => "Apenas coordenadores podem alterar papéis."], 403);
         }
 
-        if (!$this->podeGerenciarEquipe($equipeId)) {
-            $this->voltarPerfil($equipeId);
-            return;
-        }
+        try
+        {
+            $membros = $this->repositorySql->listarMembros($equipeId);
+            $totalCoordenadores = 0;
+            $papelAtualUsuario = null;
 
-        $usuarioLogadoId = $_SESSION['usuario_logado']->getId();
+            foreach ($membros as $m)
+            {
+                if ($m["papel"] === "coordenador")
+                {
+                    $totalCoordenadores++;
+                }
 
-        // Coordenador não pode alterar o próprio papel.
-        if (
-            $usuarioId === $usuarioLogadoId &&
-            !$this->ehAdmin()
-        ) {
-            $this->voltarPerfil($equipeId);
-            return;
-        }
-
-        // Impedir que a equipe fique sem coordenador.
-        $membros = $this->repositorySql->listarMembros($equipeId);
-
-        $coordenadores = array_filter(
-            $membros,
-            fn($membro) => $membro['papel'] === 'coordenador'
-        );
-
-        $membroAlvo = null;
-
-        foreach ($membros as $membro) {
-            if ((int)$membro['id'] === $usuarioId) {
-                $membroAlvo = $membro;
-                break;
+                if ($m["id"] == $usuarioId)
+                {
+                    $papelAtualUsuario = $m["papel"];
+                }
             }
+
+            if ($papelAtualUsuario === null)
+            {
+                $this->responderJson(["sucesso" => false, "mensagem" => "Integrante não encontrado na equipe."], 404);
+            }
+
+            if ($papelAtualUsuario === "coordenador" && $papel !== "coordenador" && $totalCoordenadores <= 1)
+            {
+                $this->responderJson(["sucesso" => false, "mensagem" => "A equipe não pode ficar sem nenhum coordenador."], 422);
+            }
+
+            $sucesso = $this->repositorySql->alterarPapelMembro($equipeId, $usuarioId, $papel);
+
+            if (!$sucesso)
+            {
+                $this->responderJson(["sucesso" => false, "mensagem" => "Não foi possível alterar o papel do integrante."], 500);
+            }
+
+            $this->responderJson(["sucesso" => true, "mensagem" => "Papel atualizado com sucesso."]);
         }
+        catch (\Throwable $e)
+        {
+            error_log($e->getMessage());
 
-        if (!$membroAlvo) {
-            $this->voltarPerfil($equipeId);
-            return;
+            $this->responderJson(["sucesso" => false, "mensagem" => "Erro ao alterar o papel do integrante."], 500);
         }
-
-        if (
-            $membroAlvo['papel'] === 'coordenador' &&
-            $papel === 'participante' &&
-            count($coordenadores) <= 1
-        ) {
-            $this->voltarPerfil($equipeId);
-            return;
-        }
-
-        $this->repositorySql->atualizarPapelMembro(
-            $equipeId,
-            $usuarioId,
-            $papel
-        );
-
-        $this->voltarPerfil($equipeId);
     }
 
-    // Formulário de edição
     public function editar()
     {
         $this->loginRequired();
 
-        $id = filter_input(
-            INPUT_POST,
-            'id',
-            FILTER_VALIDATE_INT
-        );
-
-        if (!$id) {
-            $this->redirect(URL_BASE . '/equipe/listar');
-            return;
-        }
-
-        if (!$this->podeGerenciarEquipe($id)) {
-            $this->voltarPerfil($id);
-            return;
-        }
-
-        $equipe = new Equipe();
-        $equipe->setId($id);
-
-        $equipeEncontrada = $this->repositorySql->buscarId($equipe);
-
-        if (!$equipeEncontrada) {
-            $this->redirect(URL_BASE . '/equipe/listar');
-            return;
-        }
-
-        $data["equipe"] = $equipeEncontrada;
-
-        $this->view("equipe/edit", $data);
-    }
-
-    // Atualizar equipe
-    public function atualizar()
-    {
-        $this->loginRequired();
-
-        $id = filter_input(
-            INPUT_POST,
-            'id',
-            FILTER_VALIDATE_INT
-        );
-
-        if (!$id) {
-            $this->redirect(URL_BASE . '/equipe/listar');
-            return;
-        }
-
-        if (!$this->podeGerenciarEquipe($id)) {
-            $this->voltarPerfil($id);
-            return;
-        }
-
-        $nome = trim($_POST["nome"] ?? '');
-        $senha = $_POST["senha"] ?? '';
-        $descricao = trim($_POST["descricao"] ?? '');
-
         $validador = new ValidadorHelper();
+        $equipeId = $_GET["id"] ?? $_POST["id"] ?? "";
 
-        $validador->obrigatorio(
-            'nome',
-            $nome,
-            'O nome da equipe é obrigatório'
-        );
+        $validador->idPositivo("id", $equipeId);
 
-        $validador->tamanho(
-            'nome',
-            $nome,
-            3,
-            100,
-            'Nome da equipe'
-        );
-
-        if ($senha !== '') {
-            $validador->tamanho(
-                'senha',
-                $senha,
-                6,
-                100,
-                'Senha da equipe'
-            );
+        if ($validador->temErros())
+        {
+            $this->redirect(URL_BASE . "/equipe/listar");
         }
 
-        $posts = [
-            "id" => $id,
-            "nome" => htmlspecialchars(
-                $nome,
-                ENT_QUOTES,
-                'UTF-8'
-            ),
-            "descricao" => htmlspecialchars(
-                $descricao,
-                ENT_QUOTES,
-                'UTF-8'
-            ),
-            "senha" => $senha !== '' ? $senha : null
-        ];
+        $equipeId = $this->validarId("id", $equipeId);
 
-        if ($validador->temErros()) {
-
-            $data["equipe"] = $posts;
-            $data["erros"] = $validador->getErros();
-
-            $this->view('equipe/edit', $data);
-            return;
-        }
-
-        $equipe = Equipe::map([$posts])[0];
-
-        if ($this->service->editarEquipe($equipe)) {
-
-            $this->voltarPerfil($id);
-            return;
-        }
-
-        $data["equipe"] = $posts;
-        $data["erros"]["equipe"] =
-            "Não foi possível atualizar a equipe.";
-
-        $this->view('equipe/edit', $data);
-    }
-
-    // Perfil da equipe
-    public function perfil()
-    {
-        $this->loginRequired();
-
-        $equipeId = filter_input(
-            INPUT_GET,
-            'id',
-            FILTER_VALIDATE_INT
-        );
-
-        if (!$equipeId) {
-            $this->redirect(URL_BASE . '/equipe/listar');
-            return;
+        if (!$this->usuarioEhCoordenadorOuAdmin($equipeId))
+        {
+            $this->redirect(URL_BASE . "/equipe/perfil?id=" . $equipeId);
         }
 
         $equipe = new Equipe();
         $equipe->setId($equipeId);
 
-        $equipeEncontrada = $this->repositorySql->buscarId($equipe);
+        $equipeExistente = $this->repositorySql->buscarId($equipe);
 
-        if (!$equipeEncontrada) {
-            $this->redirect(URL_BASE . '/equipe/listar');
+        if (!$equipeExistente)
+        {
+            $this->redirect(URL_BASE . "/equipe/listar");
+        }
+
+        $data["equipe"] = $equipeExistente;
+
+        $this->view("equipe/edit", $data);
+    }
+
+    public function atualizar()
+    {
+        $this->loginRequired();
+
+        $validador = new ValidadorHelper();
+
+        $validador->idPositivo("id", $_POST["id"] ?? "");
+
+        $validador->obrigatorio("nome", trim($_POST["nome"] ?? ""), "O nome da equipe é obrigatório.");
+        $validador->tamanho("nome", trim($_POST["nome"] ?? ""), 3, 100, "Nome da equipe");
+
+        $validador->obrigatorio("descricao", trim($_POST["descricao"] ?? ""), "A descrição da equipe é obrigatória.");
+        $validador->tamanho("descricao", trim($_POST["descricao"] ?? ""), 3, 2000, "Descrição");
+
+        if (($_POST["senha"] ?? "") !== "")
+        {
+            $validador->tamanho("senha", trim($_POST["senha"]), 8, 100, "Senha");
+            $validador->confirmarValor(trim($_POST["senha"]), trim($_POST["confirmar_senha"] ?? ""), "confirmar_senha", "As senhas não são iguais.");
+        }
+
+        if ($validador->temErros())
+        {
+            $this->responderJson(["sucesso" => false, "erros" => $validador->getErros()], 422);
+        }
+
+        $equipeId = $this->validarId("id", $_POST["id"]);
+
+        if (!$this->usuarioEhCoordenadorOuAdmin($equipeId))
+        {
+            $this->responderJson(["sucesso" => false, "mensagem" => "Você não tem permissão para editar esta equipe."], 403);
+        }
+
+        try
+        {
+            $equipe = new Equipe();
+            $equipe->setId($equipeId);
+            $equipe->setNome(trim($_POST["nome"]));
+            $equipe->setDescricao(trim($_POST["descricao"]));
+
+            if (($_POST["senha"] ?? "") !== "")
+            {
+                $equipe->setSenha(trim($_POST["senha"]));
+            }
+
+            $atualizada = $this->service->editarEquipe($equipe);
+
+            if (!$atualizada)
+            {
+                $this->responderJson(["sucesso" => false, "mensagem" => "Não foi possível atualizar a equipe."], 500);
+            }
+
+            $this->responderJson([
+                "sucesso" => true,
+                "mensagem" => "Equipe atualizada com sucesso!",
+                "redirect" => URL_BASE . "/equipe/perfil?id=" . $equipeId
+            ]);
+        }
+        catch (\Throwable $e)
+        {
+            error_log($e->getMessage());
+
+            $this->responderJson(["sucesso" => false, "mensagem" => "Erro ao atualizar equipe."], 500);
+        }
+    }
+
+    public function perfil()
+    {
+        $this->loginRequired();
+
+        $validador = new ValidadorHelper();
+        $equipeId = $_GET["id"] ?? "";
+
+        $validador->idPositivo("id", $equipeId);
+
+        if ($validador->temErros())
+        {
+            $this->redirect(URL_BASE . "/equipe/listar");
+        }
+
+        $equipeId = $this->validarId("id", $equipeId);
+
+        $equipe = new Equipe();
+        $equipe->setId($equipeId);
+
+        $equipeExistente = $this->repositorySql->buscarId($equipe);
+
+        if (!$equipeExistente)
+        {
+            $this->redirect(URL_BASE . "/equipe/listar");
+        }
+
+        // RN: Apenas integrantes ativos (ou admin) podem acessar o perfil da equipe
+        if (!$this->usuarioEhMembroOuAdmin($equipeId))
+        {
+            $this->redirect(URL_BASE . "/usuario/perfil");
             return;
         }
 
-        $usuarioLogadoId = $_SESSION['usuario_logado']->getId();
+        $termoBuscaProjeto = $_GET["busca_projeto"] ?? null;
 
-        $papelUsuario = $this->repositorySql->buscarPapelUsuario(
-            $equipeId,
-            $usuarioLogadoId
-        );
+        $data["equipe"] = $equipeExistente;
+        $data["usuarios"] = $this->repositorySql->buscarUsuariosEquipe($equipeId);
+        $data["membros"] = $this->repositorySql->listarMembros($equipeId);
+        $data["projetos"] = $this->projetoRepositorySql->buscarEquipe($equipeId, $termoBuscaProjeto);
+        $data["foruns"] = $this->forumRepositorySql->buscarEquipe($equipeId);
+        // Apenas o coordenador da equipe (ou admin) pode visualizar as solicitações pendentes
+        $solicitacoesPendentes = $this->usuarioEhCoordenadorOuAdmin($equipeId)
+            ? $this->repositorySql->listarSolicitacoesPendentes($equipeId)
+            : [];
+        $data["solicitacoes"] = $solicitacoesPendentes;
+        $data["solicitacoesPendentes"] = $solicitacoesPendentes;
 
-        $isAdmin = $this->ehAdmin();
-
-        $data["equipe"] = $equipeEncontrada;
-
-        $data["papelUsuario"] = $papelUsuario;
-
-        $data["isAdmin"] = $isAdmin;
-
-        $data["isCoordenador"] =
-            $papelUsuario === 'coordenador';
-
-        $data["isMembro"] =
-            $papelUsuario !== null;
-
-        $data["podeGerenciar"] =
-            $isAdmin || $papelUsuario === 'coordenador';
-
-        $data["usuarios"] =
-            $this->repositorySql->buscarUsuariosEquipe($equipeId);
-
-        $data["todosUsuarios"] =
-            (new UsuarioRepositorySql())->listarTodos();
-
-        $data["solicitacoesPendentes"] =
-            $data["podeGerenciar"]
-                ? $this->repositorySql->listarSolicitacoesPendentes($equipeId)
-                : [];
-
-        $data["membros"] =
-            $this->repositorySql->listarMembros($equipeId);
-
-        $data["projetos"] =
-            $this->projetoRepositorySql->buscarEquipe($equipeId);
-
-        $data["postsForum"] =
-            $this->forumRepositorySql->buscarEquipe($equipeId);
+        if ($this->requisicaoAjax() && isset($_GET["busca_projeto"]))
+        {
+            $this->responderJson(["sucesso" => true, "projetos" => $data["projetos"]]);
+        }
 
         $this->view("equipe/perfil", $data);
     }
-    // Desativar equipe
+
     public function desativar()
     {
         $this->loginRequired();
         $this->adminRequired();
 
-        $id = filter_input(
-            INPUT_POST,
-            'id',
-            FILTER_VALIDATE_INT
-        );
+        $validador = new ValidadorHelper();
+        $validador->idPositivo("id", $_POST["id"] ?? "");
 
-        if (!$id)
-        {        
-            $this->redirect(URL_BASE . '/usuario/perfil');
-            return;
+        if ($validador->temErros())
+        {
+            $this->responderJson(["sucesso" => false, "erros" => $validador->getErros()], 422);
         }
 
-        $equipe = new Equipe();
-        $equipe->setId($id);
+        $equipeId = $this->validarId("id", $_POST["id"]);
 
-        $this->repositorySql->deletar($equipe);
-        $this->redirect(URL_BASE . '/usuario/perfil');
+        try
+        {
+            $sucesso = $this->repositorySql->desativar($equipeId);
+
+            if (!$sucesso)
+            {
+                $this->responderJson(["sucesso" => false, "mensagem" => "Não foi possível desativar a equipe."], 500);
+            }
+
+            $this->responderJson([
+                "sucesso" => true,
+                "mensagem" => "Equipe desativada com sucesso.",
+                "redirect" => URL_BASE . "/equipe/listar"
+            ]);
+        }
+        catch (\Throwable $e)
+        {
+            error_log($e->getMessage());
+
+            $this->responderJson(["sucesso" => false, "mensagem" => "Erro ao desativar equipe."], 500);
+        }
     }
 
-    // Adicionar membro
     public function adicionarMembro()
     {
         $this->loginRequired();
 
-        $equipeId = filter_input(
-            INPUT_POST,
-            'equipe_id',
-            FILTER_VALIDATE_INT
-        );
+        $validador = new ValidadorHelper();
 
-        $usuarioId = filter_input(
-            INPUT_POST,
-            'usuario_id',
-            FILTER_VALIDATE_INT
-        );
+        $validador->idPositivo("equipe_id", $_POST["equipe_id"] ?? "");
+        $validador->idPositivo("usuario_id", $_POST["usuario_id"] ?? "");
+        $validador->papelEquipe(trim($_POST["papel"] ?? "participante"));
 
-        $papel = trim($_POST['papel'] ?? 'participante');
-
-        if (!$equipeId || !$usuarioId) {
-            $this->redirect(URL_BASE . '/equipe/listar');
-            return;
+        if ($validador->temErros())
+        {
+            $this->responderJson(["sucesso" => false, "erros" => $validador->getErros()], 422);
         }
 
-        if (!in_array(
-            $papel,
-            ['coordenador', 'participante'],
-            true
-        )) {
-            $papel = 'participante';
+        $equipeId = $this->validarId("equipe_id", $_POST["equipe_id"]);
+        $usuarioId = $this->validarId("usuario_id", $_POST["usuario_id"]);
+        $papel = trim($_POST["papel"] ?? "participante");
+
+        if (!$this->usuarioEhCoordenadorOuAdmin($equipeId))
+        {
+            $this->responderJson(["sucesso" => false, "mensagem" => "Apenas coordenadores podem adicionar membros."], 403);
         }
 
-        if (!$this->podeGerenciarEquipe($equipeId)) {
-            $this->voltarPerfil($equipeId);
-            return;
+        try
+        {
+            $sucesso = $this->repositorySql->adicionarMembroDireto($equipeId, $usuarioId, $papel);
+
+            if (!$sucesso)
+            {
+                $this->responderJson(["sucesso" => false, "mensagem" => "Não foi possível adicionar o membro."], 500);
+            }
+
+            $this->responderJson(["sucesso" => true, "mensagem" => "Membro adicionado com sucesso."]);
         }
+        catch (\Throwable $e)
+        {
+            error_log($e->getMessage());
 
-        $this->repositorySql->adicionarMembro(
-            $equipeId,
-            $usuarioId,
-            $papel
-        );
-
-        $this->voltarPerfil($equipeId);
+            $this->responderJson(["sucesso" => false, "mensagem" => "Erro ao adicionar membro."], 500);
+        }
     }
 
-    // Remover membro
     public function removerMembro()
     {
         $this->loginRequired();
 
-        $equipeId = filter_input(
-            INPUT_POST,
-            'equipe_id',
-            FILTER_VALIDATE_INT
-        );
+        $validador = new ValidadorHelper();
 
-        $usuarioId = filter_input(
-            INPUT_POST,
-            'usuario_id',
-            FILTER_VALIDATE_INT
-        );
+        $validador->idPositivo("equipe_id", $_POST["equipe_id"] ?? "");
+        $validador->idPositivo("usuario_id", $_POST["usuario_id"] ?? "");
 
-        if (!$equipeId || !$usuarioId) {
-            $this->redirect(URL_BASE . '/equipe/listar');
-            return;
+        if ($validador->temErros())
+        {
+            $this->responderJson(["sucesso" => false, "erros" => $validador->getErros()], 422);
         }
 
-        if (!$this->podeGerenciarEquipe($equipeId)) {
-            $this->voltarPerfil($equipeId);
-            return;
+        $equipeId = $this->validarId("equipe_id", $_POST["equipe_id"]);
+        $usuarioAlvoId = $this->validarId("usuario_id", $_POST["usuario_id"]);
+        $usuarioLogadoId = $_SESSION["usuario_logado"]->getId();
+
+        $ehProprioUsuario = ($usuarioLogadoId == $usuarioAlvoId);
+
+        if (!$ehProprioUsuario && !$this->usuarioEhCoordenadorOuAdmin($equipeId))
+        {
+            $this->responderJson(["sucesso" => false, "mensagem" => "Você não tem permissão para remover este membro."], 403);
         }
+        
 
-        $usuarioLogadoId = $_SESSION['usuario_logado']->getId();
+        try
+        {
+            $membros = $this->repositorySql->listarMembros($equipeId);
+            $totalMembros = count($membros);
+            $totalCoordenadores = 0;
+            $alvoEraCoordenador = false;
+            $alvoEncontrado = false;
 
-        // Impedir que o coordenador remova a si mesmo.
-        if (
-            $usuarioId === $usuarioLogadoId &&
-            !$this->ehAdmin()
-        ) {
-            $this->voltarPerfil($equipeId);
-            return;
-        }
+            foreach ($membros as $m)
+            {
+                if ($m["papel"] === "coordenador")
+                {
+                    $totalCoordenadores++;
+                }
 
-        // Verificar se o usuário alvo é coordenador.
-        $membros = $this->repositorySql->listarMembros($equipeId);
+                if ($m["id"] == $usuarioAlvoId)
+                {
+                    $alvoEncontrado = true;
 
-        foreach ($membros as $membro) {
+                    if ($m["papel"] === "coordenador")
+                    {
+                        $alvoEraCoordenador = true;
+                    }
+                }
+            }
 
-            if ((int)$membro['id'] === $usuarioId) {
+            if (!$alvoEncontrado)
+            {
+                $this->responderJson(["sucesso" => false, "mensagem" => "Integrante não encontrado na equipe."], 404);
+            }
 
-                // Não permitir remover coordenadores por este método.
-                // O rebaixamento deve ser feito por alterarPapel.
+            if ($totalMembros <= 1)
+            {
+                $this->responderJson(["sucesso" => false, "mensagem" => "A equipe deve ter pelo menos um integrante."], 422);
+            }
 
-                if ($membro['papel'] === 'coordenador') {
-                    $this->voltarPerfil($equipeId);
+            if ($alvoEraCoordenador && $totalCoordenadores <= 1)
+            {
+                $novoCoordenadorId = $_POST["novo_coordenador_id"] ?? null;
+
+                if (!$novoCoordenadorId || (int)$novoCoordenadorId === (int)$usuarioAlvoId)
+                {
+                    $this->responderJson([
+                        "sucesso" => false, 
+                        "mensagem" => "Você é o único coordenador da equipe. Selecione outro membro para assumir a coordenação antes de sair."
+                    ], 422);
                     return;
                 }
 
-                break;
+                // Promove o novo membro selecionado a coordenador
+                $this->repositorySql->alterarPapelMembro($equipeId, (int)$novoCoordenadorId, "coordenador");
             }
+
+            $sucesso = $this->repositorySql->removerMembro($equipeId, $usuarioAlvoId);
+
+            if (!$sucesso)
+            {
+                $this->responderJson(["sucesso" => false, "mensagem" => "Não foi possível remover o membro."], 500);
+            }
+
+            $this->responderJson([
+                "sucesso" => true,
+                "mensagem" => $ehProprioUsuario ? "Você saiu da equipe." : "Membro removido com sucesso.",
+                "redirect" => $ehProprioUsuario ? URL_BASE . "/usuario/perfil" : null
+            ]);
         }
+        catch (\Throwable $e)
+        {
+            error_log($e->getMessage());
 
-        $this->repositorySql->removerMembro(
-            $equipeId,
-            $usuarioId
-        );
-
-        $this->voltarPerfil($equipeId);
+            $this->responderJson(["sucesso" => false, "mensagem" => "Erro ao remover integrante."], 500);
+        }
     }
 
-    // Formulário para entrar em equipe
     public function formularioEntrar()
     {
         $this->loginRequired();
 
-        $this->view('equipe/entrar');
+        $this->view("equipe/entrar");
     }
 
-    // Solicitar entrada em equipe
     public function entrar()
     {
         $this->loginRequired();
 
-        $hash = trim($_POST['hash'] ?? '');
-        $senha = $_POST['senha'] ?? '';
+        $hash = trim($_POST["hash"] ?? ($_POST["hash_acesso"] ?? ""));
 
-        $erros = [];
+        $validador = new ValidadorHelper();
 
-        if ($hash === '') {
-            $erros['hash'] = 'O código Hash é obrigatório.';
+        $validador->obrigatorio("hash", $hash, "Informe o Hash de acesso da equipe.");
+        $validador->obrigatorio("senha", trim($_POST["senha"] ?? ""), "Informe a senha da equipe.");
+
+        if ($validador->temErros())
+        {
+            $this->responderJson(["sucesso" => false, "erros" => $validador->getErros()], 422);
         }
 
-        if ($senha === '') {
-            $erros['senha'] = 'A senha da equipe é obrigatória.';
-        }
+        try
+        {
+            $equipe = $this->repositorySql->buscarPorHash($hash);
 
-        if (!empty($erros)) {
+            if (!$equipe)
+            {
+                $this->responderJson(["sucesso" => false, "mensagem" => "Equipe não encontrada para o Hash informado."], 404);
+            }
 
-            $this->view('equipe/entrar', [
-                'erros' => $erros,
-                'hash' => $hash
+            if (!$this->service->validarSenhaEquipe($equipe, trim($_POST["senha"])))
+            {
+                $this->responderJson(["sucesso" => false, "erros" => ["senha" => "Senha incorreta para esta equipe."]], 422);
+            }
+
+            $sucesso = $this->service->solicitarEntradaEquipe($equipe->getId(), $_SESSION["usuario_logado"]->getId());
+
+            if (!$sucesso)
+            {
+                $this->responderJson(["sucesso" => false, "mensagem" => "Você já possui solicitação ou já faz parte da equipe."], 422);
+            }
+
+            $this->responderJson([
+                "sucesso" => true,
+                "mensagem" => "Solicitação de entrada enviada com sucesso! Aguarde a aprovação do coordenador.",
+                "redirect" => URL_BASE . "/usuario/perfil"
             ]);
-
-            return;
         }
+        catch (\Throwable $e)
+        {
+            error_log($e->getMessage());
 
-        $equipe = $this->repositorySql->buscarPorHash($hash);
-
-        if (!$equipe) {
-
-            $erros['geral'] = 'Código Hash não encontrado.';
-
-            $this->view('equipe/entrar', [
-                'erros' => $erros,
-                'hash' => $hash
-            ]);
-
-            return;
+            $this->responderJson(["sucesso" => false, "mensagem" => "Erro ao solicitar entrada na equipe."], 500);
         }
-
-        if (!password_verify($senha, $equipe->getSenha())) {
-
-            $erros['senha'] =
-                'Senha incorreta para esta equipe.';
-
-            $this->view('equipe/entrar', [
-                'erros' => $erros,
-                'hash' => $hash
-            ]);
-
-            return;
-        }
-
-        $usuarioLogadoId = $_SESSION['usuario_logado']->getId();
-
-        $solicitou = $this->repositorySql->solicitarEntrada(
-            $equipe->getId(),
-            $usuarioLogadoId
-        );
-
-        if (!$solicitou) {
-
-            $erros['geral'] =
-                'Você já é um membro ativo desta equipe ou não foi possível enviar a solicitação.';
-
-            $this->view('equipe/entrar', [
-                'erros' => $erros,
-                'hash' => $hash
-            ]);
-
-            return;
-        }
-
-        $this->view('equipe/entrar', [
-            'sucesso' =>
-                'Solicitação enviada com sucesso! Aguarde a aprovação do coordenador da equipe.'
-        ]);
     }
 
-    // Aprovar solicitação
     public function aprovarSolicitacao()
     {
         $this->loginRequired();
 
-        $equipeId = filter_input(
-            INPUT_POST,
-            'equipe_id',
-            FILTER_VALIDATE_INT
-        );
+        $validador = new ValidadorHelper();
 
-        $usuarioId = filter_input(
-            INPUT_POST,
-            'usuario_id',
-            FILTER_VALIDATE_INT
-        );
+        $validador->idPositivo("equipe_id", $_POST["equipe_id"] ?? "");
+        $validador->idPositivo("usuario_id", $_POST["usuario_id"] ?? "");
 
-        if (!$equipeId || !$usuarioId) {
-            $this->redirect(URL_BASE . '/equipe/listar');
-            return;
+        if ($validador->temErros())
+        {
+            $this->responderJson(["sucesso" => false, "erros" => $validador->getErros()], 422);
         }
 
-        if (!$this->podeGerenciarEquipe($equipeId)) {
-            $this->voltarPerfil($equipeId);
-            return;
+        $equipeId = $this->validarId("equipe_id", $_POST["equipe_id"]);
+        $usuarioId = $this->validarId("usuario_id", $_POST["usuario_id"]);
+
+        if (!$this->usuarioEhCoordenadorOuAdmin($equipeId))
+        {
+            $this->responderJson(["sucesso" => false, "mensagem" => "Apenas coordenadores podem aprovar solicitações."], 403);
         }
 
-        $this->repositorySql->aprovarSolicitacao(
-            $equipeId,
-            $usuarioId
-        );
+        try
+        {
+            $sucesso = $this->service->aprovarSolicitacao($equipeId, $usuarioId);
 
-        $this->voltarPerfil($equipeId);
+            if (!$sucesso)
+            {
+                $this->responderJson(["sucesso" => false, "mensagem" => "Não foi possível aprovar a solicitação."], 500);
+            }
+
+            $this->responderJson(["sucesso" => true, "mensagem" => "Solicitação aprovada com sucesso."]);
+        }
+        catch (\Throwable $e)
+        {
+            error_log($e->getMessage());
+
+            $this->responderJson(["sucesso" => false, "mensagem" => "Erro ao aprovar solicitação."], 500);
+        }
     }
 
-    // Rejeitar solicitação
     public function rejeitarSolicitacao()
     {
         $this->loginRequired();
 
-        $equipeId = filter_input(
-            INPUT_POST,
-            'equipe_id',
-            FILTER_VALIDATE_INT
-        );
+        $validador = new ValidadorHelper();
 
-        $usuarioId = filter_input(
-            INPUT_POST,
-            'usuario_id',
-            FILTER_VALIDATE_INT
-        );
+        $validador->idPositivo("equipe_id", $_POST["equipe_id"] ?? "");
+        $validador->idPositivo("usuario_id", $_POST["usuario_id"] ?? "");
 
-        if (!$equipeId || !$usuarioId) {
-            $this->redirect(URL_BASE . '/equipe/listar');
-            return;
+        if ($validador->temErros())
+        {
+            $this->responderJson(["sucesso" => false, "erros" => $validador->getErros()], 422);
         }
 
-        if (!$this->podeGerenciarEquipe($equipeId)) {
-            $this->voltarPerfil($equipeId);
-            return;
+        $equipeId = $this->validarId("equipe_id", $_POST["equipe_id"]);
+        $usuarioId = $this->validarId("usuario_id", $_POST["usuario_id"]);
+
+        if (!$this->usuarioEhCoordenadorOuAdmin($equipeId))
+        {
+            $this->responderJson(["sucesso" => false, "mensagem" => "Apenas coordenadores podem rejeitar solicitações."], 403);
         }
 
-        $this->repositorySql->rejeitarSolicitacao(
-            $equipeId,
-            $usuarioId
-        );
+        try
+        {
+            $sucesso = $this->service->rejeitarSolicitacao($equipeId, $usuarioId);
 
-        $this->voltarPerfil($equipeId);
+            if (!$sucesso)
+            {
+                $this->responderJson(["sucesso" => false, "mensagem" => "Não foi possível rejeitar a solicitação."], 500);
+            }
+
+            $this->responderJson(["sucesso" => true, "mensagem" => "Solicitação rejeitada com sucesso."]);
+        }
+        catch (\Throwable $e)
+        {
+            error_log($e->getMessage());
+
+            $this->responderJson(["sucesso" => false, "mensagem" => "Erro ao rejeitar solicitação."], 500);
+        }
     }
 }

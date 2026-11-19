@@ -3,9 +3,10 @@
 namespace app\repositories;
 
 use app\database\ConnectionFactory;
+use app\models\Denuncia;
 use PDO;
 
-class DenunciaRepositorySql
+class DenunciaRepositorySql implements DenunciaRepositoryInterface
 {
     private PDO $connection;
 
@@ -40,7 +41,8 @@ class DenunciaRepositorySql
 
         $resultado = [];
 
-        foreach ($grupos as $g) {
+        foreach ($grupos as $g)
+        {
             $tipo = $g['tipo'];
             $alvoId = (int)$g['alvo_id'];
 
@@ -51,7 +53,8 @@ class DenunciaRepositorySql
             $stmtMotivos->bindValue(':alvo_id', $alvoId, PDO::PARAM_INT);
             $stmtMotivos->execute();
             $motivos = [];
-            foreach ($stmtMotivos->fetchAll(PDO::FETCH_ASSOC) as $m) {
+            foreach ($stmtMotivos->fetchAll(PDO::FETCH_ASSOC) as $m)
+            {
                 $motivos[$m['motivo']] = (int)$m['qtd'];
             }
 
@@ -62,40 +65,50 @@ class DenunciaRepositorySql
             $respUser = "usuario";
             $respEmail = "";
 
-            if ($tipo === 'projeto') {
+            if ($tipo === 'projeto')
+            {
                 $stmtItem = $this->connection->prepare("SELECT p.nome, u.id as u_id, u.nome as u_nome, u.nome_usuario, u.email FROM projeto p JOIN usuario u ON u.id = p.usuario_id WHERE p.id = :id");
                 $stmtItem->bindValue(':id', $alvoId, PDO::PARAM_INT);
                 $stmtItem->execute();
-                if ($item = $stmtItem->fetch(PDO::FETCH_ASSOC)) {
+                if ($item = $stmtItem->fetch(PDO::FETCH_ASSOC))
+                {
                     $alvoNome = $item['nome'];
                     $respId = $item['u_id'];
                     $respNome = $item['u_nome'];
                     $respUser = $item['nome_usuario'];
                     $respEmail = $item['email'];
                 }
-            } elseif ($tipo === 'forum') {
+            }
+            elseif ($tipo === 'forum')
+            {
                 $stmtItem = $this->connection->prepare("SELECT f.conteudo, u.id as u_id, u.nome as u_nome, u.nome_usuario, u.email FROM postagem_forum f JOIN usuario u ON u.id = f.usuario_id WHERE f.id = :id");
                 $stmtItem->bindValue(':id', $alvoId, PDO::PARAM_INT);
                 $stmtItem->execute();
-                if ($item = $stmtItem->fetch(PDO::FETCH_ASSOC)) {
+                if ($item = $stmtItem->fetch(PDO::FETCH_ASSOC))
+                {
                     $alvoNome = mb_strimwidth($item['conteudo'], 0, 80, '...');
                     $respId = $item['u_id'];
                     $respNome = $item['u_nome'];
                     $respUser = $item['nome_usuario'];
                     $respEmail = $item['email'];
                 }
-            } elseif ($tipo === 'usuario') {
+            }
+            elseif ($tipo === 'usuario')
+            {
                 $stmtItem = $this->connection->prepare("SELECT id, nome, nome_usuario, email FROM usuario WHERE id = :id");
                 $stmtItem->bindValue(':id', $alvoId, PDO::PARAM_INT);
                 $stmtItem->execute();
-                if ($item = $stmtItem->fetch(PDO::FETCH_ASSOC)) {
+                if ($item = $stmtItem->fetch(PDO::FETCH_ASSOC))
+                {
                     $alvoNome = $item['nome'];
                     $respId = $item['id'];
                     $respNome = $item['nome'];
                     $respUser = $item['nome_usuario'];
                     $respEmail = $item['email'];
                 }
-            } elseif ($tipo === 'equipe') {
+            }
+            elseif ($tipo === 'equipe')
+            {
                 $stmtItem = $this->connection->prepare("
                     SELECT e.nome, u.id as u_id, u.nome as u_nome, u.nome_usuario, u.email 
                     FROM equipe e 
@@ -106,17 +119,20 @@ class DenunciaRepositorySql
                 ");
                 $stmtItem->bindValue(':id', $alvoId, PDO::PARAM_INT);
                 $stmtItem->execute();
-                if ($item = $stmtItem->fetch(PDO::FETCH_ASSOC)) {
+                if ($item = $stmtItem->fetch(PDO::FETCH_ASSOC))
+                {
                     $alvoNome = $item['nome'];
-                    if (!empty($item['u_id'])) {
+                    if (!empty($item['u_id']))
+                    {
                         $respId = $item['u_id'];
                         $respNome = $item['u_nome'];
                         $respUser = $item['nome_usuario'];
                         $respEmail = $item['email'] ?? '';
                     }
                 }
-                        } elseif ($tipo === 'comentario') {
-                // Tenta achar em comentario_postagem_forum primeiro
+            }
+            elseif ($tipo === 'comentario')
+            {
                 $stmtItem = $this->connection->prepare("
                     SELECT c.conteudo, u.id as u_id, u.nome as u_nome, u.nome_usuario, u.email 
                     FROM comentario_postagem_forum c 
@@ -127,8 +143,8 @@ class DenunciaRepositorySql
                 $stmtItem->execute();
                 $item = $stmtItem->fetch(PDO::FETCH_ASSOC);
 
-                // Se não for do fórum, procura em comentario_projeto
-                if (!$item) {
+                if (!$item)
+                {
                     $stmtItem = $this->connection->prepare("
                         SELECT c.conteudo, u.id as u_id, u.nome as u_nome, u.nome_usuario, u.email 
                         FROM comentario_projeto c 
@@ -140,7 +156,8 @@ class DenunciaRepositorySql
                     $item = $stmtItem->fetch(PDO::FETCH_ASSOC);
                 }
 
-                if ($item) {
+                if ($item)
+                {
                     $alvoNome = mb_strimwidth($item['conteudo'], 0, 80, '...');
                     $respId = $item['u_id'];
                     $respNome = $item['u_nome'];
@@ -163,7 +180,7 @@ class DenunciaRepositorySql
             ];
         }
 
-        return $resultado;
+        return Denuncia::map($resultado);
     }
     
     public function dispensar(string $tipo, int $alvoId): bool

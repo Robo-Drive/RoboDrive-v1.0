@@ -175,3 +175,70 @@ if (modalDesativar) {
         elemento.focus();
     }
 }
+// --- VALIDAÇÃO AJAX DE ENVIAR COMUNICADO COM MENSAGEM OBRIGATÓRIA ---
+if (modalComunicado) {
+    const formComunicado = modalComunicado.querySelector("form");
+
+    formComunicado.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // Remove erro anterior se houver
+        const erroAntigo = formComunicado.querySelector(".rd-error-ajax");
+        if (erroAntigo) erroAntigo.remove();
+
+        const textarea = formComunicado.querySelector("textarea[name='mensagem']");
+        const mensagem = textarea.value.trim();
+
+        // Validação no frontend (mínimo de 10 caracteres)
+        if (mensagem.length < 10) {
+            exibirErroComunicado(textarea, "A mensagem do comunicado é obrigatória e deve ter pelo menos 10 caracteres.");
+            return;
+        }
+
+        const submitBtn = formComunicado.querySelector("button[type='submit']");
+        const textoOriginal = submitBtn ? submitBtn.innerText : "Enviar comunicado";
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Enviando...";
+        }
+
+        try {
+            const formData = new FormData(formComunicado);
+            const response = await fetch(formComunicado.action, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.sucesso) {
+                alert(data.mensagem || "Comunicado enviado com sucesso!");
+                modalComunicado.close();
+                formComunicado.reset();
+            } else {
+                exibirErroComunicado(textarea, data.mensagem || "Não foi possível enviar o comunicado.");
+            }
+        } catch (erro) {
+            console.error("Erro no envio do comunicado:", erro);
+            // Fallback: se a resposta não for JSON, submete normal
+            formComunicado.submit();
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = textoOriginal;
+            }
+        }
+    });
+
+    function exibirErroComunicado(elemento, mensagem) {
+        elemento.classList.add("border-red-500");
+        const p = document.createElement("p");
+        p.className = "rd-error rd-error-ajax mt-1.5 text-xs text-red-400 font-bold";
+        p.textContent = mensagem;
+        elemento.insertAdjacentElement("afterend", p);
+        elemento.focus();
+    }
+}

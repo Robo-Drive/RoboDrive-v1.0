@@ -3,8 +3,8 @@
 namespace app\controllers;
 
 use app\core\Controller;
+use app\helpers\ValidadorHelper;
 use app\repositories\ComentarioRepositorySql;
-use app\repositories\DenunciaRepositorySql;
 
 class ComentarioController extends Controller
 {
@@ -14,115 +14,92 @@ class ComentarioController extends Controller
     {
         $this->repositorySql = new ComentarioRepositorySql();
     }
-
     public function salvar()
     {
         $this->loginRequired();
 
-        $tipo      = trim($_POST['tipo'] ?? '');
-        $origemId  = $_POST['origem_id'] ?? 0;
-        $conteudo  = trim($_POST['conteudo'] ?? '');
-        $usuarioId = $_SESSION['usuario_logado']->getId();
+        $validador = new ValidadorHelper();
 
-        if (empty($conteudo) || $origemId <= 0 || !in_array($tipo, ['forum', 'projeto'], true))
+        $validador->obrigatorio("conteudo", trim($_POST["conteudo"] ?? ""));
+        $validador->tipoComentario("tipo", trim($_POST["tipo"] ?? ""));
+        $validador->idPositivo("origem_id", $_POST["origem_id"] ?? "");
+
+        if ($validador->temErros())
         {
-            $this->redirect($_SERVER['HTTP_REFERER'] ?? URL_BASE);
+            $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE);
             return;
         }
 
-        if ($tipo === 'forum')
-        {
-            $this->repositorySql->salvarForum($origemId, $usuarioId, $conteudo);
-            $this->redirect(URL_BASE . '/forum/perfil?id=' . $origemId);
-            return;
-        }
+        $tipo = trim($_POST["tipo"]);
+        $origemId = filter_var($_POST["origem_id"], FILTER_VALIDATE_INT);
+        $conteudo = trim($_POST["conteudo"]);
+        $usuarioId = $_SESSION["usuario_logado"]->getId();
 
-        if ($tipo === 'projeto')
+        try
         {
-            $this->repositorySql->salvarProjeto($origemId, $usuarioId, $conteudo);
-            $this->redirect(URL_BASE . '/projeto/perfil?id=' . $origemId);
+            if ($tipo === "forum")
+            {
+                $this->repositorySql->salvarForum($origemId, $usuarioId, $conteudo);
+
+                $this->redirect(URL_BASE . "/forum/perfil?id=" . $origemId);
+                return;
+            }
+
+            if ($tipo === "projeto")
+            {
+                $this->repositorySql->salvarProjeto($origemId, $usuarioId, $conteudo);
+
+                $this->redirect(URL_BASE . "/projeto/perfil?id=" . $origemId);
+                return;
+            }
+        }
+        catch (\Throwable $e)
+        {
+            error_log("Erro ao salvar comentário: " . $e->getMessage());
+
+            $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE);
             return;
         }
     }
-
     public function desativar()
     {
         $this->loginRequired();
 
-        $id        = (int)($_POST['id'] ?? 0);
-        $tipo      = trim($_POST['tipo'] ?? '');
-        $usuarioLogado = $_SESSION['usuario_logado'];
+        $validador = new ValidadorHelper();
 
-        if ($id <= 0)
+        $validador->idPositivo("id", $_POST["id"] ?? "");
+        $validador->tipoComentario("tipo", trim($_POST["tipo"] ?? ""));
+
+        if ($validador->temErros())
         {
-            $this->redirect($_SERVER['HTTP_REFERER'] ?? URL_BASE);
+            $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE);
             return;
         }
 
-        $comentario = $this->repositorySql->buscarPorId($tipo, $id);
-        if (!$comentario)
+        $id = filter_var($_POST["id"], FILTER_VALIDATE_INT);
+        $tipo = trim($_POST["tipo"]);
+        $usuarioLogado = $_SESSION["usuario_logado"];
+
+        try
         {
-            $this->redirect($_SERVER['HTTP_REFERER'] ?? URL_BASE);
-            return;
-        }
+            $comentario = $this->repositorySql->buscarPorId($tipo, $id);
 
-        // Permite desativar se for o autor do comentário OU admin
-        if ($comentario['usuario_id'] == $usuarioLogado->getId() || $usuarioLogado->getRegra() === 'admin')
+            if (!$comentario)
+            {
+                $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE);
+                return;
+            }
+
+            if ($comentario->getUsuario()->getId() == $usuarioLogado->getId() || $usuarioLogado->getRegra() === "admin")
+            {
+                $this->repositorySql->desativar($id, $tipo);
+            }
+        }
+        catch (\Throwable $e)
         {
-            $this->repositorySql->desativar($id, $tipo);
+            error_log("Erro ao desativar comentário: " . $e->getMessage());
         }
 
-        $this->redirect($_SERVER['HTTP_REFERER'] ?? URL_BASE);
-    }
-
-    /* public function desativar()
-    {
-        $this->loginRequired();
-        $this->adminRequired();
-
-        $id = $_POST['id'] ?? 0;
-        if ($id > 0)
-        {
-            $this->repositorySql->desativar($id);
-            (new DenunciaRepositorySql())->dispensar('comentario', $id);
-        }
-
-        $this->redirect($_SERVER['HTTP_REFERER'] ?? URL_BASE . '/denuncia');
-    } */
-    public function excluir()
-    {
-        $this->loginRequired();
-
-        $id   = (int)($_POST['id'] ?? 0);
-        $tipo = trim($_POST['tipo'] ?? '');
-        $usuarioLogado = $_SESSION['usuario_logado'];
-
-        if ($id <= 0) {
-            $this->redirect($_SERVER['HTTP_REFERER'] ?? URL_BASE);
-            return;
-        }
-
-        $comentario = $this->repositorySql->buscarPorId($tipo, $id);
-        if (!$comentario) {
-            $this->redirect($_SERVER['HTTP_REFERER'] ?? URL_BASE);
-            return;
-        }
-
-        if ($comentario['usuario_id'] == $usuarioLogado->getId() || $usuarioLogado->getRegra() === 'admin') {
-            $this->repositorySql->desativar($id, $tipo);
-        }
-
-        // Volta exatamente para o Fórum ou Projeto de origem
-        if ($tipo === 'forum' && !empty($comentario['postagem_forum_id'])) {
-            $this->redirect(URL_BASE . '/forum/perfil?id=' . $comentario['postagem_forum_id']);
-            return;
-        }
-
-        if ($tipo === 'projeto' && !empty($comentario['projeto_id'])) {
-            $this->redirect(URL_BASE . '/projeto/perfil?id=' . $comentario['projeto_id']);
-            return;
-        }
-
-        $this->redirect($_SERVER['HTTP_REFERER'] ?? URL_BASE);
+        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE);
     }
 }

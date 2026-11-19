@@ -19,7 +19,8 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
 
     public function cadastrar(Usuario $usuario): ?Usuario
     {
-        try {
+        try
+        {
             $sql = "INSERT INTO usuario (nome, nome_usuario, email, senha, regra)
                     VALUES (:nome, :nome_usuario, :email, :senha, :regra)";
 
@@ -30,14 +31,17 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
             $stmt->bindValue(':senha', password_hash($usuario->getSenha(), PASSWORD_DEFAULT));
             $stmt->bindValue(':regra', 'usuario');
 
-            if (!$stmt->execute()) {
+            if (!$stmt->execute())
+            {
                 return null;
             }
 
             $usuario->setId((int) $this->connection->lastInsertId());
 
             return $usuario;
-        } catch (PDOException $e) {
+        }
+        catch (PDOException $e)
+        {
             error_log('Erro ao cadastrar usuário: ' . $e->getMessage());
             return null;
         }
@@ -45,47 +49,56 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
 
     public function editar(Usuario $usuario): ?Usuario
     {
-        try {
+        try
+        {
             $campos = [];
             $parametros = [];
 
-            if ($usuario->getNome() !== null) {
+            if ($usuario->getNome() !== null)
+            {
                 $campos[] = 'nome = :nome';
                 $parametros[':nome'] = $usuario->getNome();
             }
 
-            if ($usuario->getNomeUsuario() !== null) {
+            if ($usuario->getNomeUsuario() !== null)
+            {
                 $campos[] = 'nome_usuario = :nome_usuario';
                 $parametros[':nome_usuario'] = $usuario->getNomeUsuario();
             }
 
-            if ($usuario->getSenha() !== null && $usuario->getSenha() !== '') {
+            if ($usuario->getSenha() !== null && $usuario->getSenha() !== '')
+            {
                 $campos[] = 'senha = :senha';
                 $parametros[':senha'] = password_hash($usuario->getSenha(), PASSWORD_DEFAULT);
             }
 
-            if ($usuario->getBiografia() !== null) {
+            if ($usuario->getBiografia() !== null)
+            {
                 $campos[] = 'biografia = :biografia';
                 $parametros[':biografia'] = $usuario->getBiografia();
             }
 
-            if ($usuario->getImagem() !== null) {
+            if ($usuario->getImagem() !== null)
+            {
                 $campos[] = 'imagem = :imagem';
-                $parametros[':imagem'] = $usuario->getImagem();
+                $parametros[':imagem'] = ($usuario->getImagem() === "") ? null : $usuario->getImagem();
             }
 
-            if ($usuario->getEmail() !== null) {
+            if ($usuario->getEmail() !== null)
+            {
                 $campos[] = 'email = :email';
                 $parametros[':email'] = $usuario->getEmail();
             }
 
-            if ($usuario->getRegra() !== null) {
+            if ($usuario->getRegra() !== null)
+            {
                 $campos[] = 'regra = :regra';
                 $parametros[':regra'] = $usuario->getRegra();
             }
 
             // Não há nada para atualizar.
-            if (empty($campos)) {
+            if (empty($campos))
+            {
                 return $usuario;
             }
 
@@ -93,14 +106,17 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
 
             $stmt = $this->connection->prepare($sql);
 
-            foreach ($parametros as $chave => $valor) {
+            foreach ($parametros as $chave => $valor)
+            {
                 $stmt->bindValue($chave, $valor);
             }
 
             $stmt->bindValue(':id', $usuario->getId(), PDO::PARAM_INT);
 
             return $stmt->execute() ? $usuario : null;
-        } catch (PDOException $e) {
+        }
+        catch (PDOException $e)
+        {
             error_log('Erro ao editar usuário: ' . $e->getMessage());
             return null;
         }
@@ -187,7 +203,8 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
 
     public function redefinirSenhaComToken(string $token, string $novaSenha): bool
     {
-        try {
+        try
+        {
             $this->connection->beginTransaction();
 
             // Bloqueia o token durante a operação para impedir reutilização concorrente.
@@ -205,7 +222,8 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
 
             $tokenData = $stmtToken->fetch(PDO::FETCH_ASSOC);
 
-            if (!$tokenData) {
+            if (!$tokenData)
+            {
                 $this->connection->rollBack();
                 return false;
             }
@@ -216,14 +234,16 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
             $stmtSenha->bindValue(':id', $tokenData['usuario_id'], PDO::PARAM_INT);
             $stmtSenha->execute();
 
-            if ($stmtSenha->rowCount() === 0) {
+            if ($stmtSenha->rowCount() === 0)
+            {
                 // Verifica se o usuário existe, inclusive quando a senha já tinha o mesmo hash.
                 $sqlExiste = 'SELECT id FROM usuario WHERE id = :id LIMIT 1';
                 $stmtExiste = $this->connection->prepare($sqlExiste);
                 $stmtExiste->bindValue(':id', $tokenData['usuario_id'], PDO::PARAM_INT);
                 $stmtExiste->execute();
 
-                if (!$stmtExiste->fetchColumn()) {
+                if (!$stmtExiste->fetchColumn())
+                {
                     $this->connection->rollBack();
                     return false;
                 }
@@ -234,15 +254,19 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
             $stmtMarcar->bindValue(':id', $tokenData['id'], PDO::PARAM_INT);
             $stmtMarcar->execute();
 
-            if ($stmtMarcar->rowCount() !== 1) {
+            if ($stmtMarcar->rowCount() !== 1)
+            {
                 $this->connection->rollBack();
                 return false;
             }
 
             $this->connection->commit();
             return true;
-        } catch (PDOException $e) {
-            if ($this->connection->inTransaction()) {
+        }
+        catch (PDOException $e)
+        {
+            if ($this->connection->inTransaction())
+            {
                 $this->connection->rollBack();
             }
 

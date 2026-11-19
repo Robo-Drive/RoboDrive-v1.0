@@ -6,7 +6,7 @@ use app\database\ConnectionFactory;
 use app\models\Extra;
 use PDO;
 
-class ExtraRepositorySql
+class ExtraRepositorySql implements ExtraRepositoryInterface
 {
     private PDO $connection;
 
@@ -22,7 +22,8 @@ class ExtraRepositorySql
         $stmt->bindValue(':caminho', $extra->getCaminho());
         $stmt->bindValue(':descricao', $extra->getDescricao());
 
-        if ($stmt->execute()) {
+        if ($stmt->execute())
+        {
             $extraId = (int)$this->connection->lastInsertId();
             $extra->setId($extraId);
             $this->associarVersao($extraId, $projetoVersaoId);

@@ -17,7 +17,8 @@ class CodigoRepositorySql implements CodigoRepositoryInterface
 
     public function cadastrar(Codigo $codigo, int $projetoVersaoId): bool
     {
-        try {
+        try
+        {
             $this->connection->beginTransaction();
 
             $sql = "INSERT INTO codigo (caminho, descricao)
@@ -46,8 +47,11 @@ class CodigoRepositorySql implements CodigoRepositoryInterface
             $this->connection->commit();
 
             return true;
-        } catch (\Throwable $e) {
-            if ($this->connection->inTransaction()) {
+        }
+        catch (\Throwable $e)
+        {
+            if ($this->connection->inTransaction())
+            {
                 $this->connection->rollBack();
             }
 

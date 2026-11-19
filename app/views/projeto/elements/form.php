@@ -102,6 +102,9 @@
             </div>
         <?php endif; ?>
         <!-- Categoria -->
+        <?php $podeEditarCategoriaEVisibilidade = !isset($projeto) || (!empty($ehCoordenador)); ?>
+
+        <?php if ($podeEditarCategoriaEVisibilidade): ?>
         <div class="rd-field divCategoria">
             <?php
                 // Identifica o ID e o Nome da Categoria do projeto (se estiver editando)
@@ -184,16 +187,17 @@
                 </div>
             </div>
 
-            <!-- Campo que aparece ao criar categoria -->
+                        <!-- Campo que aparece ao criar categoria -->
             <div id="novaCategoriaContainer" class="hidden mt-3 border-l-4 border-[#13F3F7] pl-3">
                 <input
                     type="text"
-                    name="novaCategoria"
+                    name="nova_categoria"
                     id="novaCategoria"
                     placeholder="Digite o nome da nova categoria"
                     aria-label="Nome da nova categoria"
                     class="rd-input"
                 >
+            </div>
             </div>
 
             <?php if (isset($erros['categoria'])): ?>
@@ -202,6 +206,7 @@
                 </p>
             <?php endif; ?>
         </div>
+        <?php endif; ?>
 
         <!-- Visibilidade -->
         <?php
@@ -224,6 +229,7 @@
             }
         ?>
 
+        <?php if ($podeEditarCategoriaEVisibilidade): ?>
         <div class="rd-field mt-6">
             <label for="visibilidade" class="rd-label">Visibilidade</label>
 
@@ -258,6 +264,7 @@
                 <p class="rd-error"><?= $erros['visibilidade'] ?></p>
             <?php endif; ?>
         </div>
+        <?php endif; ?>
 
     </fieldset>
 

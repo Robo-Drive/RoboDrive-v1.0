@@ -4,7 +4,7 @@ include_once(__DIR__."/../elements/header.php");
 ?>
 <div class="rd-shell">
     <?php include_once(__DIR__."/../elements/sidebar.php") ?>
-    <div class="rd-content-centered !justify-start overflow-y-auto rd-scroll-hidden">
+    <div class="rd-content-centered !justify-start overflow-y-auto rd-scroll-hidden relative z-10">
 
         <div class="mb-8 text-center">
             <p class="rd-eyebrow">PROJETOS</p>
@@ -23,6 +23,5 @@ include_once(__DIR__."/../elements/header.php");
 <script src="<?= JS_URL_BASE ?>/componente.js"></script>
 <script src="<?= JS_URL_BASE ?>/inputFiles.js"></script>
 <script src="<?= JS_URL_BASE ?>/images.js"></script>
-<script src="<?= JS_URL_BASE ?>/projetoFormAjax.js"></script>
 <?php
 include_once(__DIR__."/../elements/footer.php");

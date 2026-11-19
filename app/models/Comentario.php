@@ -13,11 +13,40 @@ class Comentario
     private bool $status = true;
     private ?DateTimeImmutable $criadoEm = null;
 
+    public static function map(array $comentarios,string $campoOrigem) :array
+    {
+        if($comentarios == null)
+        {
+            return [];
+        }
+        $comentariosObj = array();
+        foreach($comentarios as $comentario)
+        {
+            $comentarioObj = new Comentario();
+            $comentarioObj->setId($comentario["id"]??null);
+            $comentarioObj->setConteudo($comentario["conteudo"]??null);
+            $comentarioObj->setOrigemId($comentario[$campoOrigem]);
+            $comentarioObj->setStatus((bool)$comentario["status"]);
+            $comentarioObj->setCriadoEm(isset($comentario["criado_em"]) ? new DateTimeImmutable($comentario["criado_em"]) : null);
+
+            $usuarioObj = new Usuario();
+            $usuarioObj->setId($comentario["usuario_id"]);
+            $usuarioObj->setNome($comentario["nome"] ?? '');
+            $usuarioObj->setNomeUsuario($comentario["nome_usuario"] ?? null);
+            $usuarioObj->setImagem($comentario['imagem'] ?? null);
+            $usuarioObj->setRegra($comentario["regra"] ?? null);
+
+            $comentarioObj->setUsuario($usuarioObj);
+            
+            $comentariosObj[] = $comentarioObj;
+        }
+        return $comentariosObj;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
-
     public function setId(?int $id): self
     {
         $this->id = $id;
@@ -28,7 +57,6 @@ class Comentario
     {
         return $this->conteudo;
     }
-
     public function setConteudo(?string $conteudo): self
     {
         $this->conteudo = $conteudo;
@@ -39,7 +67,6 @@ class Comentario
     {
         return $this->origemId;
     }
-
     public function setOrigemId(?int $origemId): self
     {
         $this->origemId = $origemId;
@@ -50,7 +77,6 @@ class Comentario
     {
         return $this->usuario;
     }
-
     public function setUsuario(?Usuario $usuario): self
     {
         $this->usuario = $usuario;
@@ -61,7 +87,6 @@ class Comentario
     {
         return $this->status;
     }
-
     public function setStatus(bool $status): self
     {
         $this->status = $status;

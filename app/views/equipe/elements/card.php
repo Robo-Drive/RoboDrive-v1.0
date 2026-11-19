@@ -4,26 +4,47 @@ $usuarioLogado = $_SESSION['usuario_logado'] ?? null;
 $usuarioLogadoId = $usuarioLogado && method_exists($usuarioLogado, 'getId') ? $usuarioLogado->getId() : null;
 $eAdmin = $usuarioLogado && method_exists($usuarioLogado, 'getRegra') && $usuarioLogado->getRegra() === 'admin';
 $eCoordenador = $eAdmin;
-$eIntegrante = $eAdmin;
+$eIntegrante = false;
+
+$totalMembros = count($usuarios ?? []);
+$totalCoordenadores = 0;
+$papelUsuarioLogado = null;
+$outrosMembros = [];
 
 if (!empty($usuarios)) {
     foreach ($usuarios as $membro) {
         $membroId = is_object($membro)
             ? (method_exists($membro, 'getId') ? $membro->getId() : null)
             : ($membro['id'] ?? null);
+        $membroNome = is_object($membro)
+            ? (method_exists($membro, 'getNome') ? $membro->getNome() : '')
+            : ($membro['nome'] ?? '');
         $membroPapel = is_object($membro)
-            ? (method_exists($membro, 'getPapelProjeto') ? $membro->getPapelProjeto() : '')
+            ? (method_exists($membro, 'getPapelEquipe') ? $membro->getPapelEquipe() : (method_exists($membro, 'getPapelProjeto') ? $membro->getPapelProjeto() : ''))
             : ($membro['papel'] ?? '');
+
+        if ($membroPapel === 'coordenador') {
+            $totalCoordenadores++;
+        }
 
         if ($membroId == $usuarioLogadoId) {
             $eIntegrante = true;
+            $papelUsuarioLogado = $membroPapel;
             if ($membroPapel === 'coordenador') {
                 $eCoordenador = true;
             }
-            break;
+        } else {
+            $outrosMembros[] = [
+                'id' => $membroId,
+                'nome' => $membroNome,
+                'papel' => $membroPapel
+            ];
         }
     }
 }
+
+$ehUnicoCoordenador = ($papelUsuarioLogado === 'coordenador' && $totalCoordenadores <= 1);
+$podeSairEquipe = ($eIntegrante && $totalMembros > 1);
 
 $urlImagemEquipe = static function ($imagem, $fallback = null) {
     $imagem = is_string($imagem) ? trim($imagem) : '';
@@ -82,6 +103,22 @@ $obterImagem = static function ($item) {
                     <button type="submit" class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition">Desativar</button>
                 </form>
             <?php endif; ?>
+            <?php if ($podeSairEquipe): ?>
+                <?php if ($ehUnicoCoordenador): ?>
+                    <button type="button" onclick="document.getElementById('modalSairEquipe').showModal()" class="border-2 border-red-500/80 text-red-400 hover:bg-red-500/10 px-4 py-2 text-xs font-bold transition">
+                        Sair da Equipe
+                    </button>
+                <?php else: ?>
+                    <form action="<?= URL_BASE ?>/equipe/remover-membro" method="post" onsubmit="return confirm('Deseja realmente sair desta equipe?');">
+                        <input type="hidden" name="equipe_id" value="<?= (int) $equipe->getId() ?>">
+                        <input type="hidden" name="usuario_id" value="<?= (int) $usuarioLogadoId ?>">
+                        <button type="submit" class="border-2 border-red-500/80 text-red-400 hover:bg-red-500/10 px-4 py-2 text-xs font-bold transition">
+                            Sair da Equipe
+                        </button>
+                    </form>
+                <?php endif; ?>
+            <?php endif; ?>
+
             <a href="<?= URL_BASE ?>/usuario/perfil" class="border-2 border-[#07556A] px-4 py-2 text-xs font-bold text-[#F2FEFE] hover:border-[#13F3F7] transition">
                 Voltar
             </a>
@@ -435,6 +472,49 @@ $obterImagem = static function ($item) {
     </div>
 
 </div>
+
+<?php if ($podeSairEquipe && $ehUnicoCoordenador): ?>
+<dialog id="modalSairEquipe" aria-labelledby="modalSairEquipeTitulo" class="rd-scroll-hidden m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto border-[3px] border-[#07556A] bg-[#06141C] p-0 text-[#F2FEFE] shadow-[8px_8px_0_#07556A] backdrop:bg-[#000505]/85">
+    <div class="h-[3px] w-full bg-red-500"></div>
+    <form action="<?= URL_BASE ?>/equipe/remover-membro" method="post" class="flex flex-col">
+        <input type="hidden" name="equipe_id" value="<?= (int) $equipe->getId() ?>">
+        <input type="hidden" name="usuario_id" value="<?= (int) $usuarioLogadoId ?>">
+
+        <div class="flex items-start justify-between gap-4 border-b-[3px] border-[#07556A] p-5 sm:p-6">
+            <div>
+                <p class="rd-eyebrow !text-red-400">Passar Coordenação</p>
+                <h2 id="modalSairEquipeTitulo" class="rd-heading text-xl uppercase sm:text-2xl">SAIR DA <span>EQUIPE</span></h2>
+            </div>
+            <button type="button" onclick="document.getElementById('modalSairEquipe').close()" aria-label="Fechar" class="flex h-10 w-10 shrink-0 items-center justify-center border-[3px] border-[#07556A] transition-colors duration-200 hover:border-[#13F3F7]">
+                <img src="<?= IMG_URL_BASE ?>/close-icon.png" alt="" class="h-4 w-4">
+            </button>
+        </div>
+
+        <div class="flex flex-col gap-6 p-5 sm:p-6">
+            <p class="border-l-4 border-red-500 pl-4 text-sm leading-relaxed text-[#91B5BD]">
+                Você é o <strong>único coordenador</strong> desta equipe. Para sair, é obrigatório selecionar outro integrante para assumir o cargo de coordenador.
+            </p>
+
+            <div class="rd-field">
+                <label for="novoCoordenadorEquipe" class="rd-label">Novo Coordenador da Equipe</label>
+                <select id="novoCoordenadorEquipe" name="novo_coordenador_id" required class="rd-select">
+                    <option value="">Selecione um integrante</option>
+                    <?php foreach ($outrosMembros as $outro): ?>
+                        <option value="<?= (int) $outro['id'] ?>">
+                            <?= htmlspecialchars($outro['nome']) ?> (<?= htmlspecialchars(ucfirst($outro['papel'])) ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </div>
+
+        <div class="flex flex-col-reverse gap-3 border-t-[3px] border-[#07556A] p-5 sm:flex-row sm:justify-end sm:p-6">
+            <button type="button" onclick="document.getElementById('modalSairEquipe').close()" class="rd-btn rd-btn-ghost">Cancelar</button>
+            <button type="submit" class="rd-btn border-red-500 bg-red-600 text-white hover:bg-red-500">Transferir e Sair</button>
+        </div>
+    </form>
+</dialog>
+<?php endif; ?>
 
 <script>
 function alternarAbaEquipe(aba) {
