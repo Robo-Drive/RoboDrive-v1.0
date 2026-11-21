@@ -515,6 +515,26 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return Equipe::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
+    // Equipes ativas do usuário filtradas pelo nome
+    public function buscarUsuarioFiltrado(Usuario $usuario, string $busca): ?array
+    {
+        $sql = "SELECT e.*
+                FROM equipe e
+                INNER JOIN equipe_usuario eu
+                    ON eu.equipe_id = e.id
+                WHERE eu.usuario_id = :id
+                AND eu.status = 'ativo'
+                AND e.status = 1
+                AND e.nome LIKE :busca";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':id', $usuario->getId(), PDO::PARAM_INT);
+        $stmt->bindValue(':busca', '%' . $busca . '%');
+        $stmt->execute();
+
+        return Equipe::map($stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+
     // Buscar equipe pelo nome
     public function buscarNome(Equipe $equipe): ?array
     {

@@ -52,7 +52,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
     // Somente coordenadores e administradores gerenciam o projeto.
     $projetoAtivo = ($projeto->isStatus() !== false);
-    $podeGerenciar = $eCoordenador && $projetoAtivo;
+    $podeGerenciar = ($eCoordenador || !empty($coordenaEquipe)) && $projetoAtivo;
     // Qualquer integrante (e o admin) edita; o participante só altera descrição, componentes e arquivos.
     $podeEditar = ($eIntegrante || $eAdmin) && $projetoAtivo;
 
@@ -118,7 +118,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
             <?php if ($podeGerenciar): ?>
 
                 <!-- Desativar projeto (admin em projeto de outro usuário: abre o modal com justificativa) -->
-                <?php if ($eAdmin && !$ehDonoDoProjeto): ?>
+                <?php if (($eAdmin || !empty($coordenaEquipe)) && !$ehDonoDoProjeto): ?>
                     <button
                         type="button"
                         class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition"

@@ -54,7 +54,6 @@ class ComentarioController extends Controller
         $origemId  = (int)$_POST["origem_id"];
         $usuarioId = $_SESSION["usuario_logado"]->getId();
 
-        // RN20: só comenta quem pode ver o conteúdo
         $erroContexto = (new \app\services\ComentarioService())->validarContexto($tipo, $origemId);
 
         if ($erroContexto)

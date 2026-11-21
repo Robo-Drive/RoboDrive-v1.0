@@ -73,12 +73,13 @@ class Controller
      * Justificativa de desativação: só existe quando um ADMIN desativa conteúdo/conta de OUTRO usuário.
      * Autodesativação (ou admin desativando algo próprio) não tem justificativa nem e-mail.
      */
-    protected function exigeJustificativa(?int $donoId): bool
+    protected function exigeJustificativa(?int $donoId, bool $coordenadorDaEquipe = false): bool
     {
         $logado = $_SESSION["usuario_logado"] ?? null;
 
+        // Admin ou coordenador da equipe do conteúdo, desde que o conteúdo seja de outro usuário
         return $logado
-            && $logado->getRegra() === "admin"
+            && ($logado->getRegra() === "admin" || $coordenadorDaEquipe)
             && (int)$donoId !== (int)$logado->getId();
     }
 

@@ -115,7 +115,6 @@ class EquipeController extends Controller
             $this->validador->obrigatorio("senha", $senha, "A senha de entrada é obrigatória.");
         }
 
-        // Na edição a senha só é validada se for preenchida
         if ($senha !== "")
         {
             $this->validador->tamanho("senha", $senha, 8, 100, "senha");
@@ -123,7 +122,6 @@ class EquipeController extends Controller
         }
     }
 
-    // Ação sobre um integrante: equipe_id, usuario_id e (opcional) papel
     public function validarMembro(bool $comPapel = false)
     {
         $this->validador->idPositivo("equipe_id", $_POST["equipe_id"] ?? "");
@@ -135,7 +133,6 @@ class EquipeController extends Controller
         }
     }
 
-    // Entrada na equipe por hash e senha
     public function validarAcesso(string $hash)
     {
         $this->validador->obrigatorio("hash", $hash, "Informe o Hash de acesso da equipe.");

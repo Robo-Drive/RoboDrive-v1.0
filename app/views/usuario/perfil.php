@@ -37,7 +37,21 @@ include_once(__DIR__."/../elements/header.php");
                 <?php endif; ?>
             </div>
 
-            <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            <!-- PESQUISA DE EQUIPES NO PERFIL -->
+            <div class="mb-6 flex gap-3">
+                <div class="flex-1">
+                    <input
+                        type="text"
+                        id="buscaEquipesPerfil"
+                        value="<?= htmlspecialchars($busca_equipe_atual ?? '') ?>"
+                        placeholder="Pesquisar equipes pelo nome..."
+                        class="rd-input w-full"
+                        autocomplete="off"
+                    >
+                </div>
+            </div>
+
+            <div id="gridEquipesPerfil" class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                 <?php if(isset($equipes) && count($equipes) > 0):?>
                     <?php foreach($equipes as $equipe):?>
                         <?php include(__DIR__."/elements/cardEquipe.php")?>
@@ -158,6 +172,32 @@ function filtrarNovaCategoria() {
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+    const inputBuscaEquipe = document.getElementById("buscaEquipesPerfil");
+    const gridEquipes = document.getElementById("gridEquipesPerfil");
+    let timeoutEquipe = null;
+
+    function filtrarEquipesPerfil() {
+        const params = new URLSearchParams();
+        params.append("id", "<?= $usuario->getId() ?>");
+        if (inputBuscaEquipe.value.trim()) params.append("busca_equipe", inputBuscaEquipe.value.trim());
+        params.append("ajax_equipe", "1");
+
+        fetch("<?= URL_BASE ?>/usuario/perfil?" + params.toString(), {
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        })
+        .then(res => res.text())
+        .then(html => {
+            gridEquipes.innerHTML = html;
+        });
+    }
+
+    if (inputBuscaEquipe) {
+        inputBuscaEquipe.addEventListener("input", function() {
+            clearTimeout(timeoutEquipe);
+            timeoutEquipe = setTimeout(filtrarEquipesPerfil, 300);
+        });
+    }
+
     const inputBusca = document.getElementById("buscaProjetosPerfil");
     const selectCategoria = document.getElementById("categoriaPerfil");
     const grid = document.getElementById("gridProjetosPerfil");

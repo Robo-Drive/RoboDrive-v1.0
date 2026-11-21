@@ -8,6 +8,7 @@ $usuarioLogado = $_SESSION["usuario_logado"];
 $eAdmin = ($usuarioLogado->getRegra() === "admin");
 $eAutor = ($forum->getUsuario()->getId() === $usuarioLogado->getId());
 $forumAtivo = ($forum->isStatus() !== false);
+$eCoordenadorEquipe = !empty($coordenaEquipe);
 
 $fotoAutor = $forum->getUsuario()->getImagem()
     ? URL_BASE . '/arquivo?arquivo=' . urlencode($forum->getUsuario()->getImagem())
@@ -37,15 +38,17 @@ $fotoAutor = $forum->getUsuario()->getImagem()
                     ?>
                 <?php endif; ?>
 
-                <?php if (($eAdmin || $eAutor) && $forumAtivo): ?>
+                <?php if (($eAdmin || $eAutor || $eCoordenadorEquipe) && $forumAtivo): ?>
+                    <?php if ($eAdmin || $eAutor): ?>
                     <form action="<?= URL_BASE ?>/forum/editar" method="post">
                         <input type="hidden" name="id" value="<?= $forum->getId() ?>">
                         <button type="submit" class="rd-btn rd-btn-secondary !py-2 !px-4 text-xs">
                             Editar
                         </button>
                     </form>
+                    <?php endif; ?>
 
-                    <?php if ($eAdmin && !$eAutor): ?>
+                    <?php if (($eAdmin || $eCoordenadorEquipe) && !$eAutor): ?>
                         <button
                             type="button"
                             class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition"

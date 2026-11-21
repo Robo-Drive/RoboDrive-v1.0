@@ -226,7 +226,6 @@ class ComponenteController extends Controller
             }
         }
 
-        // Quem participa de projetos que usam o componente é avisado por e-mail
         $integrantes = $this->repositorySql->buscarIntegrantesDeProjetosComComponente($id);
 
         $this->repositorySql->desativar($componente);
@@ -271,7 +270,6 @@ class ComponenteController extends Controller
         $this->responderAcao(true, "Componente reativado com sucesso.");
     }
 
-    // Um e-mail por integrante, listando os projetos dele que usam o componente
     private function avisarIntegrantes(array $integrantes, string $nomeComponente): void
     {
         $porUsuario = [];

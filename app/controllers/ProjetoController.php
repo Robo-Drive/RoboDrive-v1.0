@@ -336,7 +336,7 @@ class ProjetoController extends Controller
             $this->responderJson([
                 "sucesso" => true,
                 "mensagem" => "Projeto cadastrado com sucesso!",
-                "redirect" => URL_BASE . "/usuario/perfil"
+                "redirect" => $equipeId ? URL_BASE . "/equipe/perfil?id=" . $equipeId : URL_BASE . "/usuario/perfil"
             ]);
         }
         catch (\Throwable $e)
@@ -871,6 +871,7 @@ class ProjetoController extends Controller
         }
 
         $data["projeto"] = $projeto;
+        $data["coordenaEquipe"] = $this->service->coordenaEquipeDoProjeto($projeto);
         $data["comentarios"] = $this->comentarioRepositorySql->buscarPorProjeto($projetoId);
         $data["todasVersoes"] = $todasVersoes;
         $data["versaoExibida"] = $versaoExibida;
@@ -894,11 +895,6 @@ class ProjetoController extends Controller
 
         $usuarioLogado = $_SESSION["usuario_logado"] ?? null;
 
-        if (!$usuarioLogado || $usuarioLogado->getRegra() !== "admin")
-        {
-            $this->responderAcao(false, "Acesso negado.", 403);
-        }
-
         $this->validarId();
 
         if ($this->validador->temErros())
@@ -918,8 +914,16 @@ class ProjetoController extends Controller
             $this->responderAcao(false, "Projeto não encontrado.", 404);
         }
 
+        // Admin, coordenador do projeto ou coordenador da equipe do projeto
+        if (!$this->service->podeDesativar($projeto))
+        {
+            $this->responderAcao(false, "Você não tem permissão para desativar este projeto.", 403);
+        }
+
         // Justificativa só quando o admin desativa o projeto de outro usuário
-        $comJustificativa = $this->exigeJustificativa((int)($projeto->getUsuario()?->getId() ?? 0));
+        $coordenaEquipe = $this->service->coordenaEquipeDoProjeto($projeto);
+        $comJustificativa = $this->exigeJustificativa((int)($projeto->getUsuario()?->getId() ?? 0), $coordenaEquipe);
+        $autoridade = $usuarioLogado->getRegra() === "admin" ? "administração" : "coordenação da equipe";
         $justificativa = "";
 
         if ($comJustificativa)
@@ -968,7 +972,8 @@ class ProjetoController extends Controller
                             $email,
                             $integrante->getNome(),
                             $nomeProjeto,
-                            $motivoHtml
+                            $motivoHtml,
+                            $autoridade
                         );
                     }
                     catch (\Throwable $mailEx)
@@ -988,7 +993,12 @@ class ProjetoController extends Controller
             $this->responderAcao(false, "Não foi possível desativar o projeto.", 500);
         }
 
-        $this->responderAcao(true, "Projeto desativado com sucesso.", 200, URL_BASE . "/projeto/listar");
+        $equipeProjetoId = (int)($projeto->getEquipe()?->getId() ?? 0);
+        $destino = $equipeProjetoId > 0 && !$this->adminRequired()
+            ? URL_BASE . "/equipe/perfil?id=" . $equipeProjetoId
+            : URL_BASE . "/projeto/listar";
+
+        $this->responderAcao(true, "Projeto desativado com sucesso.", 200, $destino);
     }
 
     public function ativar()

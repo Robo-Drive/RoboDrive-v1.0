@@ -304,7 +304,8 @@ class UsuarioController extends Controller
         }
 
         $usuarioId = (int)$usuarioId;
-        $busca = trim($_GET["busca"] ?? "");
+        $busca = trim(filter_input(INPUT_GET, "busca", FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? "");
+        $buscaEquipe = trim(filter_input(INPUT_GET, "busca_equipe", FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? "");
         $categoriaId = $_GET["categoria_id"] ?? null;
 
         $usuario = new Usuario();
@@ -315,6 +316,27 @@ class UsuarioController extends Controller
         {
             $this->redirect(URL_BASE . "/usuario/perfil?id=" . $_SESSION["usuario_logado"]->getId());
             return;
+        }
+
+        $equipes = $buscaEquipe !== ""
+            ? $this->equipeRepositorySql->buscarUsuarioFiltrado($usuarioEncontrado, $buscaEquipe)
+            : $this->equipeRepositorySql->buscarUsuario($usuarioEncontrado);
+
+        // Resposta rápida para a busca de equipes do perfil
+        if (isset($_GET["ajax_equipe"]))
+        {
+            if (!empty($equipes))
+            {
+                foreach ($equipes as $equipe)
+                {
+                    include __DIR__ . "/../views/usuario/elements/cardEquipe.php";
+                }
+            }
+            else
+            {
+                echo '<p class="rd-empty col-span-full">Nenhuma equipe encontrada.</p>';
+            }
+            exit;
         }
 
         if (!empty($busca) || !empty($categoriaId)) 
@@ -346,8 +368,9 @@ class UsuarioController extends Controller
 
         $categoriaRepository = new \app\repositories\CategoriaRepositorySql();
         $data["usuario"] = $usuarioEncontrado;
-        $data["equipes"] = $this->equipeRepositorySql->buscarUsuario($usuarioEncontrado);
+        $data["equipes"] = $equipes;
         $data["projetos"] = $projetos;
+        $data["busca_equipe_atual"] = $buscaEquipe;
         $data["categorias"] = $categoriaRepository->listarPorUsuario($usuarioId);
         $data["busca_atual"] = $busca;
         $data["categoria_atual"] = $categoriaId;

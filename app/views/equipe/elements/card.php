@@ -242,9 +242,9 @@ $obterImagem = static function ($item) {
             <?php endif; ?>
         </div>
 
-        <?php if (!empty($postsForum)): ?>
+        <?php if (!empty($foruns)): ?>
             <div class="space-y-3">
-                 <?php foreach ($postsForum as $forum): ?>
+                 <?php foreach ($foruns as $forum): ?>
                     <?php
                     $autorForum = method_exists($forum, 'getUsuario') ? $forum->getUsuario() : null;
                     $imagemAutor = $autorForum ? $obterImagem($autorForum) : null;

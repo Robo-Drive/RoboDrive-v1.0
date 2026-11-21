@@ -111,6 +111,22 @@ class ProjetoService
         return $visibilidade === "equipe" && $equipeId > 0 && $this->usuarioParticipaDaEquipe($equipeId);
     }
 
+    // O usuário logado coordena a equipe à qual o projeto está associado
+    public function coordenaEquipeDoProjeto(Projeto $projeto): bool
+    {
+        $logado = $_SESSION["usuario_logado"] ?? null;
+        $equipeId = (int)($projeto->getEquipe()?->getId() ?? 0);
+
+        return $logado && $equipeId > 0
+            && (new EquipeRepositorySql())->usuarioECoordenador($equipeId, (int)$logado->getId());
+    }
+
+    // Admin, coordenador do projeto ou coordenador da equipe do projeto
+    public function podeDesativar(Projeto $projeto): bool
+    {
+        return $this->usuarioECoordenador((int)$projeto->getId()) || $this->coordenaEquipeDoProjeto($projeto);
+    }
+
     public function usuarioECoordenador(int $projetoId): bool
     {
         $usuarioLogado = $_SESSION["usuario_logado"] ?? null;

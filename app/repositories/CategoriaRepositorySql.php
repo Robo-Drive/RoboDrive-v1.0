@@ -45,7 +45,7 @@ class CategoriaRepositorySql implements CategoriaRepositoryInterface
     }
     public function listarTodos(): array
     {
-        $sql = "SELECT * FROM categoria WHERE usuario_id = :usuario_id";
+        $sql = "SELECT * FROM categoria WHERE usuario_id = :usuario_id AND status = true ORDER BY nome ASC";
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(":usuario_id",$_SESSION["usuario_logado"]->getId());
         $stmt->execute();

@@ -89,7 +89,8 @@ document.addEventListener("click", evento => {
     }
 });
 
-[modalComunicado, modalDesativar].forEach(modal => {
+// O modal de comunicado só existe para o admin
+[modalComunicado, modalDesativar].filter(Boolean).forEach(modal => {
     const textarea = modal.querySelector("textarea");
 
     textarea.addEventListener("input", () => atualizarTextarea(textarea));

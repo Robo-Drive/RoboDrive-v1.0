@@ -49,8 +49,7 @@ class ForumController extends Controller
 
         $data["statusFiltro"] = $status;
         $data["busca_atual"] = $busca;
-        $data["foruns"] = ($status === "todos")
-            ? $this->repositorySql->listarAdminTodos($busca)
+        $data["foruns"] = ($status === "todos") ? $this->repositorySql->listarAdminTodos($busca)
             : $this->repositorySql->listarPorStatus($status === "1", $busca);
 
         $this->view("forum/listAdmin",$data);
@@ -232,6 +231,7 @@ class ForumController extends Controller
 
         $data['comentarios'] = (new \app\repositories\ComentarioRepositorySql())->buscarPorForum((int)$postagem->getId());
         $data["forum"] = $postagem;
+        $data["coordenaEquipe"] = $this->service->coordenaEquipeDaPostagem($postagem);
         $this->view("forum/perfil", $data);
     }
    
@@ -261,14 +261,15 @@ class ForumController extends Controller
         $eAdmin = ($usuarioLogado->getRegra() === 'admin');
         $autorId = (int)$postagem->getUsuario()->getId();
 
-        // Permite se for admin ou o próprio autor
-        if (!$eAdmin && $autorId !== (int)$usuarioLogado->getId())
+        // Permite se for admin, o próprio autor ou o coordenador da equipe da postagem
+        if (!$eAdmin && $autorId !== (int)$usuarioLogado->getId() && !$this->service->coordenaEquipeDaPostagem($postagem))
         {
             $this->responderAcao(false, "Você não tem permissão para desativar esta postagem.", 403);
         }
 
         // Justificativa só quando um admin desativa a postagem de outro usuário
-        $comJustificativa = $this->exigeJustificativa($autorId);
+        $comJustificativa = $this->exigeJustificativa($autorId, $this->service->coordenaEquipeDaPostagem($postagem));
+        $autoridade = $eAdmin ? "administração" : "coordenação da equipe";
         $justificativa = '';
 
         if ($comJustificativa)
@@ -296,7 +297,8 @@ class ForumController extends Controller
                     $postagem->getUsuario()->getEmail(),
                     $postagem->getUsuario()->getNome(),
                     $postagem->getConteudo(),
-                    $justificativa
+                    $justificativa,
+                    $autoridade
                 );
             }
             catch (\Throwable $e)

@@ -48,6 +48,16 @@ class ForumService
         return (int)$postagem->getUsuario()?->getId() === (int)$logado->getId();
     }
 
+    // O usuário logado coordena a equipe da postagem
+    public function coordenaEquipeDaPostagem(Forum $postagem): bool
+    {
+        $logado = $_SESSION["usuario_logado"] ?? null;
+        $equipeId = (int)($postagem->getEquipe()?->getId() ?? 0);
+
+        return $logado && $equipeId > 0
+            && (new EquipeRepositorySql())->usuarioECoordenador($equipeId, (int)$logado->getId());
+    }
+
     // O usuário só publica no contexto de uma equipe da qual participa
     public function validarEquipe(int $equipeId, ?int $equipeAtualId = null): ?string
     {

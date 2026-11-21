@@ -31,7 +31,6 @@ class DenunciaController extends Controller
         }
     }
 
-    // Descartar denúncias: só tipo e id do conteúdo
     public function validarAlvo()
     {
         $this->validador->tipoDenuncia("tipo", trim($_POST["tipo"] ?? ""));

@@ -28,7 +28,6 @@ class AutenticacaoController extends Controller
         $this->view("login/login");
     }
 
-    // Login: e-mail e senha
     public function validar()
     {
         $this->validador->obrigatorio("email", trim($_POST["email"] ?? ""));
@@ -40,7 +39,6 @@ class AutenticacaoController extends Controller
         }
     }
 
-    // Recuperação de senha: só o e-mail
     public function validarEmail()
     {
         $this->validador->obrigatorio("email", trim($_POST["email"] ?? ""), "Informe seu e-mail");
@@ -51,7 +49,6 @@ class AutenticacaoController extends Controller
         }
     }
 
-    // Nova senha escolhida na redefinição
     public function validarNovaSenha()
     {
         $senha = $_POST["senha"] ?? "";

@@ -57,24 +57,25 @@ class MailController extends Controller
         return $this->mailHelper->enviarEmail($emailDestino, null, "", $assunto, $corpoHtml);
     }
 
-    public function enviarDesativacaoProjeto(string $emailDestino, string $nomeDestino, string $nomeProjeto, string $justificativa): bool
+    public function enviarDesativacaoProjeto(string $emailDestino, string $nomeDestino, string $nomeProjeto, string $justificativa, string $autoridade = "administração"): bool
     {
         $nomeLimpo = htmlspecialchars(html_entity_decode($nomeDestino), ENT_QUOTES, "UTF-8");
         $projetoLimpo = htmlspecialchars(html_entity_decode($nomeProjeto), ENT_QUOTES, "UTF-8");
         $motivoHtml = !empty($justificativa) ? nl2br(htmlspecialchars(html_entity_decode($justificativa), ENT_QUOTES, "UTF-8")) : "Sem justificativa detalhada informada.";
+        $assinatura = $autoridade === "administração" ? "Administração RoboDrive" : "Coordenação da equipe · RoboDrive";
         $assunto = "[RoboDrive] Projeto Desativado";
 
         $corpoHtml = "
             <div style='font-family: Arial, sans-serif; background-color: #06141C; color: #F2FEFE; padding: 20px; border: 2px solid #07556A;'>
                 <h2 style='color: #F2A058;'>RoboDrive - Projeto Desativado</h2>
                 <p>Olá, <strong>{$nomeLimpo}</strong>,</p>
-                <p>Informamos que o projeto <strong>\"{$projetoLimpo}\"</strong> foi desativado pela administração pelo seguinte motivo:</p>
+                <p>Informamos que o projeto <strong>\"{$projetoLimpo}\"</strong> foi desativado pela {$autoridade} pelo seguinte motivo:</p>
                 <blockquote style='background-color: #000505; border-left: 4px solid #F2A058; padding: 12px; margin: 15px 0; color: #F2FEFE;'>
                     {$motivoHtml}
                 </blockquote>
                 <p>Caso discorde desta decisão, responda a este e-mail para solicitar revisão.</p>
                 <hr style='border: 0; border-top: 1px solid #07556A; margin: 20px 0;'>
-                <p style='font-size: 12px; color: #91B5BD;'>Atenciosamente,<br><strong>Administração RoboDrive</strong></p>
+                <p style='font-size: 12px; color: #91B5BD;'>Atenciosamente,<br><strong>{$assinatura}</strong></p>
             </div>
         ";
 
@@ -116,7 +117,7 @@ class MailController extends Controller
             <div style='font-family: Arial, sans-serif; background-color: #06141C; color: #F2FEFE; padding: 20px; border: 2px solid #07556A;'>
                 <h2 style='color: #F2A058;'>RoboDrive - Aviso de Desativação de Conta</h2>
                 <p>Olá, <strong>{$nomeLimpo}</strong>,</p>
-                <p>Informamos que sua conta na plataforma RoboDrive foi desativada pela administração pelo seguinte motivo:</p>
+                <p>Informamos que sua conta na plataforma RoboDrive foi desativada pela {$autoridade} pelo seguinte motivo:</p>
                 <blockquote style='background-color: #000505; border-left: 4px solid #F2A058; padding: 12px; margin: 15px 0; color: #F2FEFE;'>
                     {$motivoHtml}
                 </blockquote>
@@ -129,11 +130,12 @@ class MailController extends Controller
         return $this->mailHelper->enviarEmail($emailDestino, null, "", $assunto, $corpoHtml);
     }
 
-    public function enviarDesativacaoPostagem(string $emailDestino, string $nomeDestino, string $trechoConteudo, string $justificativa): bool
+    public function enviarDesativacaoPostagem(string $emailDestino, string $nomeDestino, string $trechoConteudo, string $justificativa, string $autoridade = "administração"): bool
     {
         $nomeLimpo = htmlspecialchars(html_entity_decode($nomeDestino), ENT_QUOTES, "UTF-8");
         $trechoLimpo = htmlspecialchars(mb_strimwidth($trechoConteudo, 0, 100, "..."), ENT_QUOTES, "UTF-8");
         $motivoHtml = !empty($justificativa) ? nl2br(htmlspecialchars(html_entity_decode($justificativa), ENT_QUOTES, "UTF-8")) : "Sem justificativa detalhada informada.";
+        $assinatura = $autoridade === "administração" ? "Administração RoboDrive" : "Coordenação da equipe · RoboDrive";
         $assunto = "[RoboDrive] Sua postagem foi desativada";
 
         $corpoHtml = "
@@ -146,7 +148,7 @@ class MailController extends Controller
                 </blockquote>
                 <p>Caso discorde desta decisão, responda a este e-mail para solicitar revisão.</p>
                 <hr style='border: 0; border-top: 1px solid #07556A; margin: 20px 0;'>
-                <p style='font-size: 12px; color: #91B5BD;'>Atenciosamente,<br><strong>Administração RoboDrive</strong></p>
+                <p style='font-size: 12px; color: #91B5BD;'>Atenciosamente,<br><strong>{$assinatura}</strong></p>
             </div>
         ";
 
