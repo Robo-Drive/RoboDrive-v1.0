@@ -521,7 +521,7 @@
                 class="group flex w-full items-center gap-4 border-2 border-[#07556A] bg-[#000505] px-4 py-3 text-left transition-colors duration-200 hover:border-[#13F3F7] focus-visible:border-[#13F3F7] focus-visible:outline-none cursor-pointer"
             >
                 <span class="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-[#07556A] text-[#13F3F7] transition-colors duration-200 group-hover:border-[#13F3F7]">
-                    📁
+                    <img src="<?= IMG_URL_BASE ?>/folder-icon.png" alt="" class="h-5 w-5 object-contain">
                 </span>
                 <span class="flex min-w-0 flex-1 flex-col">
                     <span class="text-xs font-black uppercase tracking-[.08em] text-[#F2FEFE]">Adicionar arquivos extras</span>

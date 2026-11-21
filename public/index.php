@@ -70,8 +70,7 @@ $router->post('/usuario/excluir-categoria', 'UsuarioController@excluirCategoria'
 // Rotas públicas
 $router->get('/projeto/listar', 'ProjetoController@listarPublico');
 $router->get('/projeto/cadastro', 'ProjetoController@cadastrar');
-$router->get('/projeto/perfil', 'ProjetoController@perfil');
-$router->get('/projeto/entrar', 'ProjetoController@formularioEntrar');
+$router->get('/projeto/perfil', 'ProjetoController@perfil');$router->get('/projeto/entrar', 'ProjetoController@formularioEntrar');
 
 $router->post('/projeto/salvar', 'ProjetoController@salvar');
 $router->post('/projeto/editar', 'ProjetoController@editar');

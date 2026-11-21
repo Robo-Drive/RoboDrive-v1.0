@@ -32,7 +32,6 @@ class ComentarioController extends Controller
         $this->validador->idPositivo("origem_id", $_POST["origem_id"] ?? "");
     }
 
-    // Desativar: id do comentário e tipo
     public function validarDesativar()
     {
         $this->validador->idPositivo("id", $_POST["id"] ?? "");

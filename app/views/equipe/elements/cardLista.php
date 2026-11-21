@@ -7,7 +7,7 @@ $cardAlvo = [
     "titulo"    => html_entity_decode($equipe->getNome() ?? "Equipe"),
     "descricao" => html_entity_decode($equipe->getDescricao() ?? ""),
     "meta"      => "Equipe",
-    "imagem"    => null,
+    "imagem"    => IMG_URL_BASE . "/team-icon.png",
     "ativo"     => $equipe->isStatus(),
     "denuncia"  => null
 ];

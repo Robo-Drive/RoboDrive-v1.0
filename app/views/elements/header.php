@@ -56,7 +56,7 @@
         }
     ?>
 
-    <div class="flex items-center gap-3">
+    <div class="flex flex-wrap items-center gap-3">
         <?php if ($mostrarBotaoVoltar): ?>
             <!-- BOTÃO VOLTAR ESTILIZADO ROBODRIVE -->
             <button 

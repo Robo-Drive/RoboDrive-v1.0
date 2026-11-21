@@ -3,7 +3,6 @@ const sidebar = document.getElementById("sidebar");
 const fundoSidebar = document.getElementById("fundoSidebar");
 const telaGrande = window.matchMedia("(min-width: 1024px)");
 
-// O botão sanduíche só aparece nas páginas que têm sidebar
 botaoMenu.classList.replace("hidden", "flex");
 
 function alternarMenu(abrir)
@@ -33,7 +32,6 @@ document.addEventListener("keydown", evento => {
     }
 });
 
-// Ao aumentar a tela para o tamanho grande, a sidebar volta a ser fixa
 telaGrande.addEventListener("change", () => {
     if (telaGrande.matches)
     {

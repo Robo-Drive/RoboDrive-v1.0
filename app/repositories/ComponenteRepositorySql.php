@@ -45,7 +45,6 @@ class ComponenteRepositorySql implements ComponenteRepositoryInterface
 
     public function existe(Componente $componente): bool
     {
-        // Ao editar, ignora o próprio componente para não acusar duplicidade com ele mesmo
         $id = $componente->getId();
 
         $sql = "SELECT COUNT(*)
@@ -339,5 +338,12 @@ class ComponenteRepositorySql implements ComponenteRepositoryInterface
         $stmt->execute();
 
         return Componente::map($stmt->fetchAll());
+    }
+
+    public function contarAtivos(): int
+    {
+        $stmt = $this->connection->query("SELECT COUNT(*) FROM componente WHERE status = 1");
+
+        return (int) $stmt->fetchColumn();
     }
 }

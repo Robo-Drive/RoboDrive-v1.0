@@ -131,8 +131,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                 <form
                     action="<?= URL_BASE ?>/projeto/desativar"
                     method="post"
-                    onsubmit="return confirm('Deseja realmente desativar este projeto?');"
-                >
+                    data-confirmar="Deseja realmente desativar este projeto?" >
 
                     <input
                         type="hidden"
@@ -159,7 +158,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                         Sair do Projeto
                     </button>
                 <?php else: ?>
-                    <form action="<?= URL_BASE ?>/projeto/remover-membro" method="post" onsubmit="return confirm('Deseja realmente sair deste projeto?');">
+                    <form action="<?= URL_BASE ?>/projeto/remover-membro" method="post" data-confirmar="Deseja realmente sair deste projeto?" >
                         <input type="hidden" name="projeto_id" value="<?= (int)$projeto->getId() ?>">
                         <input type="hidden" name="usuario_id" value="<?= (int)$usuarioLogadoId ?>">
                         <button type="submit" class="border-2 border-red-500/80 text-red-400 hover:bg-red-500/10 px-4 py-2 text-xs font-bold transition">
@@ -372,7 +371,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
 
     <!-- 5. ARQUIVOS DE CÓDIGO -->
-    <div class="border-2 border-[#07556A] bg-[#000505] p-5">
+    <div id="codigosProjeto" data-atualizar class="border-2 border-[#07556A] bg-[#000505] p-5">
 
         <h2 class="text-xs font-black uppercase tracking-[.15em] text-[#13F3F7] mb-4 font-['Orbitron']">
             03. ARQUIVOS DE CÓDIGO
@@ -501,7 +500,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
 
     <!-- 6. COMPONENTES UTILIZADOS -->
-    <div class="border-2 border-[#07556A] bg-[#000505] p-5">
+    <div id="componentesProjeto" data-atualizar class="border-2 border-[#07556A] bg-[#000505] p-5">
 
         <h2 class="text-xs font-black uppercase tracking-[.15em] text-[#13F3F7] mb-4 font-['Orbitron']">
             04. COMPONENTES DO PROJETO
@@ -559,7 +558,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
     </div>
         <!-- 7. ARQUIVOS EXTRAS E DOCUMENTAÇÕES PARA DOWNLOAD -->
-    <div class="border-2 border-[#07556A] bg-[#000505] p-5">
+    <div id="extrasProjeto" data-atualizar class="border-2 border-[#07556A] bg-[#000505] p-5">
         <div class="flex items-center justify-between border-b border-[#07556A] pb-3 mb-4">
             <h2 class="text-xs font-black uppercase tracking-[.15em] text-[#13F3F7] font-['Orbitron']">
                 05. ARQUIVOS EXTRAS E DOCUMENTAÇÕES
@@ -666,6 +665,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
             </div>
 
 
+            <div id="solicitacoesProjeto" data-atualizar>
             <!-- SOLICITAÇÕES PENDENTES -->
             <?php if ($eCoordenador && !empty($solicitacoesPendentes)): ?>
 
@@ -761,12 +761,13 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                 </div>
 
             <?php endif; ?>
+            </div>
 
 
             <!-- LISTA DOS INTEGRANTES -->
             <?php if (!empty($usuarios)): ?>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div id="integrantesProjeto" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" data-atualizar>
 
                     <?php foreach ($usuarios as $usr): ?>
 
@@ -813,13 +814,12 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
 
                                 <!-- Remover participante -->
-                                <?php if ($eCoordenador && $ehOutroUsuario && $ehParticipante): ?>
+                                <?php if ($podeGerenciar && $ehOutroUsuario && $usrId !== (int)($projeto->getUsuario()?->getId() ?? 0)): ?>
 
                                     <form
                                         action="<?= URL_BASE ?>/projeto/remover-membro"
                                         method="post"
-                                        onsubmit="return confirm('Deseja realmente remover este participante do projeto?');"
-                                        class="shrink-0"
+                                        data-confirmar="Deseja realmente remover este participante do projeto?" class="shrink-0"
                                     >
 
                                         <input
@@ -851,7 +851,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
 
                             <!-- ALTERAR CARGO -->
-                            <?php if ($eCoordenador && $ehOutroUsuario): ?>
+                            <?php if ($eCoordenador && $ehOutroUsuario && $usrId !== (int)($projeto->getUsuario()?->getId() ?? 0)): ?>
 
                                 <form
                                     action="<?= URL_BASE ?>/projeto/alterar-papel"
@@ -951,77 +951,9 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
             </div>
         </form>
 
-        <!-- LISTAGEM DE COMENTÁRIOS DO PROJETO -->
-        <div class="space-y-4 pt-4 border-t border-[#07556A]/60">
-            <?php if (!empty($comentarios)): ?>
-                <?php foreach ($comentarios as $coment): ?>
-                    <div class="border border-[#07556A] bg-[#06141C] p-4 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <img 
-                                    src="<?= $coment->getUsuario()->getImagem() ? URL_BASE . '/arquivo?arquivo=' . urlencode($coment->getUsuario()->getImagem()) : IMG_URL_BASE . '/perfil.png' ?>" 
-                                    alt="Foto" 
-                                    class="w-8 h-8 object-cover border border-[#07556A]"
-                                >
-                                <div>
-                                    <p class="text-xs font-bold text-[#F2FEFE]">
-                                        @<?= texto($coment->getUsuario()->getNomeUsuario()) ?>
-                                    </p>
-                                    <span class="text-[.6rem] text-[#91B5BD] font-mono">
-                                        <?= $coment->getCriadoEm() ? $coment->getCriadoEm()->format('d/m/Y H:i') : '' ?>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-2">
-                                <?php if ($coment->getUsuario()->getId() === $usuarioLogadoId || $eAdmin): ?>
-                                    <?php if ($eAdmin && $coment->getUsuario()->getId() !== $usuarioLogadoId): ?>
-                                        <button
-                                            type="button"
-                                            title="desativar"
-                                            class="text-red-400 hover:text-red-300 text-xs px-2 py-1"
-                                            data-desativar
-                                            data-tipo="comentario"
-                                            data-origem="projeto"
-                                            data-id="<?= $coment->getId() ?>"
-                                            data-nome="<?= texto(mb_strimwidth(html_entity_decode($coment->getConteudo()), 0, 50, '...')) ?>"
-                                            data-responsavel="@<?= texto($coment->getUsuario()->getNomeUsuario()) ?>"
-                                        >
-                                            desativar
-                                        </button>
-                                    <?php else: ?>
-                                        <form action="<?= URL_BASE ?>/comentario/desativar" method="post" onsubmit="return confirm('Deseja desativar este comentário?');">
-                                            <input type="hidden" name="id" value="<?= $coment->getId() ?>">
-                                            <input type="hidden" name="tipo" value="projeto">
-                                            <button type="submit" title="desativar" class="text-red-400 hover:text-red-300 text-xs px-2 py-1">
-                                                desativar
-                                            </button>
-                                        </form>
-                                    <?php endif; ?>
-                                <?php endif; ?>
-
-                                <?php
-                                // Botão de denúncia do comentário
-                                $denunciaAlvo = [
-                                    "tipo"    => "comentario",
-                                    "id"      => $coment->getId(),
-                                    "nome"    => mb_strimwidth($coment->getConteudo(), 0, 50, '...'),
-                                    "autores" => [$coment->getUsuario()->getId()],
-                                    "classe"  => "shrink-0"
-                                ];
-                                include(__DIR__ . "/../../elements/denunciaBotao.php");
-                                ?>
-                            </div>
-                        </div>
-
-                        <p class="text-sm text-[#F2FEFE] leading-relaxed whitespace-pre-line pl-11">
-                            <?= texto($coment->getConteudo()) ?>
-                        </p>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p class="text-xs text-[#91B5BD] text-center py-4">Nenhum comentário neste projeto ainda.</p>
-            <?php endif; ?>
+        <!-- LISTAGEM DE COMENTÁRIOS DO PROJETO (atualizada automaticamente) -->
+        <div id="comentariosProjeto" class="space-y-4 pt-4 border-t border-[#07556A]/60" data-atualizar>
+            <?php include __DIR__ . "/comentarios.php"; ?>
         </div>
     </div>   
 </div>

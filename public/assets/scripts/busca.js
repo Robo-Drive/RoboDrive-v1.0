@@ -1,11 +1,10 @@
-// Busca em tempo real: consulta o servidor assim que o usuário para de digitar
-// e troca apenas a área de resultados ([data-resultados]) da página.
 document.addEventListener("DOMContentLoaded", function() {
     const ESPERA_MS = 300;
 
     document.querySelectorAll("form[data-busca]").forEach(function(form) {
-        const input = form.querySelector("input[name='busca']");
-        const resultados = document.querySelector("[data-resultados]");
+        const input = form.querySelector("input[type='text']");
+        const seletorAlvo = form.dataset.alvo || "[data-resultados]";
+        const resultados = document.querySelector(seletorAlvo);
 
         if (!input || !resultados) {
             return;
@@ -14,8 +13,24 @@ document.addEventListener("DOMContentLoaded", function() {
         let temporizador = null;
         let controlador = null;
 
+        function montarUrl() {
+            const url = new URL(form.getAttribute("action"), window.location.href);
+            const params = new URLSearchParams(window.location.search);
+
+            url.searchParams.forEach(function(valor, chave) {
+                if (!params.has(chave)) params.set(chave, valor);
+            });
+
+            new FormData(form).forEach(function(valor, chave) {
+                params.set(chave, valor);
+            });
+
+            url.search = params.toString();
+            return url.toString();
+        }
+
         async function buscar() {
-            const url = form.action + "?" + new URLSearchParams(new FormData(form)).toString();
+            const url = montarUrl();
 
             if (controlador) {
                 controlador.abort();
@@ -30,7 +45,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 const html = await response.text();
                 const pagina = new DOMParser().parseFromString(html, "text/html");
-                const novosResultados = pagina.querySelector("[data-resultados]");
+                const novosResultados = pagina.querySelector(seletorAlvo);
 
                 if (novosResultados) {
                     resultados.innerHTML = novosResultados.innerHTML;

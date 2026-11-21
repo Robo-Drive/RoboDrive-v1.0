@@ -1,7 +1,3 @@
-// Notificação (caixinha sobreposta) no estilo do site.
-//   rdNotificar("Mensagem", "sucesso" | "erro")        -> mostra agora
-//   rdNotificarDepois("Mensagem", "sucesso" | "erro")  -> mostra na próxima página carregada
-//                                                         (usado antes de recarregar ou redirecionar)
 (function() {
     const CHAVE_PENDENTE = "rdNotificacaoPendente";
     const DURACAO_MS = 5000;

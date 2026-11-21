@@ -11,7 +11,7 @@ include_once(__DIR__."/../elements/header.php");
                 <p class="rd-eyebrow">ADMINISTRAÇÃO</p>
                 <h1 class="rd-heading text-[clamp(1.8rem,4vw,2.8rem)]">EQUIPES</h1>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
                 <form method="get" action="<?= URL_BASE ?>/admin/equipe/listar" class="flex items-center gap-2">
                     <input type="hidden" name="busca" value="<?= htmlspecialchars($busca_atual ?? '') ?>">
                     <label for="status" class="text-xs text-[#91B5BD] uppercase font-bold">Status:</label>
@@ -43,7 +43,7 @@ include_once(__DIR__."/../elements/header.php");
             </form>
         </section>
 
-        <section data-resultados class="grid grid-cols-1 gap-5 p-5 md:grid-cols-2 lg:grid-cols-4">
+        <section id="resultadosEquipes" data-atualizar data-resultados class="grid grid-cols-1 gap-5 p-5 md:grid-cols-2 lg:grid-cols-4">
             <?php if(isset($equipes) && count($equipes) > 0):?>
                 <?php foreach($equipes as $equipe):?>
                     <?php include(__DIR__."/elements/cardLista.php")?>

@@ -46,7 +46,6 @@ class DenunciaRepositorySql implements DenunciaRepositoryInterface
             $tipo = $g['tipo'];
             $alvoId = (int)$g['alvo_id'];
 
-            // Busca os motivos agrupados
             $sqlMotivos = "SELECT motivo, COUNT(*) as qtd FROM denuncia WHERE tipo = :tipo AND alvo_id = :alvo_id AND status = true GROUP BY motivo";
             $stmtMotivos = $this->connection->prepare($sqlMotivos);
             $stmtMotivos->bindValue(':tipo', $tipo);
@@ -58,14 +57,12 @@ class DenunciaRepositorySql implements DenunciaRepositoryInterface
                 $motivos[$m['motivo']] = (int)$m['qtd'];
             }
 
-            // Descrições escritas por quem denunciou
             $stmtDesc = $this->connection->prepare("SELECT d.motivo, d.descricao, d.criado_em, u.nome_usuario FROM denuncia d JOIN usuario u ON u.id = d.usuario_id WHERE d.tipo = :tipo AND d.alvo_id = :alvo_id AND d.status = true AND d.descricao IS NOT NULL AND d.descricao <> '' ORDER BY d.criado_em ASC");
             $stmtDesc->bindValue(':tipo', $tipo);
             $stmtDesc->bindValue(':alvo_id', $alvoId, PDO::PARAM_INT);
             $stmtDesc->execute();
             $descricoes = $stmtDesc->fetchAll(PDO::FETCH_ASSOC);
 
-            // Identifica o alvo e seu responsável de acordo com o tipo
             $alvoNome = "Item #{$alvoId}";
             $respId = 1;
             $respNome = "Usuário";
@@ -134,7 +131,7 @@ class DenunciaRepositorySql implements DenunciaRepositoryInterface
                 $stmtItem = $this->connection->prepare("
                     SELECT e.nome, u.id as u_id, u.nome as u_nome, u.nome_usuario, u.email 
                     FROM equipe e 
-                    LEFT JOIN equipe_usuario eu ON eu.equipe_id = e.id AND eu.papel = 'coordenador' AND eu.status = true
+                    LEFT JOIN equipe_usuario eu ON eu.equipe_id = e.id AND eu.papel = 'coordenador' AND eu.status = 'ativo'
                     LEFT JOIN usuario u ON u.id = eu.usuario_id 
                     WHERE e.id = :id 
                     LIMIT 1

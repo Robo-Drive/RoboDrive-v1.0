@@ -337,4 +337,11 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
 
         return Usuario::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
+
+    public function contarAtivos(): int
+    {
+        $stmt = $this->connection->query("SELECT COUNT(*) FROM usuario WHERE status = 1");
+
+        return (int) $stmt->fetchColumn();
+    }
 }

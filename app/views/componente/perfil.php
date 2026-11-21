@@ -9,7 +9,6 @@ if (isset($componente)):
     $eAutor = ($usuarioLogado && $autorId && $usuarioLogado->getId() === $autorId);
     $componenteAtivo = ($componente->isStatus() !== false);
 
-    // Formatações contra script injection mantendo acentuação e quebras de linha
     $nomeFormatado = texto($componente->getNome() ?? 'Componente');
     $descricaoFormatada = nl2br(texto($componente->getDescricao() ?? 'Sem descrição cadastrada.'));
     $nomeUsuarioFormatado = texto($componente->getUsuario()?->getNomeUsuario() ?? 'Desconhecido');
@@ -31,7 +30,7 @@ if (isset($componente)):
                 </h1>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
                 <?php if (!$componenteAtivo): ?>
                     <span class="rd-badge rd-badge-private">Desativado</span>
                     <?php
@@ -49,7 +48,7 @@ if (isset($componente)):
                     </form>
 
                     <?php if ($eAutor): ?>
-                        <form action="<?= URL_BASE ?>/componente/desativar" method="post" onsubmit="return confirm('Deseja realmente desativar este componente?');">
+                        <form action="<?= URL_BASE ?>/componente/desativar" method="post" data-confirmar="Deseja realmente desativar este componente?" >
                             <input type="hidden" name="id" value="<?= $componente->getId() ?>">
                             <button type="submit" class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition">
                                 Desativar
@@ -78,7 +77,7 @@ if (isset($componente)):
         </div>
 
         <!-- CONTEÚDO PRINCIPAL DO PERFIL -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div id="conteudoComponente" data-atualizar class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
             <!-- FOTO EM DESTAQUE -->
             <div class="lg:col-span-5 border-2 border-[#07556A] bg-[#06141C] p-4 flex flex-col items-center justify-center">

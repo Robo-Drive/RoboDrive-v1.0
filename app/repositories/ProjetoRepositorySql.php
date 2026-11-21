@@ -327,6 +327,16 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
 
         return $resultado ?: [];
     }
+    public function atualizarCategoria(int $projetoId, int $categoriaId): bool
+    {
+        $sql = "UPDATE projeto SET categoria_id = :categoria_id WHERE id = :projeto_id";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':categoria_id', $categoriaId, PDO::PARAM_INT);
+        $stmt->bindValue(':projeto_id', $projetoId, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
     public function transferirProprietario(int $projetoId, int $novoDonoId): bool
     {
         $sql = "UPDATE projeto SET usuario_id = :novo_dono_id WHERE id = :projeto_id";
@@ -350,23 +360,27 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
         return Projeto::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    public function existeNome(string $nome, ?int $id = null): bool
+    // Verifica se o próprio usuário já tem um projeto ATIVO com esse nome (desativados e de outros usuários não contam)
+    public function existeNomeDoUsuario(string $nome, int $usuarioId, ?int $ignorarProjetoId = null): bool
     {
         $sql = "SELECT COUNT(*)
                 FROM projeto
-                WHERE nome = :nome";
+                WHERE nome = :nome
+                  AND usuario_id = :usuario_id
+                  AND status = 1";
 
-        if ($id !== null)
+        if ($ignorarProjetoId !== null)
         {
-            $sql .= " AND id <> :id";
+            $sql .= " AND id <> :ignorar_id";
         }
 
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':nome', trim($nome));
+        $stmt->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
 
-        if ($id !== null)
+        if ($ignorarProjetoId !== null)
         {
-            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->bindValue(':ignorar_id', $ignorarProjetoId, PDO::PARAM_INT);
         }
 
         $stmt->execute();
@@ -465,7 +479,6 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
 
     public function removerMembro(int $projetoId, int $usuarioId): bool
     {
-        // O ENUM só aceita 'pendente' ou 'ativo'; por isso a remoção exclui a associação.
         $sql = "DELETE FROM projeto_usuario
                 WHERE projeto_id = :projeto_id
                   AND usuario_id = :usuario_id";
@@ -487,8 +500,7 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
         $stmt->execute();
 
         return Projeto::map($stmt->fetchAll(PDO::FETCH_ASSOC));
-    }// Executa a consulta
-        
+    }   
 
     public function listarAdminTodos(): array
     {
@@ -577,6 +589,17 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
 
         return $stmt->execute();
     }
+    public function atualizarNome(int $projetoId, string $nome): bool
+    {
+        $sql = "UPDATE projeto SET nome = :nome WHERE id = :id";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':nome', trim($nome));
+        $stmt->bindValue(':id', $projetoId, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
     public function ativar(int $projetoId): bool
     {
         $sql = "UPDATE projeto
@@ -675,5 +698,12 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
 
         $stmt->execute();
         return Projeto::map($stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+
+    public function contarAtivos(): int
+    {
+        $stmt = $this->connection->query("SELECT COUNT(*) FROM projeto WHERE status = 1");
+
+        return (int) $stmt->fetchColumn();
     }
 }

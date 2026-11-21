@@ -24,9 +24,11 @@ class ProjetoService
 
     public function salvarProjeto(array $posts): array
     {
-        if ($this->repositorySql->existeNome(trim($posts["nome"] ?? ""))) 
+        $usuarioId = (int)$_SESSION["usuario_logado"]->getId();
+
+        if ($this->repositorySql->existeNomeDoUsuario(trim($posts["nome"] ?? ""), $usuarioId))
         {
-            throw new Exception("Já existe um projeto cadastrado com esse nome.");
+            throw new Exception("Você já possui um projeto com esse nome.");
         }
 
         if (($posts["visibilidade"] ?? "") === "equipe" && empty($posts["equipe_id"])) 
@@ -40,9 +42,13 @@ class ProjetoService
 
     public function editarProjeto(Projeto $projeto): bool
     {
-        if ($this->repositorySql->existeNome($projeto->getNome(), $projeto->getId())) 
+        // O dono do projeto é o usuário atual do projeto (a edição não troca o dono)
+        $projetoAtual = $this->repositorySql->buscarId((new Projeto())->setId($projeto->getId()), true);
+        $donoId = (int)($projetoAtual?->getUsuario()?->getId() ?? 0);
+
+        if ($donoId > 0 && $this->repositorySql->existeNomeDoUsuario($projeto->getNome(), $donoId, $projeto->getId()))
         {
-            throw new Exception("Já existe um projeto cadastrado com esse nome.");
+            throw new Exception("Você já possui um projeto com esse nome.");
         }
 
         $this->repositorySql->editar($projeto);
@@ -102,6 +108,11 @@ class ProjetoService
 
         $equipeId = (int)($projeto->getEquipe()?->getId() ?? 0);
 
+        if ($this->coordenaEquipeDoProjeto($projeto))
+        {
+            return true;
+        }
+
         return $visibilidade === "equipe" && $equipeId > 0 && $this->usuarioParticipaDaEquipe($equipeId);
     }
 
@@ -117,6 +128,48 @@ class ProjetoService
     public function podeDesativar(Projeto $projeto): bool
     {
         return $this->usuarioECoordenador((int)$projeto->getId()) || $this->coordenaEquipeDoProjeto($projeto);
+    }
+
+    public function podeGerenciarMembros(Projeto $projeto): bool
+    {
+        return $this->podeDesativar($projeto);
+    }
+
+    public function ativarProjeto(int $projetoId): void
+    {
+        $projetoBusca = new Projeto();
+        $projetoBusca->setId($projetoId);
+        $projeto = $this->repositorySql->buscarId($projetoBusca, true);
+        $donoId = (int)($projeto?->getUsuario()?->getId() ?? 0);
+
+        if ($projeto && $donoId > 0 && $this->repositorySql->existeNomeDoUsuario($projeto->getNome(), $donoId, $projetoId))
+        {
+            $base = $projeto->getNome() . " (Antigo)";
+            $novoNome = $base;
+            $contador = 2;
+
+            while ($this->repositorySql->existeNomeDoUsuario($novoNome, $donoId, $projetoId))
+            {
+                $novoNome = $projeto->getNome() . " (Antigo " . $contador++ . ")";
+            }
+
+            $this->repositorySql->atualizarNome($projetoId, $novoNome);
+        }
+
+        $this->repositorySql->ativar($projetoId);
+    }
+
+    public function transferirPropriedade(Projeto $projeto, int $novoDonoId): void
+    {
+        $nomeCategoria = $projeto->getCategoria()?->getNome();
+
+        if ($nomeCategoria !== null && $nomeCategoria !== "")
+        {
+            $categoriaId = (new CategoriaRepositorySql())->obterOuCriarParaUsuario($nomeCategoria, $novoDonoId);
+            $this->repositorySql->atualizarCategoria((int)$projeto->getId(), $categoriaId);
+        }
+
+        $this->repositorySql->transferirProprietario((int)$projeto->getId(), $novoDonoId);
     }
 
     public function usuarioECoordenador(int $projetoId): bool
@@ -229,7 +282,14 @@ class ProjetoService
 
             if ($ehDonoDoProjeto)
             {
-                $this->repositorySql->transferirProprietario($projetoId, $novoCoordenadorId);
+                $novoDonoEhIntegrante = count(array_filter($membros, fn($m) => (int)$m["id"] === $novoCoordenadorId)) > 0;
+
+                if (!$novoDonoEhIntegrante)
+                {
+                    return ["resposta" => false, "erro" => "O novo proprietário precisa ser integrante do projeto.", "status" => 422];
+                }
+
+                $this->transferirPropriedade($projeto, $novoCoordenadorId);
             }
         }
 

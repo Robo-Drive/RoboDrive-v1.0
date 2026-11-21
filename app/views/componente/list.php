@@ -27,7 +27,7 @@ include_once(__DIR__."/../elements/header.php");
             <button type="submit" class="rd-btn rd-btn-secondary !py-2 !px-4 text-xs">Buscar</button>
         </form>
 
-        <section data-resultados class="grid grid-cols-1 gap-5 p-5 md:grid-cols-2 lg:grid-cols-4">
+        <section id="resultadosComponentes" data-atualizar data-resultados class="grid grid-cols-1 gap-5 p-5 md:grid-cols-2 lg:grid-cols-4">
             <?php if(isset($componentes) && count($componentes) > 0):?>
                 <?php foreach($componentes as $componente):?>
                     <?php include(__DIR__."/elements/card.php")?>

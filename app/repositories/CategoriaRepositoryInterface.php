@@ -13,4 +13,9 @@ Interface CategoriaRepositoryInterface
     public function listarTodos(): array;
     public function editar(Categoria $categoria): ?Categoria;
     public function deletar(Categoria $categoria): bool;
+    public function obterOuCriarParaUsuario(string $nome, int $usuarioId): int;
+    public function listarPublicas(): array;
+    public function listarPorUsuario(int $usuarioId): array;
+    public function pertenceAoUsuario(int $categoriaId, int $usuarioId): bool;
+    public function reatribuirProjetosEDesativar(int $categoriaAntigaId, int $categoriaNovaId, int $usuarioId): bool;
 }

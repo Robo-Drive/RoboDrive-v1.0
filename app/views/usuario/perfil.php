@@ -51,7 +51,7 @@ include_once(__DIR__."/../elements/header.php");
                 </div>
             </div>
 
-            <div id="gridEquipesPerfil" class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            <div id="gridEquipesPerfil" data-atualizar class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                 <?php if(isset($equipes) && count($equipes) > 0):?>
                     <?php foreach($equipes as $equipe):?>
                         <?php include(__DIR__."/elements/cardEquipe.php")?>
@@ -94,7 +94,7 @@ include_once(__DIR__."/../elements/header.php");
                     >
                 </div>
                 <div class="sm:w-64">
-                    <select id="categoriaPerfil" class="rd-select w-full">
+                    <select id="categoriaPerfil" data-atualizar class="rd-select w-full">
                         <option value="">Todas as categorias</option>
                         <?php if(!empty($categorias)): ?>
                             <?php foreach($categorias as $cat): ?>
@@ -108,7 +108,7 @@ include_once(__DIR__."/../elements/header.php");
             </div>
 
             <!-- LISTAGEM DOS PROJETOS COM AJAX -->
-            <div id="gridProjetosPerfil" class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            <div id="gridProjetosPerfil" data-atualizar class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                 <?php if(isset($projetos) && count($projetos) > 0):?>
                     <?php foreach($projetos as $projeto):?>
                         <?php include(__DIR__."/elements/cardProjeto.php")?>
@@ -122,6 +122,7 @@ include_once(__DIR__."/../elements/header.php");
     </div>
 </div>
 
+<div id="gerenciarCategorias" data-atualizar>
 <?php if($perfilProprio && !empty($categorias) && count($categorias) > 1): ?>
 <!-- MODAL DE EXCLUIR CATEGORIA COM REATRIBUIÇÃO OBRIGATÓRIA -->
 <div id="modalGerenciarCategorias" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden">
@@ -169,6 +170,7 @@ function filtrarNovaCategoria() {
 }
 </script>
 <?php endif; ?>
+</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -182,7 +184,10 @@ document.addEventListener("DOMContentLoaded", function() {
         if (inputBuscaEquipe.value.trim()) params.append("busca_equipe", inputBuscaEquipe.value.trim());
         params.append("ajax_equipe", "1");
 
-        fetch("<?= URL_BASE ?>/usuario/perfil?" + params.toString(), {
+        const url = "<?= URL_BASE ?>/usuario/perfil?" + params.toString();
+        gridEquipes.dataset.fonte = url;
+
+        fetch(url, {
             headers: { "X-Requested-With": "XMLHttpRequest" }
         })
         .then(res => res.text())
@@ -212,7 +217,10 @@ document.addEventListener("DOMContentLoaded", function() {
         if (categoria) params.append("categoria_id", categoria);
         params.append("ajax", "1");
 
-        fetch("<?= URL_BASE ?>/usuario/perfil?" + params.toString(), {
+        const url = "<?= URL_BASE ?>/usuario/perfil?" + params.toString();
+        grid.dataset.fonte = url;
+
+        fetch(url, {
             headers: { "X-Requested-With": "XMLHttpRequest" }
         })
         .then(res => res.text())

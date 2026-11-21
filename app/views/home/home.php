@@ -56,7 +56,7 @@
             COMEÇAR AGORA
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
-          <a href="#" class="inline-flex w-full items-center justify-center gap-3 border-[3px] border-[#13F3F7] bg-transparent px-6 py-3 text-center text-sm font-black uppercase tracking-[.06em] text-[#13F3F7] no-underline transition-[filter,transform] duration-200 hover:translate-y-[-2px] sm:w-auto sm:px-10 sm:py-[1.1rem] sm:text-base">VER PROJETOS PÚBLICOS</a>
+          <a href="<?= URL_BASE."/projeto/listar" ?>" class="inline-flex w-full items-center justify-center gap-3 border-[3px] border-[#13F3F7] bg-transparent px-6 py-3 text-center text-sm font-black uppercase tracking-[.06em] text-[#13F3F7] no-underline transition-[filter,transform] duration-200 hover:translate-y-[-2px] sm:w-auto sm:px-10 sm:py-[1.1rem] sm:text-base">VER PROJETOS PÚBLICOS</a>
         </div>
       </div>
     </div>
@@ -102,22 +102,22 @@
 
       <div class="border-b-[3px] border-r-[3px] border-[#07556A] px-4 py-8 text-center transition-colors duration-200 hover:bg-[rgba(7,85,106,.08)] sm:px-8 sm:py-14 lg:border-b-0">
         <div class="mb-2 text-[.55rem] font-bold uppercase tracking-[.2em] text-[#91B5BD] sm:mb-3 sm:text-[.65rem] sm:tracking-[.25em]">PROJETOS</div>
-        <div class="font-['Barlow_Condensed'] text-[clamp(2.5rem,6vw,7rem)] font-black leading-none text-[#13F3F7]">50+</div>
+        <div class="font-['Barlow_Condensed'] text-[clamp(2.5rem,6vw,7rem)] font-black leading-none text-[#13F3F7]"><?= (int) ($totalProjetos ?? 0) ?></div>
       </div>
 
       <div class="border-b-[3px] border-[#07556A] px-4 py-8 text-center transition-colors duration-200 hover:bg-[rgba(7,85,106,.08)] sm:px-8 sm:py-14 lg:border-b-0 lg:border-r-[3px]">
         <div class="mb-2 text-[.55rem] font-bold uppercase tracking-[.2em] text-[#91B5BD] sm:mb-3 sm:text-[.65rem] sm:tracking-[.25em]">EQUIPES</div>
-        <div class="font-['Barlow_Condensed'] text-[clamp(2.5rem,6vw,7rem)] font-black leading-none text-[#F2FEFE]">8</div>
+        <div class="font-['Barlow_Condensed'] text-[clamp(2.5rem,6vw,7rem)] font-black leading-none text-[#F2FEFE]"><?= (int) ($totalEquipes ?? 0) ?></div>
       </div>
 
       <div class="border-b-[3px] border-r-[3px] border-[#07556A] px-4 py-8 text-center transition-colors duration-200 hover:bg-[rgba(7,85,106,.08)] sm:px-8 sm:py-14 sm:border-b-0">
         <div class="mb-2 text-[.55rem] font-bold uppercase tracking-[.2em] text-[#91B5BD] sm:mb-3 sm:text-[.65rem] sm:tracking-[.25em]">COMPONENTES</div>
-        <div class="font-['Barlow_Condensed'] text-[clamp(2.5rem,6vw,7rem)] font-black leading-none text-[#13F3F7]">156</div>
+        <div class="font-['Barlow_Condensed'] text-[clamp(2.5rem,6vw,7rem)] font-black leading-none text-[#13F3F7]"><?= (int) ($totalComponentes ?? 0) ?></div>
       </div>
 
       <div class="px-4 sm:px-8 py-8 sm:py-14 text-center transition-colors duration-200 hover:bg-[rgba(7,85,106,.08)]">
         <div class="mb-2 text-[.55rem] font-bold uppercase tracking-[.2em] text-[#91B5BD] sm:mb-3 sm:text-[.65rem] sm:tracking-[.25em]">USUARIOS</div>
-        <div class="font-['Barlow_Condensed'] text-[clamp(2.5rem,6vw,7rem)] font-black leading-none text-[#F2FEFE]">186</div>
+        <div class="font-['Barlow_Condensed'] text-[clamp(2.5rem,6vw,7rem)] font-black leading-none text-[#F2FEFE]"><?= (int) ($totalUsuarios ?? 0) ?></div>
       </div>
 
     </div>

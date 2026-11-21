@@ -605,4 +605,11 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
 
         return $this->deletar($equipe);
     }
+
+    public function contarAtivos(): int
+    {
+        $stmt = $this->connection->query("SELECT COUNT(*) FROM equipe WHERE status = 1");
+
+        return (int) $stmt->fetchColumn();
+    }
 }

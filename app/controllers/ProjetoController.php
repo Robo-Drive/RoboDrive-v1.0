@@ -473,7 +473,6 @@ class ProjetoController extends Controller
             {
                 $categoriaRaw = trim($_POST["categoria"] ?? "");
 
-                // A categoria precisa ser do proprietário do projeto (não de outros coordenadores)
                 $equipePost = !empty($_POST["equipe_id"]) ? (int)$_POST["equipe_id"] : null;
                 $erroVinculo = $this->service->validarVinculos(
                     $equipePost,
@@ -628,6 +627,16 @@ class ProjetoController extends Controller
 
             $usuarioLogado = $_SESSION["usuario_logado"] ?? null;
 
+            $equipeDoProjetoId = (int)($projeto->getEquipe()?->getId() ?? 0);
+
+            if ($equipeDoProjetoId > 0 && !(new \app\repositories\EquipeRepositorySql())->usuarioPertenceAEquipe($equipeDoProjetoId, (int)$usuarioLogado->getId()))
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "mensagem" => "Este projeto pertence a uma equipe. Apenas integrantes da equipe podem entrar nele."
+                ], 403);
+            }
+
             $solicitou = $this->repositorySql->solicitarEntrada(
                 (int)$projeto->getId(),
                 (int)$usuarioLogado->getId()
@@ -722,6 +731,16 @@ class ProjetoController extends Controller
             $this->responderAcao(false, "Apenas coordenadores podem alterar papéis.", 403);
         }
 
+        $projetoBusca = new Projeto();
+        $projetoBusca->setId($projetoId);
+        $projetoAlvo = $this->repositorySql->buscarId($projetoBusca);
+        $donoId = (int)($projetoAlvo?->getUsuario()?->getId() ?? 0);
+
+        if ($usuarioId === $donoId && (int)$_SESSION["usuario_logado"]->getId() !== $donoId)
+        {
+            $this->responderAcao(false, "Apenas o proprietário pode alterar o papel dele no projeto.", 403);
+        }
+
         $resultado = $this->service->alterarPapel($projetoId, $usuarioId, trim($_POST["papel"]));
 
         if (!$resultado["resposta"])
@@ -776,7 +795,18 @@ class ProjetoController extends Controller
         $usuarioId = (int)$_POST["usuario_id"];
         $ehProprioUsuario = ((int)$_SESSION["usuario_logado"]->getId() === $usuarioId);
 
-        if (!$ehProprioUsuario && !$this->service->usuarioECoordenador($projetoId))
+        $projetoBusca = new Projeto();
+        $projetoBusca->setId($projetoId);
+        $projeto = $this->repositorySql->buscarId($projetoBusca);
+
+        $donoId = (int)($projeto?->getUsuario()?->getId() ?? 0);
+
+        if (!$ehProprioUsuario && $usuarioId === $donoId)
+        {
+            $this->responderAcao(false, "O proprietário só pode sair do projeto transferindo a propriedade para outro integrante.", 403);
+        }
+
+        if (!$ehProprioUsuario && !($projeto && $this->service->podeGerenciarMembros($projeto)))
         {
             $this->responderAcao(false, "Você não tem permissão para remover este membro.", 403);
         }
@@ -904,16 +934,18 @@ class ProjetoController extends Controller
             $this->responderAcao(false, "Projeto não encontrado.", 404);
         }
 
-        // Admin, coordenador do projeto ou coordenador da equipe do projeto
         if (!$this->service->podeDesativar($projeto))
         {
             $this->responderAcao(false, "Você não tem permissão para desativar este projeto.", 403);
         }
 
-        // Justificativa só quando o admin desativa o projeto de outro usuário
         $coordenaEquipe = $this->service->coordenaEquipeDoProjeto($projeto);
         $comJustificativa = $this->exigeJustificativa((int)($projeto->getUsuario()?->getId() ?? 0), $coordenaEquipe);
-        $autoridade = $usuarioLogado->getRegra() === "admin" ? "administração" : "coordenação da equipe";
+        $autoridade = match (true) {
+            $usuarioLogado->getRegra() === "admin" => "administração",
+            $coordenaEquipe => "coordenação da equipe",
+            default => "pessoa responsável pelo projeto",
+        };
         $justificativa = "";
 
         if ($comJustificativa)
@@ -939,7 +971,22 @@ class ProjetoController extends Controller
 
             $usuariosProjeto = $this->usuarioRepositorySql->buscarProjeto($projetoId);
 
-            if ($comJustificativa && !empty($usuariosProjeto))
+            $donoId = (int)($projeto->getUsuario()?->getId() ?? 0);
+            $donoNaLista = count(array_filter($usuariosProjeto, fn($u) => (int)$u->getId() === $donoId)) > 0;
+
+            if ($donoId > 0 && !$donoNaLista)
+            {
+                $donoBusca = new \app\models\Usuario();
+                $donoBusca->setId($donoId);
+                $donoCompleto = $this->usuarioRepositorySql->buscarId($donoBusca);
+
+                if ($donoCompleto)
+                {
+                    $usuariosProjeto[] = $donoCompleto;
+                }
+            }
+
+            if (!empty($usuariosProjeto))
             {
                 $motivoHtml = nl2br(
                     htmlspecialchars($justificativa, ENT_QUOTES, "UTF-8")
@@ -1023,7 +1070,7 @@ class ProjetoController extends Controller
             $this->responderAcao(false, "Projeto já está ativo.", 422);
         }
 
-        $this->repositorySql->ativar($id);
+        $this->service->ativarProjeto($id);
 
         $this->responderAcao(true, "Projeto reativado com sucesso.");
     }

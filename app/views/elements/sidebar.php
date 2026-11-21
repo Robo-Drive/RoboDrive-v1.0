@@ -36,7 +36,7 @@ $listAdmin = [
     [
         "route" => URL_BASE."/admin/equipe/listar",
         "nome" => "Equipes",
-        "icon" => "usuarios-icon.svg"
+        "icon" => "team-icon.png"
     ],
     [
         "route" => URL_BASE."/admin/projeto/listar",

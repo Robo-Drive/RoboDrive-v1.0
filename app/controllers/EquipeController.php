@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\core\Controller;
 use app\helpers\ValidadorHelper;
 use app\models\Equipe;
+use app\models\Projeto;
 use app\repositories\EquipeRepositorySql;
 use app\repositories\ForumRepositorySql;
 use app\repositories\ProjetoRepositorySql;
@@ -25,6 +26,25 @@ class EquipeController extends Controller
         $this->forumRepositorySql = new ForumRepositorySql();
         $this->projetoRepositorySql = new ProjetoRepositorySql();
         $this->validador = new ValidadorHelper();
+    }
+
+    private function filtrarProjetosVisiveis(array $projetos, int $equipeId): array
+    {
+        $usuarioLogado = $_SESSION["usuario_logado"] ?? null;
+        $usuarioId = $usuarioLogado ? (int)$usuarioLogado->getId() : 0;
+
+        $ehMembro = $usuarioId > 0 && $this->repositorySql->usuarioPertenceAEquipe($equipeId, $usuarioId);
+        $ehCoordenador = $usuarioId > 0 && $this->repositorySql->usuarioECoordenador($equipeId, $usuarioId);
+
+        return array_values(array_filter($projetos, function (Projeto $projeto) use ($usuarioId, $ehMembro, $ehCoordenador) {
+            return match ($projeto->getVisibilidade()) {
+                "publico" => true,
+                "equipe" => $ehMembro || $ehCoordenador,
+                default => $ehCoordenador
+                    || ($usuarioId > 0 && (int)$projeto->getUsuario()?->getId() === $usuarioId)
+                    || ($usuarioId > 0 && $this->projetoRepositorySql->usuarioPertenceAoProjeto((int)$projeto->getId(), $usuarioId)),
+            };
+        }));
     }
 
     private function usuarioEhAdmin(): bool
@@ -76,9 +96,7 @@ class EquipeController extends Controller
 
         $data["statusFiltro"] = $status;
         $data["busca_atual"] = $busca;
-        $data["equipes"] = ($status === "todos")
-            ? $this->repositorySql->listarAdminTodos($busca)
-            : $this->repositorySql->listarPorStatus($status === "1", $busca);
+        $data["equipes"] = ($status === "todos") ? $this->repositorySql->listarAdminTodos($busca) : $this->repositorySql->listarPorStatus($status === "1", $busca);
 
         $this->view("equipe/list", $data);
     }
@@ -321,23 +339,25 @@ class EquipeController extends Controller
             return;
         }
 
-        $termoBuscaProjeto = $_GET["busca_projeto"] ?? null;
+        $busca = trim(filter_input(INPUT_GET, "busca", FILTER_SANITIZE_FULL_SPECIAL_CHARS)??"");
+        $secaoBusca = $_GET["secao"] ?? "";
+        $termoBuscaProjeto = ($secaoBusca === "projetos" && $busca !== "") ? $busca : null;
+        $data["buscaProjetos"] = $secaoBusca === "projetos" ? $busca : "";
+        $data["buscaForum"] = $secaoBusca === "forum" ? $busca : "";
 
         $data["equipe"] = $equipeExistente;
         $data["usuarios"] = $this->repositorySql->buscarUsuariosEquipe($equipeId);
         $data["membros"] = $this->repositorySql->listarMembros($equipeId);
-        $data["projetos"] = $this->projetoRepositorySql->buscarEquipe($equipeId, $termoBuscaProjeto);
-        $data["foruns"] = $this->forumRepositorySql->buscarEquipe($equipeId);
+        $data["projetos"] = $this->filtrarProjetosVisiveis(
+            $this->projetoRepositorySql->buscarEquipe($equipeId, $termoBuscaProjeto) ?? [],
+            $equipeId
+        );
+        $data["foruns"] = $this->forumRepositorySql->buscarEquipe($equipeId, ($secaoBusca === "forum" && $busca !== "") ? $busca : null);
         $solicitacoesPendentes = $this->usuarioEhCoordenadorOuAdmin($equipeId)
             ? $this->repositorySql->listarSolicitacoesPendentes($equipeId)
             : [];
         $data["solicitacoes"] = $solicitacoesPendentes;
         $data["solicitacoesPendentes"] = $solicitacoesPendentes;
-
-        if ($this->requisicaoAjax() && isset($_GET["busca_projeto"]))
-        {
-            $this->responderJson(["sucesso" => true, "projetos" => $data["projetos"]]);
-        }
 
         $this->view("equipe/perfil", $data);
     }
@@ -362,7 +382,6 @@ class EquipeController extends Controller
             $this->responderJson(["sucesso" => false, "mensagem" => "Você não tem permissão para desativar esta equipe."], 403);
         }
 
-        // Justificativa só quando um admin (que não coordena a equipe) desativa a equipe de outros usuários
         if ($this->usuarioEhAdmin() && !$ehCoordenador)
         {
             $erroJustificativa = $this->erroJustificativa();
@@ -457,12 +476,7 @@ class EquipeController extends Controller
             $this->responderAcao(false, $resultado["erro"], $resultado["status"]);
         }
 
-        $this->responderAcao(
-            true,
-            $ehProprioUsuario ? "Você saiu da equipe." : "Membro removido com sucesso.",
-            200,
-            $ehProprioUsuario ? URL_BASE . "/usuario/perfil" : null
-        );
+        $this->responderAcao(true,$ehProprioUsuario ? "Você saiu da equipe." : "Membro removido com sucesso.",200, $ehProprioUsuario ? URL_BASE . "/usuario/perfil" : null);
     }
 
     public function formularioEntrar()

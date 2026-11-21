@@ -41,7 +41,7 @@ include_once(__DIR__."/../elements/header.php");
                             <th>Ações</th>
                         </tr>
                     </thead>
-                    <tbody data-resultados>
+                    <tbody id="resultadosUsuarios" data-atualizar data-resultados>
                         <?php if(isset($usuarios) && count($usuarios) > 0): ?>
                         <?php foreach($usuarios as $u):?>
                         <?php $proprioUsuario = $u->getId() == $_SESSION["usuario_logado"]->getId(); ?>
@@ -67,7 +67,7 @@ include_once(__DIR__."/../elements/header.php");
                                         <form action="<?= URL_BASE ?>/usuario/editar" method="post"><input type="hidden" name="id" value="<?= $u->getId() ?>"><button type="submit" class="rd-btn rd-btn-secondary rd-btn-sm">Editar</button></form>
                                                                                 <?php if(!$proprioUsuario): ?>
                                         <?php if($u->isStatus() === false): ?>
-                                            <form action="<?= URL_BASE ?>/usuario/ativar" method="post" onsubmit="return confirm('Deseja realmente reativar a conta deste usuário?');">
+                                            <form action="<?= URL_BASE ?>/usuario/ativar" method="post" data-confirmar="Deseja realmente reativar a conta deste usuário?" >
                                                 <input type="hidden" name="id" value="<?= $u->getId() ?>">
                                                 <button type="submit" class="rd-btn rd-btn-primary rd-btn-sm !bg-emerald-600 hover:!bg-emerald-500 !text-black font-bold">Ativar</button>
                                             </form>

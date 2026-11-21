@@ -34,6 +34,7 @@ class Forum
             $usuarioObj->setId($forum["usuario_id"] ?? ($_SESSION["usuario_logado"]->getId() ?? null));
             $usuarioObj->setNome($forum["nome"] ?? '');
             $usuarioObj->setNomeUsuario($forum["nome_usuario"] ?? null);
+            $usuarioObj->setEmail($forum["email"] ?? null);
             $usuarioObj->setImagem($forum['imagem'] ?? null);
             $usuarioObj->setRegra($forum["regra"] ?? null);
             

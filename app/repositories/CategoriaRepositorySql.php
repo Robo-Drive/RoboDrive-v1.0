@@ -31,6 +31,34 @@ class CategoriaRepositorySql implements CategoriaRepositoryInterface
 
         return $categoria;
     }
+    public function obterOuCriarParaUsuario(string $nome, int $usuarioId): int
+    {
+        $sqlBusca = "SELECT id FROM categoria
+                     WHERE nome = :nome AND usuario_id = :usuario_id AND status = 1
+                     LIMIT 1";
+
+        $stmt = $this->connection->prepare($sqlBusca);
+        $stmt->bindValue(':nome', $nome);
+        $stmt->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $categoriaId = $stmt->fetchColumn();
+
+        if ($categoriaId !== false)
+        {
+            return (int)$categoriaId;
+        }
+
+        $sqlInsercao = "INSERT INTO categoria (nome, usuario_id) VALUES (:nome, :usuario_id)";
+
+        $stmt = $this->connection->prepare($sqlInsercao);
+        $stmt->bindValue(':nome', $nome);
+        $stmt->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return (int)$this->connection->lastInsertId();
+    }
+
     public function buscarId(Categoria $categoria): ?Categoria
     {
         return new Categoria();

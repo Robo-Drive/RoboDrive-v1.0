@@ -29,7 +29,7 @@ $fotoAutor = $forum->getUsuario()->getImagem()
                 </h1>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
                 <?php if (!$forumAtivo): ?>
                     <span class="rd-badge rd-badge-private">Desativada</span>
                     <?php
@@ -61,7 +61,7 @@ $fotoAutor = $forum->getUsuario()->getImagem()
                             Desativar
                         </button>
                     <?php else: ?>
-                        <form action="<?= URL_BASE ?>/forum/desativar" method="post" onsubmit="return confirm('Deseja realmente desativar esta postagem?');">
+                        <form action="<?= URL_BASE ?>/forum/desativar" method="post" data-confirmar="Deseja realmente desativar esta postagem?" >
                             <input type="hidden" name="id" value="<?= $forum->getId() ?>">
                             <button type="submit" class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition">
                                 Desativar
@@ -160,7 +160,7 @@ $fotoAutor = $forum->getUsuario()->getImagem()
             </form>
 
             <!-- LISTAGEM DE COMENTÁRIOS -->
-            <div class="space-y-4 pt-4 border-t border-[#07556A]/60 w-full">
+            <div id="comentariosForum" data-atualizar class="space-y-4 pt-4 border-t border-[#07556A]/60 w-full">
                 <?php if (!empty($comentarios)): ?>
                     <?php foreach ($comentarios as $coment): ?>
                         <?php
@@ -205,7 +205,7 @@ $fotoAutor = $forum->getUsuario()->getImagem()
                                                 Desativar
                                             </button>
                                         <?php else: ?>
-                                            <form action="<?= URL_BASE ?>/comentario/desativar" method="post" onsubmit="return confirm('Deseja desativar este comentário?');">
+                                            <form action="<?= URL_BASE ?>/comentario/desativar" method="post" data-confirmar="Deseja desativar este comentário?" >
                                                 <input type="hidden" name="id" value="<?= $coment->getId() ?>">
                                                 <input type="hidden" name="tipo" value="forum">
                                                 <button type="submit" title="Desativar comentário" class="text-red-400 hover:text-red-300 text-xs px-2 py-1 font-bold">

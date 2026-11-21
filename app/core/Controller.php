@@ -54,7 +54,6 @@ class Controller
             $this->redirect(URL_BASE);
         }
     }
-    // Admin logado? (não bloqueia, só informa)
     protected function ehAdmin(): bool
     {
         return isset($_SESSION["usuario_logado"]) && $_SESSION["usuario_logado"]->getRegra() === "admin";
