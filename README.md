@@ -63,6 +63,6 @@ senha = robodriveadmin
 ## Problemas comuns
 
 - **"Não foi possível acessar o banco"**: confira se `DB_USER` e `DB_PASS` estão certos e se o MySQL/MariaDB está rodando. Lembre-se de exportar as variáveis no mesmo terminal antes de iniciar o servidor.
-- **Página em branco ou erro de função inexistente**: a versão do PHP é anterior à 8.0. Confira com `php -v`.
+- **Página em branco ou erro de função inexistente**: a versão do PHP é anterior à 8.5. Confira com `php -v`.
 - **Imagens não sobem**: a pasta `store/` precisa de permissão de escrita.
 - **Porta**: o sistema usa a porta `8080`, fixa em `URL_BASE` no arquivo `app/config/config.php`. Se usar outra porta, altere esse valor.
