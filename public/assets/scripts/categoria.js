@@ -7,13 +7,11 @@ const novaCategoria = document.getElementById("novaCategoria");
 const opcoesCategoria = document.querySelectorAll(".categoria-option");
 
 
-// Abrir lista ao clicar no campo
 pesquisaCategoria.addEventListener("focus", () => {
     listaCategorias.classList.remove("hidden");
 });
 
 
-// Pesquisar categoria
 pesquisaCategoria.addEventListener("input", () => {
 
     const pesquisa = pesquisaCategoria.value.toLowerCase();
@@ -34,7 +32,6 @@ pesquisaCategoria.addEventListener("input", () => {
 });
 
 
-// Selecionar categoria
 opcoesCategoria.forEach(opcao => {
 
     opcao.addEventListener("click", () => {
@@ -42,17 +39,13 @@ opcoesCategoria.forEach(opcao => {
         const valor = opcao.dataset.value;
         const nome = opcao.textContent.trim();
 
-        // Define o valor do select real
         categoria.value = valor;
 
-        // Mostra o nome escolhido no campo de pesquisa
         pesquisaCategoria.value = nome;
 
-        // Fecha a lista
         listaCategorias.classList.add("hidden");
 
 
-        // Se for criar categoria
         if (valor === "criar") {
 
             novaCategoriaContainer.classList.remove("hidden");
@@ -72,7 +65,6 @@ opcoesCategoria.forEach(opcao => {
 });
 
 
-// Fechar lista quando clicar fora
 document.addEventListener("click", (event) => {
 
     if (!event.target.closest(".divCategoria")) {

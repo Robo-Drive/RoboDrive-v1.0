@@ -14,13 +14,25 @@ class Categoria
 
     public static function map(array $categorias) :array
     {
+        if($categorias == null)
+        {
+            return [];
+        }
         $categoriasObj = array();
         foreach($categorias as $categoria)
         {
             $categoriaObj = new Categoria();
             $categoriaObj->setId($categoria["id"]??null);
             $categoriaObj->setNome($categoria["nome"]??null);
-            $categoriaObj->setUsuario(new Usuario()->setId($_SESSION["usuario_logado"]->getId()??null));
+
+            $usuarioObj = new Usuario();
+            $usuarioObj->setId($categoria["usuario_id"]);
+            $usuarioObj->setNome($categoria["usuario_nome"] ?? null);
+            $usuarioObj->setNomeUsuario($categoria["nome_usuario"] ?? null);
+            $usuarioObj->setImagem($categoria['imagem'] ?? null);
+            $usuarioObj->setRegra($categoria["regra"] ?? null);
+            
+            $categoriaObj->setUsuario($usuarioObj);
             $categoriaObj->setStatus($categoria["status"]??null);
             $categoriasObj[] = $categoriaObj;
         }
@@ -34,7 +46,6 @@ class Categoria
     public function setId(?int $id): self
     {
         $this->id = $id;
-
         return $this;
     }
 
@@ -45,7 +56,6 @@ class Categoria
     public function setNome(?string $nome): self
     {
         $this->nome = $nome;
-
         return $this;
     }
 
@@ -56,7 +66,6 @@ class Categoria
     public function setUsuario(?Usuario $usuario): self
     {
         $this->usuario = $usuario;
-
         return $this;
     }
 
@@ -67,7 +76,6 @@ class Categoria
     public function setStatus(?bool $status): self
     {
         $this->status = $status;
-
         return $this;
     }
 }

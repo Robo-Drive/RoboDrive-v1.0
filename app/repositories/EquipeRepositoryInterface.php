@@ -8,7 +8,7 @@ use app\models\Usuario;
 interface EquipeRepositoryInterface
 {
     public function cadastrar(Equipe $equipe):?Equipe;
-    public function buscarId(Equipe $equipe):?Equipe;
+    public function buscarId(Equipe $equipe, bool $incluirDesativados = false):?Equipe;
     public function buscarNome(Equipe $equipe): ?array;
     public function buscarUsuario(Usuario $usuario): ?array;
     public function listarTodos():array;

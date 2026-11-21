@@ -4,15 +4,22 @@ namespace app\services;
 
 use app\models\Usuario;
 use app\repositories\UsuarioRepositorySql;
+use app\services\CategoriaService;
 use Exception;
 
 class UsuarioService
 {
     private UsuarioRepositorySql $repositorySql;
+    private CategoriaService $categoriaService;
 
     public function __construct()
     {
         $this->repositorySql = new UsuarioRepositorySql;
+        $this->categoriaService = new CategoriaService;
+    }
+    public function ativar(Usuario $usuario): void
+    {
+        $this->repositorySql->ativar($usuario);
     }
     public function salvarUsuario(Usuario $usuario): bool | array
     {
@@ -21,7 +28,15 @@ class UsuarioService
         $nomeUsuarioResposta = $this->repositorySql->buscarNomeUsuario($usuario);
         if(empty($emailResposta) && empty($nomeUsuarioResposta))
         {
-            $this->repositorySql->cadastrar($usuario);
+            $novoUsuario = $this->repositorySql->cadastrar($usuario);
+
+            if (!$novoUsuario)
+            {
+                return ["email" => "Não foi possível concluir o cadastro. Tente novamente."];
+            }
+
+            $this->categoriaService->cadastro(["categoria_nome" => "Meus projetos"], (int)$novoUsuario->getId());
+
             return true;
         }
         
@@ -60,7 +75,9 @@ class UsuarioService
         {
             $this->repositorySql->editar($usuario);
             return true;
-        } catch (Exception $e) {
+        }
+        catch (Exception $e)
+        {
             return false;
         }
     }

@@ -1,99 +1,182 @@
-const input = document.getElementById("codigos");
-const lista = document.getElementById("listaCodigos");
-
-const arquivos = [];
+// --- MANIPULAÇÃO DE CÓDIGOS ---
+const inputCodigos = document.getElementById("codigos");
+const listaCodigos = document.getElementById("listaCodigos");
+const arquivosCodigos = [];
 
 function adicionarArquivos() {
-    input.click();
+    if (inputCodigos) inputCodigos.click();
 }
 
-input.addEventListener("change", () => {
-    for (const arquivo of input.files) {
-        const existe = arquivos.some(item =>
-            item.name === arquivo.name &&
-            item.size === arquivo.size &&
-            item.lastModified === arquivo.lastModified
-        );
+if (inputCodigos) {
+    inputCodigos.addEventListener("change", () => {
+        for (const arquivo of inputCodigos.files) {
+            const existe = arquivosCodigos.some(item =>
+                item.name === arquivo.name &&
+                item.size === arquivo.size &&
+                item.lastModified === arquivo.lastModified
+            );
 
-        if (!existe) {
-            // Inicializa a descrição vazia no objeto do arquivo
-            arquivo.descricao = "";
-            arquivos.push(arquivo);
+            if (!existe) {
+                arquivo.descricao = "";
+                arquivosCodigos.push(arquivo);
+            }
         }
-    }
 
-    input.value = "";
-    atualizarLista();
-});
+        inputCodigos.value = "";
+        atualizarListaCodigos();
+    });
+}
 
-function atualizarLista() {
-    lista.innerHTML = "";
+function atualizarListaCodigos() {
+    if (!listaCodigos) return;
+    listaCodigos.innerHTML = "";
 
-    arquivos.forEach((arquivo, indice) => {
-        // Container do item (agora estilizado como um card para caber a descrição)
+    arquivosCodigos.forEach((arquivo, indice) => {
         const li = document.createElement("li");
-        li.className = "w-full bg-black/80 border border-white p-3 text-white hover:border-[#00F5F5] transition-all flex flex-col gap-2";
+        li.className = "w-full bg-[#06141C] border border-[#07556A] p-3 text-white hover:border-[#13F3F7] transition-all flex flex-col gap-2";
 
-        // Linha superior: Informações do arquivo + Botão de remover
         const topo = document.createElement("div");
         topo.className = "flex justify-between items-center";
 
         const span = document.createElement("span");
-        span.className = "text-sm font-semibold truncate";
+        span.className = "text-xs font-semibold text-[#F2FEFE] truncate";
         span.textContent = `${arquivo.name} (${(arquivo.size / 1024).toFixed(0)} KB)`;
 
         const botao = document.createElement("button");
         botao.type = "button";
-        botao.className = "cursor-pointer";
-
-        const img = document.createElement("img");
-        img.src = `${IMG_URL_BASE}/close-icon.png`;
-        img.alt = "Remover";
-        img.className = "w-5 h-5";
-
-        botao.appendChild(img);
+        botao.className = "cursor-pointer text-red-400 hover:text-red-300 font-bold px-2";
+        botao.textContent = "✕";
         botao.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            removerArquivo(indice);
+            removerCodigo(indice);
         });
 
         topo.appendChild(span);
         topo.appendChild(botao);
 
-        // Linha inferior: Input para a descrição do código
         const inputDescricao = document.createElement("input");
         inputDescricao.type = "text";
         inputDescricao.name = "codigos_descricao[]";
-        inputDescricao.placeholder = "Descrição deste código (ex: Script de movimentação dos motores)";
+        inputDescricao.id = `codigos_descricao_${indice}`;
+        inputDescricao.placeholder = "Descrição deste código (ex: Script de movimentação dos motores)...";
         inputDescricao.value = arquivo.descricao || "";
-        inputDescricao.className = "w-full h-10 bg-black border border-white/40 px-3 text-white text-sm outline-none focus:border-[#00F5F5] transition-all";
+        inputDescricao.className = "w-full bg-[#000505] border border-[#07556A] p-2 text-white text-xs outline-none focus:border-[#13F3F7] transition-all";
 
-        // Salva no objeto para não perder o valor caso adicione/remova outros arquivos
         inputDescricao.addEventListener("input", (e) => {
             arquivo.descricao = e.target.value;
         });
 
         li.appendChild(topo);
         li.appendChild(inputDescricao);
-
-        lista.appendChild(li);
+        listaCodigos.appendChild(li);
     });
 
-    atualizarInput();
+    atualizarInputCodigos();
 }
 
-function atualizarInput() {
+function atualizarInputCodigos() {
+    if (!inputCodigos) return;
     const dataTransfer = new DataTransfer();
-
-    arquivos.forEach(arquivo => {
+    arquivosCodigos.forEach(arquivo => {
         dataTransfer.items.add(arquivo);
     });
-
-    input.files = dataTransfer.files;
+    inputCodigos.files = dataTransfer.files;
 }
 
-function removerArquivo(indice) {
-    arquivos.splice(indice, 1);
-    atualizarLista();
+function removerCodigo(indice) {
+    arquivosCodigos.splice(indice, 1);
+    atualizarListaCodigos();
+}
+
+
+// --- MANIPULAÇÃO DE EXTRAS ---
+const inputExtras = document.getElementById("extras");
+const listaExtras = document.getElementById("listaExtras");
+const arquivosExtras = [];
+
+function adicionarArquivosExtras() {
+    if (inputExtras) inputExtras.click();
+}
+
+if (inputExtras) {
+    inputExtras.addEventListener("change", () => {
+        for (const arquivo of inputExtras.files) {
+            const existe = arquivosExtras.some(item =>
+                item.name === arquivo.name &&
+                item.size === arquivo.size &&
+                item.lastModified === arquivo.lastModified
+            );
+
+            if (!existe) {
+                arquivo.descricao = "";
+                arquivosExtras.push(arquivo);
+            }
+        }
+
+        inputExtras.value = "";
+        atualizarListaExtras();
+    });
+}
+
+function atualizarListaExtras() {
+    if (!listaExtras) return;
+    listaExtras.innerHTML = "";
+
+    arquivosExtras.forEach((arquivo, indice) => {
+        const li = document.createElement("li");
+        li.className = "w-full bg-[#06141C] border border-[#07556A] p-3 text-white hover:border-[#13F3F7] transition-all flex flex-col gap-2";
+
+        const topo = document.createElement("div");
+        topo.className = "flex justify-between items-center";
+
+        const span = document.createElement("span");
+        span.className = "text-xs font-semibold text-[#F2FEFE] truncate";
+        span.textContent = `${arquivo.name} (${(arquivo.size / 1024).toFixed(0)} KB)`;
+
+        const botao = document.createElement("button");
+        botao.type = "button";
+        botao.className = "cursor-pointer text-red-400 hover:text-red-300 font-bold px-2";
+        botao.textContent = "✕";
+        botao.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            removerExtra(indice);
+        });
+
+        topo.appendChild(span);
+        topo.appendChild(botao);
+
+        const inputDesc = document.createElement("input");
+        inputDesc.type = "text";
+        inputDesc.name = "extras_descricao[]";
+        inputDesc.id = `extras_descricao_${indice}`;
+        inputDesc.value = arquivo.descricao || "";
+        inputDesc.placeholder = "Descrição ou finalidade deste arquivo (ex: Manual em PDF, Peça 3D STL)...";
+        inputDesc.className = "w-full bg-[#000505] border border-[#07556A] p-2 text-xs text-white outline-none focus:border-[#13F3F7] transition-all";
+
+        inputDesc.addEventListener("input", (e) => {
+            arquivo.descricao = e.target.value;
+        });
+
+        li.appendChild(topo);
+        li.appendChild(inputDesc);
+        listaExtras.appendChild(li);
+    });
+
+    atualizarInputExtras();
+}
+
+function atualizarInputExtras() {
+    if (!inputExtras) return;
+    const dataTransfer = new DataTransfer();
+    arquivosExtras.forEach(arquivo => {
+        dataTransfer.items.add(arquivo);
+    });
+    inputExtras.files = dataTransfer.files;
+}
+
+function removerExtra(indice) {
+    arquivosExtras.splice(indice, 1);
+    atualizarListaExtras();
 }

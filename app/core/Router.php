@@ -39,7 +39,8 @@ class Router
         }
 
         http_response_code(404);
-        exit('Rota não encontrada');//TODO:Page 404
+        require_once __DIR__ . '/../views/elements/404.php';
+        exit;
     }
 
     public function dispatch($route)

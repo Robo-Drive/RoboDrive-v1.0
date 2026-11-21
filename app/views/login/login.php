@@ -21,7 +21,7 @@ include_once(__DIR__ . "/../elements/header.php");
         </div>
 
         <div>
-            <form action="<?= URL_BASE ?>/logar" method="post" class="w-full">
+            <form action="<?= URL_BASE ?>/logar" autocomplete="off" method="post" class="w-full">
                 <?php include_once(__DIR__ . "/elements/form.php") ?>
             </form>
 
@@ -32,7 +32,7 @@ include_once(__DIR__ . "/../elements/header.php");
         </div>
     </section>
 </main>
-<script src="<?= JS_URL_BASE ?>/password.js"></script> 
-<script src="<?= JS_URL_BASE ?>/script.js"></script>
-<script src="<?= JS_URL_BASE ?>/metaballs-wallpaper.js"></script><?php
+<script src="<?= js_url("password.js") ?>"></script> 
+<script src="<?= js_url("script.js") ?>"></script>
+<script src="<?= js_url("metaballs-wallpaper.js") ?>"></script><?php
                                                                     include_once(__DIR__ . "/../elements/footer.php");

@@ -4,7 +4,6 @@ namespace app\services;
 
 use app\models\Componente;
 use app\repositories\ComponenteRepositorySql;
-use Exception;
 
 class ComponenteService
 {
@@ -14,23 +13,48 @@ class ComponenteService
     {
         $this->repositorySql = new ComponenteRepositorySql();
     }
-    public function salvarComponente(Componente $equipe): bool
+    public function listarTodos() : array|null
     {
-        $this->repositorySql->cadastrar($equipe);
-        return true;
+        return $this->repositorySql->listarTodos();
     }
-    public function editarComponente(Componente $equipe):bool
+    public function salvarComponente(Componente $componente): array
+    {
+        if($this->repositorySql->existe($componente))
+        {
+            return ["resposta" => false, "erro" => "Já existe um componente com esse nome."];
+        }
+
+        $this->repositorySql->cadastrar($componente);
+        return ["resposta" => true];
+    }
+    public function editarComponente(Componente $componente): array
     {
         try
         {
-            $this->repositorySql->editar($equipe);
+            if($this->repositorySql->existe($componente))
+            {
+                return ["resposta" => false, "erro" => "Já existe um componente com esse nome."];
+            }
+
+            $this->repositorySql->editar($componente);
+            return ["resposta" => true];
         }
-        catch(Exception $e)
+        catch (\Throwable $e)
         {
-            print_r($e);
-            die;
-            return false;
+            error_log($e->getMessage());
+            return ["resposta" => false, "erro" => "Erro interno ao atualizar o componente."];
         }
-        return true;
+    }
+    public function associar(array $posts)
+    {
+        $this->repositorySql->associar($posts);
+    }
+    public function buscarProjeto(int $id): array  
+    {
+        return $this->repositorySql->buscarProjeto($id);
+    }
+    public function desativar()
+    {
+
     }
 }

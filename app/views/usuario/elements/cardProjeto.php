@@ -1,10 +1,20 @@
-<?php if(isset($projeto)):?>
-<a href="<?= URL_BASE ?>/projeto/perfil?id=<?= $projeto->getId() ?>">
-    <div class="w-[500px] h-[200px] border hover:border-[#00F5F5] px-4">
-        <h1 class="p-4 font-bold text-2xl text-center"><?= $projeto->getNome() ?></h1>
-        <hr>
-        <p><?= $projeto->getDescricao() ?></p>
-        <p class="text-zinc-500">Criado em:<?= $projeto->getCriadoEm()->format("d/m/Y");?></p>
-</a>
-</div>
-<?php endif;?>
+<?php if(isset($projeto)):
+$cardAlvo = [
+    "rotulo"    => "Projeto",
+    "tipo"      => "projeto",
+    "id"        => (int) $projeto->getId(),
+    "link"      => URL_BASE . "/projeto/perfil?id=" . (int) $projeto->getId(),
+    "titulo"    => html_entity_decode($projeto->getNome() ?? "Projeto"),
+    "descricao" => html_entity_decode($projeto->getDescricao() ?? ""),
+    "meta"      => $projeto->getCriadoEm()?->format("d/m/Y") ?? "",
+    "imagem"    => null,
+    "ativo"     => $projeto->isStatus(),
+    "denuncia"  => [
+        "tipo"    => "projeto",
+        "id"      => (int) $projeto->getId(),
+        "nome"    => $projeto->getNome(),
+        "autores" => [$usuario->getId()]
+    ]
+];
+include(__DIR__ . "/../../elements/cardPadrao.php");
+endif; ?>
