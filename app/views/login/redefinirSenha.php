@@ -30,11 +30,6 @@ include_once(__DIR__ . "/../elements/header.php");
                         <img class="passwordButton h-4 w-4 sm:h-5 sm:w-5 transition-all duration-200" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
                     </button>
                 </div>
-                <?php if(isset($erros)): ?>
-                    <?php if(isset($erros["senha"])): ?>
-                        <p class="mt-1.5 sm:mt-2 text-xs sm:text-sm font-medium text-[#13F3F7]"><?= $erros["senha"] ?></p>
-                    <?php endif;?>
-                <?php endif;?>
             </div>
             <div class="relative">
                 <label for="confirmar_senha" class="absolute -top-3 left-3 z-10 bg-[#06141C] px-2 text-[.65rem] sm:text-[.7rem] font-bold uppercase tracking-[.14em] text-[#F2FEFE]">
@@ -49,11 +44,6 @@ include_once(__DIR__ . "/../elements/header.php");
                     </button>
                 </div>
                 <p class="confirmarErro mt-1.5 sm:mt-2 text-xs sm:text-sm font-medium text-[#13F3F7]">
-                    <?php if(isset($erros)): ?>
-                        <?php if(isset($erros["confirmar_senha"])): ?>
-                            <?= $erros["confirmar_senha"] ?>
-                        <?php endif;?>
-                    <?php endif;?>
                 </p>
                 
             </div>
@@ -64,6 +54,6 @@ include_once(__DIR__ . "/../elements/header.php");
         </form>
     </section>
 </main>
-<script src="<?= JS_URL_BASE ?>/password.js"></script> 
+<script src="<?= js_url("password.js") ?>"></script> 
 
 <?php include_once(__DIR__ . "/../elements/footer.php"); ?>

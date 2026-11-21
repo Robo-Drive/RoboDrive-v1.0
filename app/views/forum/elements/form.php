@@ -11,9 +11,6 @@
             class="rd-textarea"
         ><?= isset($forum) ? (is_object($forum) ? $forum->getConteudo() : ($forum["conteudo"] ?? "")) : "" ?></textarea>
 
-        <?php if (isset($erros['conteudo'])): ?>
-            <p class="rd-error"><?= $erros['conteudo'] ?></p>
-        <?php endif; ?>
     </div>
 
     <!-- Visibilidade -->

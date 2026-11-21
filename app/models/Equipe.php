@@ -4,11 +4,12 @@ namespace app\models;
 
 class Equipe
 {
-    private ?int $id;
-    private ?string $nome;
-    private ?string $senha;
+    private ?int $id = null;
+    private ?string $nome = null;
+    private ?string $senha = null;
     private ?string $descricao = null;
     private ?string $hashAcesso = null;
+    private ?bool $status = true;
 
     public static function map(?array $equipes): array
     {
@@ -24,6 +25,7 @@ class Equipe
             $equipeObj->setNome($equipe["nome"] ?? null);
             $equipeObj->setSenha($equipe["senha"] ?? null);
             $equipeObj->setDescricao($equipe["descricao"] ?? null);
+            $equipeObj->setStatus(isset($equipe["status"]) ? (bool)$equipe["status"] : true);
             $equipeObj->setHashAcesso($equipe["hash_acesso"] ?? null);
             $equipesObj[] = $equipeObj;
         }
@@ -78,6 +80,17 @@ class Equipe
     public function setHashAcesso(?string $hashAcesso): self
     {
         $this->hashAcesso = $hashAcesso;
+        return $this;
+    }
+
+    public function isStatus(): ?bool
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?bool $status): self
+    {
+        $this->status = $status;
         return $this;
     }
 }

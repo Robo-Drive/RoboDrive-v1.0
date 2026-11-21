@@ -79,6 +79,16 @@ class CategoriaRepositorySql implements CategoriaRepositoryInterface
         return Categoria::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
+    public function pertenceAoUsuario(int $categoriaId, int $usuarioId): bool
+    {
+        $stmt = $this->connection->prepare("SELECT COUNT(*) FROM categoria WHERE id = :id AND usuario_id = :usuario_id AND status = true");
+        $stmt->bindValue(':id', $categoriaId, PDO::PARAM_INT);
+        $stmt->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return (int)$stmt->fetchColumn() > 0;
+    }
+
     public function reatribuirProjetosEDesativar(int $categoriaAntigaId, int $categoriaNovaId, int $usuarioId): bool
     {
         // Garante que ambas as categorias pertençam ao usuário

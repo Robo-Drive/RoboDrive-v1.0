@@ -3,21 +3,42 @@
 namespace app\controllers;
 
 use app\core\Controller;
+use app\helpers\ValidadorHelper;
 use app\repositories\DenunciaRepositorySql;
 
 class DenunciaController extends Controller
 {
     private DenunciaRepositorySql $repositorySql;
+    private ValidadorHelper $validador;
 
     public function __construct()
     {
         $this->repositorySql = new DenunciaRepositorySql();
+        $this->validador = new ValidadorHelper();
+    }
+
+    public function validar()
+    {
+        $this->validador->tipoDenuncia("tipo", trim($_POST["tipo"] ?? ""));
+        $this->validador->idPositivo("id", $_POST["id"] ?? "");
+        $this->validador->obrigatorio("motivo", trim($_POST["motivo"] ?? ""), "Selecione o motivo da denúncia.");
+    }
+
+    // Descartar denúncias: só tipo e id do conteúdo
+    public function validarAlvo()
+    {
+        $this->validador->tipoDenuncia("tipo", trim($_POST["tipo"] ?? ""));
+        $this->validador->idPositivo("id", $_POST["id"] ?? "");
     }
 
     public function listar()
     {
         $this->loginRequired();
-        $this->adminRequired();
+
+        if (!$this->adminRequired())
+        {
+            $this->redirect(URL_BASE . "/usuario/perfil");
+        }
 
         $data["denuncias"] = $this->repositorySql->listarAgrupadas();
         $this->view("denuncia/list", $data);
@@ -27,33 +48,47 @@ class DenunciaController extends Controller
     {
         $this->loginRequired();
 
-        $tipo = trim(filter_input(INPUT_POST, "tipo", FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? "");
-        $alvoId = filter_input(INPUT_POST, "id", FILTER_VALIDATE_INT);
+        $this->validar();
+
+        if ($this->validador->temErros())
+        {
+            $erros = $this->validador->getErros();
+
+            $this->responderAcao(false, reset($erros), 422, null, $erros);
+        }
+
+        $tipo = trim($_POST["tipo"]);
+        $alvoId = (int)$_POST["id"];
         $motivo = trim(filter_input(INPUT_POST, "motivo", FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? "");
         $descricao = trim(filter_input(INPUT_POST, "descricao", FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? "");
 
-        if ($tipo && $alvoId && $motivo)
-        {
-            $usuarioLogadoId = $_SESSION["usuario_logado"]->getId();
-            $this->repositorySql->salvar($tipo, $alvoId, $usuarioLogadoId, $motivo, $descricao);
-        }
+        $usuarioLogadoId = $_SESSION["usuario_logado"]->getId();
+        $this->repositorySql->salvar($tipo, $alvoId, $usuarioLogadoId, $motivo, $descricao);
 
-        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . "/");
+        $this->responderAcao(true, "Denúncia enviada com sucesso. Obrigado por ajudar a comunidade!");
     }
 
     public function desativar()
     {
         $this->loginRequired();
-        $this->adminRequired();
 
-        $tipo = trim(filter_input(INPUT_POST, "tipo", FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? "");
-        $alvoId = filter_input(INPUT_POST, "id", FILTER_VALIDATE_INT);
-
-        if ($tipo && $alvoId)
+        if (!$this->adminRequired())
         {
-            $this->repositorySql->dispensar($tipo, $alvoId);
+            $this->responderAcao(false, "Acesso negado.", 403);
         }
 
-        $this->redirect(URL_BASE . "/denuncia");
+        $this->validarAlvo();
+
+        if ($this->validador->temErros())
+        {
+            $this->responderAcao(false, "Denúncia inválida.", 422, null, $this->validador->getErros());
+        }
+
+        $tipo = trim($_POST["tipo"]);
+        $alvoId = (int)$_POST["id"];
+
+        $this->repositorySql->dispensar($tipo, $alvoId);
+
+        $this->responderAcao(true, "Denúncias descartadas com sucesso.");
     }
 }

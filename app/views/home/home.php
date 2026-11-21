@@ -6,7 +6,7 @@
   <title>ROBODRIVE</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Orbitron:wght@700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="<?= js_url("tailwind.js") ?>"></script>
 </head>
 
 <body class="relative overflow-x-hidden bg-[#000505] font-['Space_Grotesk'] text-[#F2FEFE] selection:bg-[rgba(19,243,247,.32)] selection:text-[#000505] before:fixed before:inset-0 before:-z-10 before:pointer-events-none before:content-[''] before:bg-[radial-gradient(circle_at_top_right,rgba(240,237,6,.08),transparent_26%)] [&::-webkit-scrollbar]:hidden">
@@ -574,4 +574,4 @@
     requestAnimationFrame(animate);
   });
 </script>
-<script src="<?= JS_URL_BASE ?>/wallpaper.js"></script>
+<script src="<?= js_url("wallpaper.js") ?>"></script>

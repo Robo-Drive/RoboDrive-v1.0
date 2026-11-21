@@ -23,9 +23,9 @@ $diasPendente = $primeiraDenuncia->diff(new DateTimeImmutable())->days;
             </div>
 
             <?php if(in_array($denuncia["tipo"], ["forum", "comentario"])): ?>
-                <blockquote class="line-clamp-3 break-words border-l-4 border-[#07556A] pl-3 text-sm leading-relaxed text-[#F2FEFE]">“<?= $denuncia["alvo_nome"] ?>”</blockquote>
+                <blockquote class="line-clamp-3 break-words border-l-4 border-[#07556A] pl-3 text-sm leading-relaxed text-[#F2FEFE]">“<?= texto($denuncia["alvo_nome"]) ?>”</blockquote>
             <?php else: ?>
-                <h3 class="truncate font-['Orbitron'] text-lg font-black text-[#F2FEFE]"><?= $denuncia["alvo_nome"] ?></h3>
+                <h3 class="truncate font-['Orbitron'] text-lg font-black text-[#F2FEFE]"><?= texto($denuncia["alvo_nome"]) ?></h3>
             <?php endif; ?>
 
             <p class="text-sm text-[#91B5BD]">
@@ -42,10 +42,24 @@ $diasPendente = $primeiraDenuncia->diff(new DateTimeImmutable())->days;
                     <?php endforeach; ?>
                 </ul>
             <?php endif; ?>
+
+            <?php if(!empty($denuncia["descricoes"])): ?>
+                <div class="flex flex-col gap-2">
+                    <p class="text-[.65rem] font-bold uppercase tracking-[.15em] text-[#4E6B72]">Descrição das denúncias</p>
+                    <?php foreach($denuncia["descricoes"] as $desc): ?>
+                        <blockquote class="break-words border-l-4 border-[#F0ED06] bg-[#082B3A] px-3 py-2 text-sm leading-relaxed text-[#F2FEFE]">
+                            <?= nl2br(texto($desc["descricao"])) ?>
+                            <span class="mt-1 block text-[.65rem] font-bold uppercase tracking-[.08em] text-[#91B5BD]">@<?= texto($desc["nome_usuario"]) ?> · <?= texto($desc["motivo"]) ?></span>
+                        </blockquote>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
 
         <div class="grid shrink-0 grid-cols-2 gap-2 sm:flex sm:flex-wrap lg:grid lg:w-44 lg:grid-cols-1">
-            <?php if($tipoDenuncia["rota"]): ?>
+            <?php if($denuncia["tipo"] == "comentario" && !empty($denuncia["link"])): ?>
+                <a href="<?= URL_BASE.$denuncia["link"] ?>" class="rd-btn rd-btn-ghost rd-btn-sm w-full text-center">Ver conteúdo</a>
+            <?php elseif($tipoDenuncia["rota"]): ?>
                 <form action="<?= URL_BASE.$tipoDenuncia["rota"] ?>" method="<?= $tipoDenuncia["metodo"] ?>">
                     <input type="hidden" name="id" value="<?= $denuncia["alvo_id"] ?>">
                     <button type="submit" class="rd-btn rd-btn-ghost rd-btn-sm w-full">Ver conteúdo</button>
@@ -56,8 +70,8 @@ $diasPendente = $primeiraDenuncia->diff(new DateTimeImmutable())->days;
                 class="rd-btn rd-btn-secondary rd-btn-sm w-full"
                 data-comunicado
                 data-id="<?= $denuncia["responsavel_id"] ?>"
-                data-nome="<?= $denuncia["responsavel_nome"] ?>"
-                data-email="<?= $denuncia["responsavel_email"] ?>"
+                data-nome="<?= texto($denuncia["responsavel_nome"]) ?>"
+                data-email="<?= texto($denuncia["responsavel_email"]) ?>"
             >Enviar e-mail</button>
             <form action="<?= URL_BASE ?>/denuncia/desativar" method="post" data-confirmar="Descartar as denúncias deste item? Ele continuará ativo na plataforma.">
                 <input type="hidden" name="tipo" value="<?= $denuncia["tipo"] ?>">
@@ -70,8 +84,8 @@ $diasPendente = $primeiraDenuncia->diff(new DateTimeImmutable())->days;
                 data-desativar
                 data-tipo="<?= $denuncia["tipo"] ?>"
                 data-id="<?= $denuncia["alvo_id"] ?>"
-                data-nome="<?= $denuncia["alvo_nome"] ?>"
-                data-responsavel="<?= $denuncia["responsavel_nome"] ?>"
+                data-nome="<?= texto($denuncia["alvo_nome"]) ?>"
+                data-responsavel="<?= texto($denuncia["responsavel_nome"]) ?>"
             >Desativar</button>
         </div>
 

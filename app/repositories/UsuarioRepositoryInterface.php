@@ -11,7 +11,7 @@ interface UsuarioRepositoryInterface
     public function buscarEmail(Usuario $usuario): ?Usuario;
     public function buscarNome(Usuario $usuario): ?array;
     public function buscarProjeto(int $projetoId): ?array;
-    public function listarTodos():array;
+    public function listarTodos(?string $busca = null):array;
     public function editar(Usuario $usuario):?Usuario;
     public function deletar(Usuario $usuario):bool;
 }

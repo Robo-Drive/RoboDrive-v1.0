@@ -41,9 +41,11 @@ class ProjetoController extends Controller
     private ComentarioRepositorySql $comentarioRepositorySql;
     private DenunciaRepositorySql $denunciaRepositorySql;
     private MailController $mailController;
+    private ValidadorHelper $validador;
 
     public function __construct()
     {
+        $this->validador = new ValidadorHelper();
         $this->service = new ProjetoService();
         $this->repositorySql = new ProjetoRepositorySql();
         $this->componenteService = new ComponenteService();
@@ -61,376 +63,26 @@ class ProjetoController extends Controller
         $this->mailController = new MailController();
     }
 
-    private function usuarioTemPermissao(int $projetoId): bool
-    {
-        $usuarioLogado = $_SESSION["usuario_logado"] ?? null;
-
-        if (!$usuarioLogado || $projetoId <= 0)
-        {
-            return false;
-        }
-
-        if ($usuarioLogado->getRegra() === "admin")
-        {
-            return true;
-        }
-
-        return $this->repositorySql->usuarioPertenceAoProjeto($projetoId, (int)$usuarioLogado->getId());
-    }
-
-    private function usuarioECoordenador(int $projetoId): bool
-    {
-        $usuarioLogado = $_SESSION["usuario_logado"] ?? null;
-
-        if (!$usuarioLogado || $projetoId <= 0)
-        {
-            return false;
-        }
-
-        if ($usuarioLogado->getRegra() === "admin")
-        {
-            return true;
-        }
-
-        return $this->repositorySql->usuarioECoordenador($projetoId, (int)$usuarioLogado->getId());
-    }
-
-    private function possuiArquivosEnviados(array $arquivoCampo): bool
-    {
-        if (empty($arquivoCampo["name"]) || !is_array($arquivoCampo["name"]))
-        {
-            return false;
-        }
-
-        foreach ($arquivoCampo["name"] as $nome)
-        {
-            if (trim((string)$nome) !== "")
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function validarDadosBaseProjeto(ValidadorHelper $validador, bool $validarVisibilidadeECategoria, bool $exigirSenha): void
-    {
-        $validador->obrigatorio("nome", trim((string)($_POST["nome"] ?? "")), "O nome do projeto é obrigatório.");
-        $validador->tamanho("nome", trim((string)($_POST["nome"] ?? "")), 3, 100, "Nome");
-
-        $validador->obrigatorio("descricao", trim((string)($_POST["descricao"] ?? "")), "A descrição é obrigatória.");
-        $validador->tamanho("descricao", trim((string)($_POST["descricao"] ?? "")), 3, 2000, "Descrição");
-
-        if ($exigirSenha)
-        {
-            $validador->obrigatorio("senha", trim((string)($_POST["senha"] ?? "")), "A senha de acesso ao projeto é obrigatória.");
-            $validador->tamanho("senha", trim((string)($_POST["senha"] ?? "")), 6, 100, "Senha");
-            $validador->confirmarValor((string)($_POST["senha"] ?? ""), (string)($_POST["confirmar_senha"] ?? ""), "confirmar_senha", "As senhas não conferem.");
-        }
-
-        if ($validarVisibilidadeECategoria)
-        {
-            $categoria = trim((string)($_POST["categoria"] ?? ""));
-            $validador->visibilidadeValida(trim((string)($_POST["visibilidade"] ?? "")));
-            $validador->obrigatorio("categoria", $categoria, "Selecione ou crie uma categoria.");
-
-            if ($categoria === "criar")
-            {
-                $novaCategoria = trim((string)($_POST["nova_categoria"] ?? ""));
-                $validador->obrigatorio("nova_categoria", $novaCategoria, "Informe o nome da nova categoria.");
-                $validador->tamanho("nova_categoria", $novaCategoria, 3, 100, "Nova categoria");
-            }
-        }
-    }
-
-    private function validarComponentes(ValidadorHelper $validador, array $componentesRaw): array
-    {
-        $map = [];
-
-        foreach ($componentesRaw as $componenteId => $dados)
-        {
-            $idInt = (int)$componenteId;
-            if ($idInt <= 0)
-            {
-                continue;
-            }
-
-            $quantidade = (int)($dados["quantidade"] ?? 0);
-            $validador->componenteQuantidade($quantidade);
-            $map[$idInt] = $quantidade;
-        }
-
-        return $map;
-    }
-
-    private function validarDescricoesArquivos(ValidadorHelper $validador, array $arquivos, array $descricoes, string $campoPrefixo, string $rotulo): void
-    {
-        if (!$this->possuiArquivosEnviados($arquivos))
-        {
-            return;
-        }
-
-        foreach ($arquivos["name"] as $i => $nomeArquivo)
-        {
-            $nomeLimpo = trim((string)$nomeArquivo);
-            if ($nomeLimpo === "")
-            {
-                continue;
-            }
-
-            $desc = trim((string)($descricoes[$i] ?? ""));
-            $validador->obrigatorio($campoPrefixo . "_" . $i, $desc, "A descrição de {$rotulo} {$nomeLimpo} é obrigatória.");
-            $validador->tamanho($campoPrefixo . "_" . $i, $desc, 3, 255, "Descrição de {$rotulo}");
-        }
-    }
-    public function formularioEntrar()
+    public function listarAdmin()
     {
         $this->loginRequired();
 
-        $this->view("projeto/entrar");
-    }
-
-    public function entrar()
-    {
-        $this->loginRequired();
-
-        $hash = trim($_POST["hash"] ?? ($_POST["hash_acesso"] ?? ""));
-        $senha = trim($_POST["senha"] ?? "");
-
-        $validador = new ValidadorHelper();
-
-        $validador->obrigatorio("hash", $hash, "Informe o Hash de acesso do projeto.");
-        $validador->obrigatorio("senha", $senha, "Informe a senha do projeto.");
-
-        if ($validador->temErros()) 
+        if (!$this->adminRequired())
         {
-            $this->responderJson(["sucesso" => false, "erros" => $validador->getErros()], 422);
+            $this->redirect(URL_BASE . "/projeto/listar");
         }
-
-        try 
-        {
-            $projeto = $this->repositorySql->buscarPorHash($hash);
-
-            if (!$projeto) 
-            {
-                $this->responderJson(["sucesso" => false, "mensagem" => "Código Hash do projeto não encontrado."], 404);
-            }
-
-            if (!password_verify($senha, $projeto->getSenha())) 
-            {
-                $this->responderJson(["sucesso" => false, "erros" => ["senha" => "Senha incorreta para este projeto."]], 422);
-            }
-
-            $usuarioLogado = $_SESSION["usuario_logado"] ?? null;
-            $solicitou = $this->repositorySql->solicitarEntrada((int)$projeto->getId(), (int)$usuarioLogado->getId());
-
-            if (!$solicitou) 
-            {
-                $this->responderJson(["sucesso" => false, "mensagem" => "Você já é integrante ou possui solicitação pendente para este projeto."], 422);
-            }
-
-            $this->responderJson([
-                "sucesso" => true,
-                "mensagem" => "Solicitação de entrada enviada com sucesso! Aguarde a aprovação do coordenador.",
-                "redirect" => URL_BASE . "/usuario/perfil"
-            ]);
-        }
-        catch (\Throwable $e) 
-        {
-            error_log("ERRO AO ENTRAR NO PROJETO: " . $e->getMessage());
-
-            $this->responderJson(["sucesso" => false, "mensagem" => "Erro ao solicitar entrada no projeto."], 500);
-        }
-    }
-
-    public function aprovarSolicitacao()
-    {
-        $this->loginRequired();
-
-        $projetoId = $_POST["projeto_id"] ?? null;
-        $usuarioId = $_POST["usuario_id"] ?? null;
-
-        if ($projetoId && $usuarioId && $this->usuarioECoordenador((int)$projetoId)) 
-        {
-            $this->repositorySql->aprovarSolicitacao((int)$projetoId, (int)$usuarioId);
-        }
-
-        $this->redirect(URL_BASE . "/projeto/perfil?id=" . $projetoId);
-    }
-
-    public function rejeitarSolicitacao()
-    {
-        $this->loginRequired();
-
-        $projetoId = $_POST["projeto_id"] ?? null;
-        $usuarioId = $_POST["usuario_id"] ?? null;
-
-        if ($projetoId && $usuarioId && $this->usuarioECoordenador((int)$projetoId)) 
-        {
-            $this->repositorySql->rejeitarSolicitacao((int)$projetoId, (int)$usuarioId);
-        }
-
-        $this->redirect(URL_BASE . "/projeto/perfil?id=" . $projetoId);
-    }
-
-    public function alterarPapel()
-    {
-        $this->loginRequired();
-
-        $projetoId = $_POST["projeto_id"] ?? null;
-        $usuarioId = $_POST["usuario_id"] ?? null;
-        $papel = trim((string)($_POST["papel"] ?? ""));
-
-        if (!$projetoId || !$usuarioId || !in_array($papel, ["coordenador", "participante"], true) || !$this->usuarioECoordenador((int)$projetoId)) 
-        {
-            $this->redirect(URL_BASE . "/projeto/perfil?id=" . ($projetoId ?? 0));
-            return;
-        }
-
-        $usuarioLogado = $_SESSION["usuario_logado"] ?? null;
-
-        // Coordenador não pode alterar o próprio papel diretamente
-        if ($usuarioLogado && (int)$usuarioLogado->getId() === (int)$usuarioId && $usuarioLogado->getRegra() !== "admin") 
-        {
-            $this->redirect(URL_BASE . "/projeto/perfil?id=" . $projetoId);
-            return;
-        }
-
-        $this->repositorySql->atualizarPapelMembro((int)$projetoId, (int)$usuarioId, $papel);
-
-        $this->redirect(URL_BASE . "/projeto/perfil?id=" . $projetoId);
-    }
-
-    public function adicionarMembro()
-    {
-        $this->loginRequired();
-
-        $projetoId = $_POST["projeto_id"] ?? null;
-        $usuarioId = $_POST["usuario_id"] ?? null;
-        $papel = trim((string)($_POST["papel"] ?? "participante"));
-
-        if (!in_array($papel, ["coordenador", "participante"], true)) 
-        {
-            $papel = "participante";
-        }
-
-        if (!$projetoId || !$usuarioId || !$this->usuarioECoordenador((int)$projetoId)) 
-        {
-            $this->redirect(URL_BASE . "/projeto/perfil?id=" . ($projetoId ?? 0));
-            return;
-        }
-
-        $this->repositorySql->adicionarMembro((int)$projetoId, (int)$usuarioId, $papel);
-
-        $this->redirect(URL_BASE . "/projeto/perfil?id=" . $projetoId);
-    }
-
-    public function removerMembro()
-    {
-        $this->loginRequired();
-
-        $projetoId = $_POST["projeto_id"] ?? null;
-        $usuarioId = $_POST["usuario_id"] ?? null;
-        $novoCoordenadorId = $_POST["novo_coordenador_id"] ?? null;
-
-        if (!$projetoId || !$usuarioId) 
-        {
-            $this->redirect(URL_BASE . "/projeto");
-            return;
-        }
-
-        $usuarioLogadoId = $_SESSION["usuario_logado"]->getId();
-        $ehProprioUsuario = ((int)$usuarioLogadoId === (int)$usuarioId);
-
-        // Se não for o próprio usuário saindo, apenas coordenadores podem remover
-        if (!$ehProprioUsuario && !$this->usuarioECoordenador((int)$projetoId)) 
-        {
-            $this->redirect(URL_BASE . "/projeto/perfil?id=" . $projetoId);
-            return;
-        }
-
-        $membros = $this->repositorySql->listarMembros((int)$projetoId);
-
-        // Se houver apenas 1 membro no projeto, ninguém pode sair
-        if (count($membros) <= 1) 
-        {
-            $this->redirect(URL_BASE . "/projeto/perfil?id=" . $projetoId);
-            return;
-        }
-
-        $coordenadores = array_filter($membros, fn($m) => $m["papel"] === "coordenador");
-        $membroAlvo = null;
-        foreach ($membros as $m) 
-        {
-            if ((int)$m["id"] === (int)$usuarioId) 
-            {
-                $membroAlvo = $m;
-                break;
-            }
-        }
-
-        if (!$membroAlvo) 
-        {
-            $this->redirect(URL_BASE . "/projeto/perfil?id=" . $projetoId);
-            return;
-        }
-
-        $projetoBusca = new Projeto();
-        $projetoBusca->setId((int)$projetoId);
-        $projeto = $this->repositorySql->buscarId($projetoBusca);
-
-        $ehDonoDoProjeto = ($projeto && (int)$projeto->getUsuario()?->getId() === (int)$usuarioId);
-        $ehUnicoCoordenador = ($membroAlvo["papel"] === "coordenador" && count($coordenadores) <= 1);
-
-        // Se for o único coordenador ou o dono do projeto, é obrigatório passar a responsabilidade para outro membro
-        if ($ehUnicoCoordenador || $ehDonoDoProjeto) 
-        {
-            if (!$novoCoordenadorId || (int)$novoCoordenadorId === (int)$usuarioId) 
-            {
-                $this->redirect(URL_BASE . "/projeto/perfil?id=" . $projetoId);
-                return;
-            }
-
-            // Promove o novo membro escolhido para coordenador se era o único coordenador
-            if ($ehUnicoCoordenador) 
-            {
-                $this->repositorySql->atualizarPapelMembro((int)$projetoId, (int)$novoCoordenadorId, "coordenador");
-            }
-
-            // Transfere a titularidade do projeto se for o dono
-            if ($ehDonoDoProjeto) 
-            {
-                $this->repositorySql->transferirProprietario((int)$projetoId, (int)$novoCoordenadorId);
-            }
-        }
-
-        $this->repositorySql->removerMembro((int)$projetoId, (int)$usuarioId);
-
-        if ($ehProprioUsuario) 
-        {
-            $this->redirect(URL_BASE . "/usuario/perfil");
-            return;
-        }
-
-        $this->redirect(URL_BASE . "/projeto/perfil?id=" . $projetoId);
-    }
-
-    public function listarTodos()
-    {
-        $this->loginRequired();
-        $this->adminRequired();
 
         $status = (string)($_GET["status"] ?? "1");
+
         $data["statusFiltro"] = $status;
-        $data["projetos"] = ($status === "todos")
-            ? $this->repositorySql->listarAdminTodos()
-            : $this->repositorySql->listarPorStatus($status === "1");
+        $data["projetos"] = ($status === "todos") ? $this->repositorySql->listarAdminTodos() : $this->repositorySql->listarPorStatus($status === "1");
+
         $this->view("projeto/list", $data);
     }
 
     public function listarPublico()
     {
-        $busca = trim((string)($_GET["busca"] ?? ""));
+        $busca = trim(filter_input(INPUT_GET, "busca", FILTER_SANITIZE_FULL_SPECIAL_CHARS)??"");
 
         if ($busca !== "")
         {
@@ -456,11 +108,13 @@ class ProjetoController extends Controller
             {
                 echo '<p class="rd-empty w-full col-span-full">Nenhum projeto encontrado.</p>';
             }
+
             exit;
         }
 
         $data["projetos"] = $projetos;
         $data["busca_atual"] = $busca;
+
         $this->view("projeto/list", $data);
     }
 
@@ -470,49 +124,152 @@ class ProjetoController extends Controller
 
         $data["componentes"] = $this->componenteService->listarTodos();
         $data["categorias"] = $this->categoriaService->listarTodos();
+
         $this->view("projeto/create", $data);
+    }
+
+    // Valida o formulário de cadastro e de edição do projeto.
+    // Na edição, só o coordenador (e o admin) altera nome, categoria e visibilidade;
+    // o participante altera descrição, componentes e arquivos.
+    public function validar(bool $editar = false, bool $ehCoordenador = true)
+    {
+        if ($editar)
+        {
+            $this->validador->idPositivo("id", $_POST["id"] ?? "");
+        }
+
+        if ($ehCoordenador)
+        {
+            $this->validador->obrigatorio("nome", trim((string)($_POST["nome"] ?? "")), "O nome do projeto é obrigatório.");
+            if (!isset($this->validador->getErros()["nome"]))
+            {
+                $this->validador->tamanho("nome", trim((string)($_POST["nome"] ?? "")), 3, 100);
+            }
+        }
+
+        $this->validador->obrigatorio("descricao", trim((string)($_POST["descricao"] ?? "")), "A descrição é obrigatória.");
+        if (!isset($this->validador->getErros()["descricao"]))
+        {
+            $this->validador->tamanho("descricao", trim((string)($_POST["descricao"] ?? "")), 3, 2000, "descrição");
+        }
+
+        if (!$editar)
+        {
+            $this->validador->obrigatorio("senha", trim((string)($_POST["senha"] ?? "")), "A senha de acesso ao projeto é obrigatória.");
+            $this->validador->tamanho("senha", trim((string)($_POST["senha"] ?? "")), 8, 100, "Senha");
+            $this->validador->confirmarValor((string)($_POST["senha"] ?? ""), (string)($_POST["confirmar_senha"] ?? ""), "confirmar_senha", "As senhas não conferem.");
+        }
+
+        if (!$editar || $ehCoordenador)
+        {
+            $this->validador->visibilidadeValida(trim((string)($_POST["visibilidade"] ?? "")));
+            $this->validador->categoria($_POST["categoria"] ?? "", $_POST["nova_categoria"] ?? "");
+        }
+
+        $this->validador->componentes($_POST["componentes"] ?? []);
+
+        $this->validador->descricoesArquivos($_FILES["codigos"] ?? [], $_POST["codigos_descricao"] ?? [], "codigos_descricao", "do código");
+        $this->validador->descricoesArquivos($_FILES["extras"] ?? [], $_POST["extras_descricao"] ?? [], "extras_descricao", "do arquivo extra");
+
+        $this->validador->validarImagens("imagens", $_FILES["imagens"] ?? []);
+        $this->validador->validarCodigos("codigos", $_FILES["codigos"] ?? []);
+        $this->validador->validarExtras("extras", $_FILES["extras"] ?? []);
+    }
+
+    // Monta [idComponente => quantidade] a partir do formulário
+    private function mapaComponentes(): array
+    {
+        $map = [];
+
+        foreach (($_POST["componentes"] ?? []) as $componenteId => $dados)
+        {
+            if ((int)$componenteId > 0)
+            {
+                $map[(int)$componenteId] = (int)($dados["quantidade"] ?? 0);
+            }
+        }
+
+        return $map;
+    }
+
+    // Ação sobre um integrante: projeto_id, usuario_id e (opcional) papel
+    public function validarMembro(bool $comPapel = false)
+    {
+        $this->validador->idPositivo("projeto_id", $_POST["projeto_id"] ?? "");
+        $this->validador->idPositivo("usuario_id", $_POST["usuario_id"] ?? "");
+
+        if ($comPapel)
+        {
+            $this->validador->papel(trim((string)($_POST["papel"] ?? "participante")));
+        }
+    }
+
+    // Entrada no projeto por hash e senha
+    public function validarAcesso(string $hash, string $senha)
+    {
+        $this->validador->obrigatorio("hash", $hash, "Informe o Hash de acesso do projeto.");
+        $this->validador->obrigatorio("senha", $senha, "Informe a senha do projeto.");
+    }
+
+    // Id do projeto enviado por POST ou GET
+    public function validarId()
+    {
+        $this->validador->idPositivo("id", $_POST["id"] ?? $_GET["id"] ?? "");
     }
 
     public function salvar()
     {
         $this->loginRequired();
+        $this->validar();
 
-        $validador = new ValidadorHelper();
-        $this->validarDadosBaseProjeto($validador, true, true);
+        if ($this->validador->temErros())
+        {
+            $this->responderJson([
+                "sucesso" => false,
+                "erros" => $this->validador->getErros()
+            ], 422);
+        }
 
-        $mapComponentes = $this->validarComponentes($validador, $_POST["componentes"] ?? []);
         $componentesObj = [];
-        foreach ($mapComponentes as $componenteId => $quantidade)
+
+        foreach ($this->mapaComponentes() as $componenteId => $quantidade)
         {
             $comp = new Componente();
             $comp->setId($componenteId);
             $comp->setQuantidade($quantidade);
+
             $componentesObj[] = $comp;
         }
 
         $codigos = $_FILES["codigos"] ?? [];
         $codigosDesc = $_POST["codigos_descricao"] ?? [];
-        $this->validarDescricoesArquivos($validador, $codigos, $codigosDesc, "codigos_descricao", "do código");
-
         $extras = $_FILES["extras"] ?? [];
         $extrasDesc = $_POST["extras_descricao"] ?? [];
-        $this->validarDescricoesArquivos($validador, $extras, $extrasDesc, "extras_descricao", "do arquivo extra");
-
-        $validador->validarImagens("imagens", $_FILES["imagens"] ?? []);
-        $validador->validarCodigos("codigos", $codigos);
-        $validador->validarExtras("extras", $extras);
-
-        if ($validador->temErros())
-        {
-            $this->responderJson(["sucesso" => false, "erros" => $validador->getErros()], 422);
-        }
 
         try
         {
-            $categoriaRaw = trim((string)($_POST["categoria"] ?? ""));
+            $categoriaRaw = trim($_POST["categoria"] ?? "");
+
+            $equipeId = !empty($_POST["equipe_id"])
+                ? (int)$_POST["equipe_id"]
+                : null;
+
+            // RN04, RN11, RN14: categoria do próprio usuário e equipe da qual ele participa
+            $erroVinculo = $this->service->validarVinculos(
+                $equipeId,
+                $categoriaRaw === "criar" ? null : (int)$categoriaRaw,
+                (int)$_SESSION["usuario_logado"]->getId(),
+                trim((string)($_POST["visibilidade"] ?? ""))
+            );
+
+            if ($erroVinculo)
+            {
+                $this->responderAcao(false, $erroVinculo, 403);
+            }
+
             if ($categoriaRaw === "criar")
             {
-                $novaCat = $this->categoriaService->cadastro(["categoria_nome" => trim((string)($_POST["nova_categoria"] ?? ""))]);
+                $novaCat = $this->categoriaService->cadastro(["categoria_nome" => trim(filter_input(INPUT_POST, "nova_categoria", FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? "")]);
                 $categoriaId = (int)$novaCat->getId();
             }
             else
@@ -520,46 +277,60 @@ class ProjetoController extends Controller
                 $categoriaId = (int)$categoriaRaw;
             }
 
-            if ($categoriaId <= 0)
-            {
-                $this->responderJson(["sucesso" => false, "erros" => ["categoria" => "Categoria inválida."]], 422);
-            }
+            $nome = trim(filter_input(INPUT_POST, "nome", FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? "");
+            $descricao = trim(filter_input(INPUT_POST, "descricao", FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? "");
+            $visibilidade = trim(filter_input(INPUT_POST, "visibilidade", FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? "");
 
-            $equipeId = !empty($_POST["equipe_id"]) ? (int)$_POST["equipe_id"] : null;
+            $senha = $_POST["senha"] ?? "";
 
             $postsProjeto = [
-                "nome" => trim((string)($_POST["nome"] ?? "")),
-                "descricao" => trim((string)($_POST["descricao"] ?? "")),
-                "visibilidade" => trim((string)($_POST["visibilidade"] ?? "")),
+                "nome" => $nome,
+                "descricao" => $descricao,
+                "visibilidade" => $visibilidade,
                 "equipe_id" => $equipeId,
                 "categoria_id" => $categoriaId,
                 "componentes" => $componentesObj,
                 "codigos_descricao" => $codigosDesc,
-                "senha" => (string)($_POST["senha"] ?? "")
+                "senha" => $senha
             ];
 
             $cadastrados = $this->service->salvarProjeto($postsProjeto);
+
             $projetoSalvo = $cadastrados[0];
             $projetoVersaoSalvo = $cadastrados[1];
 
             if (!empty($componentesObj))
             {
-                $this->componenteService->associar(["componentes" => $componentesObj, "projeto" => $projetoVersaoSalvo]);
+                $this->componenteService->associar([
+                    "componentes" => $componentesObj,
+                    "projeto" => $projetoVersaoSalvo
+                ]);
             }
 
-            if ($this->possuiArquivosEnviados($codigos))
+            if ($this->validador->possuiArquivos($codigos))
             {
-                $this->codigoService->salvarCodigo($codigos, $codigosDesc, $projetoVersaoSalvo);
+                $this->codigoService->salvarCodigo(
+                    $codigos,
+                    $codigosDesc,
+                    $projetoVersaoSalvo
+                );
             }
 
-            if ($this->possuiArquivosEnviados($extras))
+            if ($this->validador->possuiArquivos($extras))
             {
-                $this->extraService->salvarExtras($extras, $extrasDesc, $projetoVersaoSalvo);
+                $this->extraService->salvarExtras(
+                    $extras,
+                    $extrasDesc,
+                    $projetoVersaoSalvo
+                );
             }
 
-            if ($this->possuiArquivosEnviados($_FILES["imagens"] ?? []))
+            if ($this->validador->possuiArquivos($_FILES["imagens"] ?? []))
             {
-                $this->imagemService->salvarImagem($_FILES["imagens"], $projetoSalvo);
+                $this->imagemService->salvarImagem(
+                    $_FILES["imagens"],
+                    $projetoSalvo
+                );
             }
 
             $this->responderJson([
@@ -571,7 +342,11 @@ class ProjetoController extends Controller
         catch (\Throwable $e)
         {
             error_log("ERRO AO SALVAR PROJETO: " . $e->getMessage());
-            $this->responderJson(["sucesso" => false, "mensagem" => "Não foi possível cadastrar o projeto."], 500);
+
+            $this->responderJson([
+                "sucesso" => false,
+                "mensagem" => "Não foi possível cadastrar o projeto."
+            ], 500);
         }
     }
 
@@ -579,25 +354,29 @@ class ProjetoController extends Controller
     {
         $this->loginRequired();
 
+        $this->validarId();
+
         $projetoId = (int)($_POST["id"] ?? $_GET["id"] ?? 0);
 
-        if ($projetoId <= 0 || !$this->usuarioTemPermissao($projetoId))
+        if ($this->validador->temErros() || !$this->service->usuarioTemPermissao($projetoId))
         {
-            $this->redirect(URL_BASE . "/projeto");
+            $this->redirect(URL_BASE . "/projeto/listar");
             return;
         }
 
         $projetoBusca = new Projeto();
         $projetoBusca->setId($projetoId);
-        $projeto = $this->repositorySql->buscarId($projetoBusca);
+
+        $projeto = $this->repositorySql->buscarId($projetoBusca, $this->ehAdmin());
 
         if (!$projeto || $projeto->getNome() === null)
         {
-            $this->redirect(URL_BASE . "/projeto");
+            $this->redirect(URL_BASE . "/projeto/listar");
             return;
         }
 
         $versaoAtual = $this->repositorySql->buscarUltimaVersao($projetoId);
+
         $codigosAtuais = [];
         $componentesAtuais = [];
         $extrasAtuais = [];
@@ -605,6 +384,7 @@ class ProjetoController extends Controller
         if ($versaoAtual)
         {
             $versaoId = (int)$versaoAtual["id"];
+
             $codigosAtuais = $this->codigoRepositorySql->buscarPorVersao($versaoId);
             $componentesAtuais = $this->componenteRepositorySql->buscarPorVersao($versaoId);
             $extrasAtuais = $this->extraRepositorySql->buscarPorVersao($versaoId);
@@ -612,15 +392,16 @@ class ProjetoController extends Controller
 
         $data["projeto"] = $projeto;
         $data["componentes"] = $this->componenteService->listarTodos();
+
         $proprietarioId = $projeto->getUsuario()?->getId();
-        $data["categorias"] = $proprietarioId
-            ? $this->categoriaService->listarPorUsuario((int)$proprietarioId)
-            : $this->categoriaService->listarTodos();
+
+        $data["categorias"] = $this->categoriaService->listarPorUsuario((int)$proprietarioId);
+
         $data["codigosAtuais"] = $codigosAtuais;
         $data["componentesAtuais"] = $componentesAtuais;
         $data["extrasAtuais"] = $extrasAtuais;
         $data["imagensAtuais"] = $this->imagemService->buscarProjeto($projetoId);
-        $data["ehCoordenador"] = $this->usuarioECoordenador($projetoId);
+        $data["ehCoordenador"] = $this->service->usuarioECoordenador($projetoId);
 
         $this->view("projeto/edit", $data);
     }
@@ -629,141 +410,101 @@ class ProjetoController extends Controller
     {
         $this->loginRequired();
 
-        $projetoId = (int)($_POST["id"] ?? 0);
+        $this->validador->idPositivo("id", $_POST["id"] ?? "");
 
-        if ($projetoId <= 0)
+        if ($this->validador->temErros())
         {
-            $this->responderJson(["sucesso" => false, "mensagem" => "ID do projeto inválido."], 422);
+            $this->responderJson([
+                "sucesso" => false,
+                "mensagem" => "ID do projeto inválido."
+            ], 422);
         }
 
-        if (!$this->usuarioTemPermissao($projetoId))
+        $projetoId = (int)$_POST["id"];
+
+        if (!$this->service->usuarioTemPermissao($projetoId))
         {
-            $this->responderJson(["sucesso" => false, "mensagem" => "Você não tem permissão para alterar este projeto."], 403);
+            $this->responderJson([
+                "sucesso" => false,
+                "mensagem" => "Você não tem permissão para alterar este projeto."
+            ], 403);
         }
 
         $projetoBusca = new Projeto();
         $projetoBusca->setId($projetoId);
+
         $projetoExistente = $this->repositorySql->buscarId($projetoBusca);
 
         if (!$projetoExistente || $projetoExistente->getNome() === null)
         {
-            $this->responderJson(["sucesso" => false, "mensagem" => "Projeto não encontrado."], 404);
+            $this->responderJson([
+                "sucesso" => false,
+                "mensagem" => "Projeto não encontrado."
+            ], 404);
         }
 
-        $ehCoordenador = $this->usuarioECoordenador($projetoId);
+        $ehCoordenador = $this->service->usuarioECoordenador($projetoId);
+
         $proprietarioId = (int)($projetoExistente->getUsuario()?->getId() ?? 0);
 
-        $validador = new ValidadorHelper();
-        $this->validarDadosBaseProjeto($validador, $ehCoordenador, false);
-        $mapForm = $this->validarComponentes($validador, $_POST["componentes"] ?? []);
+        // Coordenador (e admin) editam tudo. O participante só altera descrição, componentes e arquivos.
+        $this->validar(true, $ehCoordenador);
+
+        if ($this->validador->temErros())
+        {
+            $this->responderJson([
+                "sucesso" => false,
+                "erros" => $this->validador->getErros()
+            ], 422);
+        }
 
         $novosCodigos = $_FILES["codigos"] ?? [];
         $novosCodigosDesc = $_POST["codigos_descricao"] ?? [];
-        $this->validarDescricoesArquivos($validador, $novosCodigos, $novosCodigosDesc, "codigos_descricao", "do código");
-
         $novosExtras = $_FILES["extras"] ?? [];
         $novosExtrasDesc = $_POST["extras_descricao"] ?? [];
-        $this->validarDescricoesArquivos($validador, $novosExtras, $novosExtrasDesc, "extras_descricao", "do arquivo extra");
-
-        $validador->validarImagens("imagens", $_FILES["imagens"] ?? []);
-        $validador->validarCodigos("codigos", $novosCodigos);
-        $validador->validarExtras("extras", $novosExtras);
-
-        if ($validador->temErros())
-        {
-            $this->responderJson(["sucesso" => false, "erros" => $validador->getErros()], 422);
-        }
 
         try
         {
-            $versaoAtual = $this->repositorySql->buscarUltimaVersao($projetoId);
-            $versaoAtualId = (int)($versaoAtual["id"] ?? 0);
-
-            $codigosBanco = $versaoAtualId > 0 ? $this->codigoRepositorySql->buscarPorVersao($versaoAtualId) : [];
-            $idsCodigosBanco = array_values(array_unique(array_map(fn($c) => (int)$c->getId(), $codigosBanco)));
-            $codigosManter = array_values(array_unique(array_map("intval", $_POST["codigos_manter"] ?? [])));
-
-            $extrasBanco = $versaoAtualId > 0 ? $this->extraRepositorySql->buscarPorVersao($versaoAtualId) : [];
-            $idsExtrasBanco = array_values(array_unique(array_map(fn($e) => (int)$e->getId(), $extrasBanco)));
-            $extrasManter = array_values(array_unique(array_map("intval", $_POST["extras_manter"] ?? [])));
-
-            sort($idsCodigosBanco, SORT_NUMERIC);
-            sort($codigosManter, SORT_NUMERIC);
-            sort($idsExtrasBanco, SORT_NUMERIC);
-            sort($extrasManter, SORT_NUMERIC);
-
-            $temNovosCodigos = $this->possuiArquivosEnviados($novosCodigos);
-            $mudouCodigos = $temNovosCodigos || ($idsCodigosBanco !== $codigosManter);
-
-            $temNovosExtras = $this->possuiArquivosEnviados($novosExtras);
-            $mudouExtras = $temNovosExtras || ($idsExtrasBanco !== $extrasManter);
-
-            $compsBanco = $versaoAtualId > 0 ? $this->componenteRepositorySql->buscarPorVersao($versaoAtualId) : [];
-            $mapBanco = [];
-            foreach ($compsBanco as $comp)
-            {
-                $mapBanco[(int)$comp->getId()] = (int)$comp->getQuantidade();
-            }
-
-            ksort($mapBanco, SORT_NUMERIC);
-            ksort($mapForm, SORT_NUMERIC);
-            $mudouComponentes = ($mapBanco !== $mapForm);
-
-            if ($mudouCodigos || $mudouComponentes || $mudouExtras)
-            {
-                $novaVersaoNum = (int)($versaoAtual["versao"] ?? 0) + 1;
-                $nota = trim((string)($_POST["descricao_alteracao"] ?? "")) ?: "Atualização para versão v{$novaVersaoNum}";
-                $usuarioLogado = $_SESSION["usuario_logado"];
-
-                $novaVersaoId = (int)$this->repositorySql->criarVersao($projetoId, (int)$usuarioLogado->getId(), $novaVersaoNum, $nota);
-
-                foreach ($codigosManter as $codigoId)
-                {
-                    $this->codigoRepositorySql->associarVersao($codigoId, $novaVersaoId);
-                }
-
-                if ($temNovosCodigos)
-                {
-                    $versaoObj = new Projeto();
-                    $versaoObj->setId($novaVersaoId);
-                    $this->codigoService->salvarCodigo($novosCodigos, $novosCodigosDesc, $versaoObj);
-                }
-
-                foreach ($extrasManter as $extraId)
-                {
-                    $this->extraRepositorySql->associarVersao($extraId, $novaVersaoId);
-                }
-
-                if ($temNovosExtras)
-                {
-                    $versaoObjExtra = new Projeto();
-                    $versaoObjExtra->setId($novaVersaoId);
-                    $this->extraService->salvarExtras($novosExtras, $novosExtrasDesc, $versaoObjExtra);
-                }
-
-                $componentesObj = [];
-                foreach ($mapForm as $componenteId => $qtd)
-                {
-                    $comp = new Componente();
-                    $comp->setId($componenteId);
-                    $comp->setQuantidade($qtd);
-                    $componentesObj[] = $comp;
-                }
-
-                if (!empty($componentesObj))
-                {
-                    $novaVersaoObj = new Projeto();
-                    $novaVersaoObj->setId($novaVersaoId);
-                    $this->componenteService->associar(["componentes" => $componentesObj, "projeto" => $novaVersaoObj]);
-                }
-            }
+            $this->service->atualizarVersao(
+                $projetoId,
+                (int)$_SESSION["usuario_logado"]->getId(),
+                $this->mapaComponentes(),
+                $_POST["codigos_manter"] ?? [],
+                $_POST["extras_manter"] ?? [],
+                $novosCodigos,
+                $novosCodigosDesc,
+                $novosExtras,
+                $novosExtrasDesc,
+                trim((string)($_POST["descricao_alteracao"] ?? ""))
+            );
 
             if ($ehCoordenador)
             {
-                $categoriaRaw = trim((string)($_POST["categoria"] ?? ""));
+                $categoriaRaw = trim($_POST["categoria"] ?? "");
+
+                // A categoria precisa ser do proprietário do projeto (não de outros coordenadores)
+                $equipePost = !empty($_POST["equipe_id"]) ? (int)$_POST["equipe_id"] : null;
+                $erroVinculo = $this->service->validarVinculos(
+                    $equipePost,
+                    $categoriaRaw === "criar" ? null : (int)$categoriaRaw,
+                    $proprietarioId,
+                    trim((string)($_POST["visibilidade"] ?? $projetoExistente->getVisibilidade())),
+                    $projetoExistente->getEquipe()?->getId() ? (int)$projetoExistente->getEquipe()->getId() : null
+                );
+
+                if ($erroVinculo)
+                {
+                    $this->responderJson(["sucesso" => false, "mensagem" => $erroVinculo], 403);
+                }
+
                 if ($categoriaRaw === "criar")
                 {
-                    $novaCat = $this->categoriaService->cadastro(["categoria_nome" => trim((string)($_POST["nova_categoria"] ?? ""))], $proprietarioId);
+                    $novaCat = $this->categoriaService->cadastro([
+                        "categoria_nome" => trim(
+                            filter_input(INPUT_POST, "nova_categoria", FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? ""
+                        )
+                    ], $proprietarioId);
+
                     $categoriaId = (int)$novaCat->getId();
                 }
                 else
@@ -771,47 +512,70 @@ class ProjetoController extends Controller
                     $categoriaId = (int)$categoriaRaw;
                 }
 
-                if ($categoriaId <= 0)
-                {
-                    $this->responderJson(["sucesso" => false, "erros" => ["categoria" => "Categoria inválida."]], 422);
-                }
-
-                $visibilidade = trim((string)($_POST["visibilidade"] ?? $projetoExistente->getVisibilidade()));
+                $visibilidade = trim(
+                    filter_input(INPUT_POST, "visibilidade", FILTER_SANITIZE_FULL_SPECIAL_CHARS)
+                    ?? $projetoExistente->getVisibilidade()
+                );
             }
             else
             {
                 $categoriaId = (int)($projetoExistente->getCategoria()?->getId() ?? 0);
+
                 $visibilidade = (string)$projetoExistente->getVisibilidade();
             }
+            $nome = $ehCoordenador
+                ? trim(filter_input(INPUT_POST, "nome", FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? "")
+                : (string)$projetoExistente->getNome();
+
+            $descricao = trim(
+                filter_input(INPUT_POST, "descricao", FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? ""
+            );
 
             $projetoObj = new Projeto();
+
             $projetoObj->setId($projetoId);
-            $projetoObj->setNome(trim((string)($_POST["nome"] ?? "")));
-            $projetoObj->setDescricao(trim((string)($_POST["descricao"] ?? "")));
+            $projetoObj->setNome($nome);
+            $projetoObj->setDescricao($descricao);
             $projetoObj->setVisibilidade($visibilidade);
 
-            if (!empty($_POST["equipe_id"]))
+            if (!$ehCoordenador)
+            {
+                // Participante: a equipe do projeto não muda
+                $projetoObj->setEquipe($projetoExistente->getEquipe());
+            }
+            elseif (!empty($_POST["equipe_id"]))
             {
                 $equipe = new Equipe();
                 $equipe->setId((int)$_POST["equipe_id"]);
+
                 $projetoObj->setEquipe($equipe);
             }
 
             $catObj = new Categoria();
             $catObj->setId($categoriaId);
+
             $projetoObj->setCategoria($catObj);
 
             $this->service->editarProjeto($projetoObj);
 
-            if ($this->possuiArquivosEnviados($_FILES["imagens"] ?? []))
+            if ($this->validador->possuiArquivos($_FILES["imagens"] ?? []))
             {
-                $this->imagemService->salvarImagem($_FILES["imagens"], $projetoObj);
+                $this->imagemService->salvarImagem(
+                    $_FILES["imagens"],
+                    $projetoObj
+                );
             }
 
-            $imagensManter = array_values(array_unique(array_map("intval", $_POST["imagens_manter"] ?? [])));
-            $this->imagemRepositorySql->desativarImagensExceto($projetoId, $imagensManter);
+            $imagensManter = array_values(array_unique(
+                array_map("intval", $_POST["imagens_manter"] ?? [])
+            ));
 
-            $this->responderJson([
+            $this->imagemRepositorySql->desativarImagensExceto(
+                $projetoId,
+                $imagensManter
+            );
+
+            $this->responderJson([ 
                 "sucesso" => true,
                 "mensagem" => "Projeto atualizado com sucesso!",
                 "redirect" => URL_BASE . "/projeto/perfil?id=" . $projetoId
@@ -820,22 +584,243 @@ class ProjetoController extends Controller
         catch (\Throwable $e)
         {
             error_log("ERRO AO ATUALIZAR PROJETO: " . $e->getMessage());
-            $this->responderJson(["sucesso" => false, "mensagem" => "Não foi possível atualizar o projeto."], 500);
+
+            $this->responderJson([
+                "sucesso" => false,
+                "mensagem" => "Não foi possível atualizar o projeto."
+            ], 500);
         }
+    }
+
+    public function formularioEntrar()
+    {
+        $this->loginRequired();
+
+        $this->view("projeto/entrar");
+    }
+
+    public function entrar()
+    {
+        $this->loginRequired();
+
+        $hash = trim($_POST["hash"] ?? ($_POST["hash_acesso"] ?? ""));
+        $senha = trim($_POST["senha"] ?? "");
+
+        $this->validarAcesso($hash, $senha);
+
+        if ($this->validador->temErros())
+        {
+            $this->responderJson([
+                "sucesso" => false,
+                "erros" => $this->validador->getErros()
+            ], 422);
+        }
+
+        try
+        {
+            $projeto = $this->repositorySql->buscarPorHash($hash);
+
+            if (!$projeto)
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "mensagem" => "Código Hash do projeto não encontrado."
+                ], 404);
+            }
+
+            if (!password_verify($senha, $projeto->getSenha()))
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "erros" => ["senha" => "Senha incorreta para este projeto."]
+                ], 422);
+            }
+
+            $usuarioLogado = $_SESSION["usuario_logado"] ?? null;
+
+            $solicitou = $this->repositorySql->solicitarEntrada(
+                (int)$projeto->getId(),
+                (int)$usuarioLogado->getId()
+            );
+
+            if (!$solicitou)
+            {
+                $this->responderJson([
+                    "sucesso" => false,
+                    "mensagem" => "Você já é integrante ou possui solicitação pendente para este projeto."
+                ], 422);
+            }
+
+            $this->responderJson([
+                "sucesso" => true,
+                "mensagem" => "Solicitação de entrada enviada com sucesso! Aguarde a aprovação do coordenador.",
+                "redirect" => URL_BASE . "/usuario/perfil"
+            ]);
+        }
+        catch (\Throwable $e)
+        {
+            error_log("ERRO AO ENTRAR NO PROJETO: " . $e->getMessage());
+
+            $this->responderJson([
+                "sucesso" => false,
+                "mensagem" => "Erro ao solicitar entrada no projeto."
+            ], 500);
+        }
+    }
+
+    public function aprovarSolicitacao()
+    {
+        $this->loginRequired();
+        $this->validarMembro();
+
+        if ($this->validador->temErros())
+        {
+            $this->responderAcao(false, "Dados inválidos para aprovar a solicitação.", 422, null, $this->validador->getErros());
+        }
+
+        $projetoId = (int)$_POST["projeto_id"];
+        $usuarioId = (int)$_POST["usuario_id"];
+
+        if (!$this->service->usuarioECoordenador($projetoId))
+        {
+            $this->responderAcao(false, "Apenas coordenadores podem aprovar solicitações.", 403);
+        }
+
+        $this->repositorySql->aprovarSolicitacao($projetoId, $usuarioId);
+
+        $this->responderAcao(true, "Solicitação aprovada com sucesso.");
+    }
+
+    public function rejeitarSolicitacao()
+    {
+        $this->loginRequired();
+        $this->validarMembro();
+
+        if ($this->validador->temErros())
+        {
+            $this->responderAcao(false, "Dados inválidos para rejeitar a solicitação.", 422, null, $this->validador->getErros());
+        }
+
+        $projetoId = (int)$_POST["projeto_id"];
+        $usuarioId = (int)$_POST["usuario_id"];
+
+        if (!$this->service->usuarioECoordenador($projetoId))
+        {
+            $this->responderAcao(false, "Apenas coordenadores podem rejeitar solicitações.", 403);
+        }
+
+        $this->repositorySql->rejeitarSolicitacao($projetoId, $usuarioId);
+
+        $this->responderAcao(true, "Solicitação rejeitada com sucesso.");
+    }
+
+    public function alterarPapel()
+    {
+        $this->loginRequired();
+        $this->validarMembro(true);
+
+        if ($this->validador->temErros())
+        {
+            $this->responderAcao(false, "Dados inválidos para alterar o papel.", 422, null, $this->validador->getErros());
+        }
+
+        $projetoId = (int)$_POST["projeto_id"];
+        $usuarioId = (int)$_POST["usuario_id"];
+
+        if (!$this->service->usuarioECoordenador($projetoId))
+        {
+            $this->responderAcao(false, "Apenas coordenadores podem alterar papéis.", 403);
+        }
+
+        $resultado = $this->service->alterarPapel($projetoId, $usuarioId, trim($_POST["papel"]));
+
+        if (!$resultado["resposta"])
+        {
+            $this->responderAcao(false, $resultado["erro"], $resultado["status"]);
+        }
+
+        $this->responderAcao(true, "Papel atualizado com sucesso.");
+    }
+
+    public function adicionarMembro()
+    {
+        $this->loginRequired();
+        $this->validarMembro(true);
+
+        if ($this->validador->temErros())
+        {
+            $this->responderAcao(false, "Dados inválidos para adicionar o membro.", 422, null, $this->validador->getErros());
+        }
+
+        $projetoId = (int)$_POST["projeto_id"];
+        $usuarioId = (int)$_POST["usuario_id"];
+
+        if (!$this->service->usuarioECoordenador($projetoId))
+        {
+            $this->responderAcao(false, "Apenas coordenadores podem adicionar membros.", 403);
+        }
+
+        $this->repositorySql->adicionarMembro($projetoId, $usuarioId, trim($_POST["papel"] ?? "participante"));
+
+        $this->responderAcao(true, "Membro adicionado com sucesso.");
+    }
+
+    public function removerMembro()
+    {
+        $this->loginRequired();
+        $this->validarMembro();
+
+        $novoCoordenador = $_POST["novo_coordenador_id"] ?? "";
+
+        if ($novoCoordenador !== "")
+        {
+            $this->validador->idPositivo("novo_coordenador_id", $novoCoordenador);
+        }
+
+        if ($this->validador->temErros())
+        {
+            $this->responderAcao(false, "Dados inválidos para remover o membro.", 422, null, $this->validador->getErros());
+        }
+
+        $projetoId = (int)$_POST["projeto_id"];
+        $usuarioId = (int)$_POST["usuario_id"];
+        $ehProprioUsuario = ((int)$_SESSION["usuario_logado"]->getId() === $usuarioId);
+
+        if (!$ehProprioUsuario && !$this->service->usuarioECoordenador($projetoId))
+        {
+            $this->responderAcao(false, "Você não tem permissão para remover este membro.", 403);
+        }
+
+        $resultado = $this->service->removerMembro($projetoId, $usuarioId, $novoCoordenador !== "" ? (int)$novoCoordenador : null);
+
+        if (!$resultado["resposta"])
+        {
+            $this->responderAcao(false, $resultado["erro"], $resultado["status"]);
+        }
+
+        if ($ehProprioUsuario)
+        {
+            $this->responderAcao(true, "Você saiu do projeto.", 200, URL_BASE . "/usuario/perfil");
+        }
+
+        $this->responderAcao(true, "Membro removido com sucesso.");
     }
 
     public function perfil()
     {
-        $projetoId = (int)($_GET["id"] ?? 0);
+        $this->validarId();
 
-        if ($projetoId <= 0)
+        if ($this->validador->temErros())
         {
             $this->redirect(URL_BASE . "/projeto/listar");
             return;
         }
 
+        $projetoId = (int)$_GET["id"];
+
         $projetoBusca = new Projeto();
         $projetoBusca->setId($projetoId);
+
         $projeto = $this->repositorySql->buscarId($projetoBusca);
 
         if (!$projeto || $projeto->getNome() === null)
@@ -844,13 +829,14 @@ class ProjetoController extends Controller
             return;
         }
 
-        if ($projeto->getVisibilidade() === "privado" && !$this->usuarioTemPermissao($projetoId))
+        if (!$this->service->podeVisualizar($projeto))
         {
             $this->redirect(URL_BASE . "/projeto/listar");
             return;
         }
 
         $todasVersoes = $this->repositorySql->buscarTodasVersoes($projetoId);
+
         $versaoParam = $_GET["versao"] ?? null;
         $versaoExibida = null;
 
@@ -878,6 +864,7 @@ class ProjetoController extends Controller
         if ($versaoExibida)
         {
             $versaoId = (int)$versaoExibida["id"];
+
             $codigos = $this->codigoRepositorySql->buscarPorVersao($versaoId);
             $componentes = $this->componenteRepositorySql->buscarPorVersao($versaoId);
             $extras = $this->extraRepositorySql->buscarPorVersao($versaoId);
@@ -893,7 +880,8 @@ class ProjetoController extends Controller
         $data["usuarios"] = $this->usuarioRepositorySql->buscarProjeto($projetoId);
         $data["todosUsuarios"] = $this->usuarioRepositorySql->listarTodos();
         $data["imagens"] = $this->imagemService->buscarProjeto($projetoId);
-        $data["solicitacoesPendentes"] = $this->usuarioECoordenador($projetoId)
+
+        $data["solicitacoesPendentes"] = $this->service->usuarioECoordenador($projetoId)
             ? $this->repositorySql->listarSolicitacoesPendentes($projetoId)
             : [];
 
@@ -904,93 +892,139 @@ class ProjetoController extends Controller
     {
         $this->loginRequired();
 
-        $projetoId = (int)($_POST["id"] ?? 0);
         $usuarioLogado = $_SESSION["usuario_logado"] ?? null;
-        $isAjax = (!empty($_SERVER["HTTP_X_REQUESTED_WITH"]) && strtolower((string)$_SERVER["HTTP_X_REQUESTED_WITH"]) === "xmlhttprequest");
-        $fallbackUrl = URL_BASE . "/projeto/listar";
 
-        if ($projetoId <= 0 || !$usuarioLogado || $usuarioLogado->getRegra() !== "admin")
+        if (!$usuarioLogado || $usuarioLogado->getRegra() !== "admin")
         {
-            if ($isAjax)
-            {
-                $this->responderJson(["sucesso" => false, "mensagem" => "Acesso negado."], 403);
-            }
-            $this->redirect($fallbackUrl);
-            return;
+            $this->responderAcao(false, "Acesso negado.", 403);
         }
 
-        $justificativa = trim((string)($_POST["justificativa"] ?? ""));
+        $this->validarId();
 
-        if (mb_strlen($justificativa) < 10)
+        if ($this->validador->temErros())
         {
-            if ($isAjax)
-            {
-                $this->responderJson(["sucesso" => false, "mensagem" => "A justificativa é obrigatória (mínimo de 10 caracteres)."], 422);
-            }
-            $this->redirect($fallbackUrl);
-            return;
+            $this->responderAcao(false, "Projeto inválido.", 422, null, $this->validador->getErros());
         }
+
+        $projetoId = (int)$_POST["id"];
 
         $projetoBusca = new Projeto();
         $projetoBusca->setId($projetoId);
+
         $projeto = $this->repositorySql->buscarId($projetoBusca);
 
         if (!$projeto || $projeto->getNome() === null)
         {
-            if ($isAjax)
+            $this->responderAcao(false, "Projeto não encontrado.", 404);
+        }
+
+        // Justificativa só quando o admin desativa o projeto de outro usuário
+        $comJustificativa = $this->exigeJustificativa((int)($projeto->getUsuario()?->getId() ?? 0));
+        $justificativa = "";
+
+        if ($comJustificativa)
+        {
+            $erroJustificativa = $this->erroJustificativa();
+
+            if ($erroJustificativa)
             {
-                $this->responderJson(["sucesso" => false, "mensagem" => "Projeto não encontrado."], 404);
+                $this->responderErroJustificativa($erroJustificativa);
             }
-            $this->redirect($fallbackUrl);
-            return;
+
+            $justificativa = trim((string)($_POST["justificativa"] ?? ""));
         }
 
         try
         {
             $this->repositorySql->desativar($projetoId);
-            $this->denunciaRepositorySql->dispensar("projeto", $projetoId);
+
+            $this->denunciaRepositorySql->dispensar(
+                "projeto",
+                $projetoId
+            );
 
             $usuariosProjeto = $this->usuarioRepositorySql->buscarProjeto($projetoId);
 
-            if (!empty($usuariosProjeto))
+            if ($comJustificativa && !empty($usuariosProjeto))
             {
-                $motivoHtml = nl2br(htmlspecialchars($justificativa, ENT_QUOTES, "UTF-8"));
+                $motivoHtml = nl2br(
+                    htmlspecialchars($justificativa, ENT_QUOTES, "UTF-8")
+                );
+
                 $nomeProjeto = (string)$projeto->getNome();
 
                 foreach ($usuariosProjeto as $integrante)
                 {
                     $email = (string)($integrante->getEmail() ?? "");
-                    if ($email === "")
+
+                    if ($email === "" || (int)$integrante->getId() === (int)$usuarioLogado->getId())
                     {
                         continue;
                     }
 
                     try
                     {
-                        $this->mailController->enviarDesativacaoProjeto($email, $integrante->getNome(), $nomeProjeto, $motivoHtml);
+                        $this->mailController->enviarDesativacaoProjeto(
+                            $email,
+                            $integrante->getNome(),
+                            $nomeProjeto,
+                            $motivoHtml
+                        );
                     }
                     catch (\Throwable $mailEx)
                     {
-                        error_log("ERRO AO NOTIFICAR DESATIVACAO ({$email}): " . $mailEx->getMessage());
+                        error_log(
+                            "ERRO AO NOTIFICAR DESATIVACAO ({$email}): " .
+                            $mailEx->getMessage()
+                        );
                     }
                 }
             }
-
-            if ($isAjax)
-            {
-                $this->responderJson(["sucesso" => true, "mensagem" => "Projeto desativado com sucesso."]);
-            }
-
-            $this->redirect($fallbackUrl);
         }
         catch (\Throwable $e)
         {
             error_log("ERRO AO DESATIVAR PROJETO: " . $e->getMessage());
-            if ($isAjax)
-            {
-                $this->responderJson(["sucesso" => false, "mensagem" => "Não foi possível desativar o projeto."], 500);
-            }
-            $this->redirect($fallbackUrl);
+
+            $this->responderAcao(false, "Não foi possível desativar o projeto.", 500);
         }
+
+        $this->responderAcao(true, "Projeto desativado com sucesso.", 200, URL_BASE . "/projeto/listar");
+    }
+
+    public function ativar()
+    {
+        $this->loginRequired();
+
+        if (!$this->adminRequired())
+        {
+            $this->responderAcao(false, "Acesso negado.", 403);
+        }
+
+        $this->validarId();
+
+        if ($this->validador->temErros())
+        {
+            $this->responderAcao(false, "Projeto inválido.", 422, null, $this->validador->getErros());
+        }
+
+        $id = (int)$_POST["id"];
+
+        $projetoBusca = new Projeto();
+        $projetoBusca->setId($id);
+        $item = $this->repositorySql->buscarId($projetoBusca, true);
+
+        if (!$item)
+        {
+            $this->responderAcao(false, "Projeto não encontrado.", 404);
+        }
+
+        if ($item->isStatus() !== false)
+        {
+            $this->responderAcao(false, "Projeto já está ativo.", 422);
+        }
+
+        $this->repositorySql->ativar($id);
+
+        $this->responderAcao(true, "Projeto reativado com sucesso.");
     }
 }

@@ -19,15 +19,16 @@ $titulo = "Denúncias";
 include_once(__DIR__."/../elements/header.php");
 
 $denuncias = $denuncias ?? [];
-$totalDenuncias = array_sum(array_column($denuncias, "quantidade"));
+// Os itens implementam ArrayAccess (array_column não lê esse formato)
+$totalDenuncias = array_sum(array_map(fn($d) => (int)$d["quantidade"], $denuncias));
 $datasDenuncias = array_map(fn($d) => strtotime($d["primeira_denuncia"]), $denuncias);
 $maisAntiga = $datasDenuncias ? min($datasDenuncias) : null;
-$quantidadePorTipo = array_count_values(array_column($denuncias, "tipo"));
+$quantidadePorTipo = array_count_values(array_map(fn($d) => $d["tipo"], $denuncias));
 
 $tiposDenuncia = [
     "usuario"    => ["rotulo" => "Usuário",    "plural" => "Usuários",    "rota" => "/usuario/perfil",    "metodo" => "get"],
     "projeto"    => ["rotulo" => "Projeto",    "plural" => "Projetos",    "rota" => "/projeto/perfil",    "metodo" => "get"],
-    "forum"      => ["rotulo" => "Postagem",   "plural" => "Postagens",   "rota" => "/forum/perfil",      "metodo" => "post"],
+    "forum"      => ["rotulo" => "Postagem",   "plural" => "Postagens",   "rota" => "/forum/perfil",      "metodo" => "get"],
     "comentario" => ["rotulo" => "Comentário", "plural" => "Comentários", "rota" => null,                  "metodo" => null],
     "componente" => ["rotulo" => "Componente", "plural" => "Componentes", "rota" => "/componente/perfil", "metodo" => "get"],
     "equipe"     => ["rotulo" => "Equipe",     "plural" => "Equipes",     "rota" => "/equipe/perfil",     "metodo" => "get"]
@@ -89,6 +90,6 @@ $tiposDenuncia = [
 </div>
 
 <?php include_once(__DIR__."/../elements/adminModais.php") ?>
-<script src="<?= JS_URL_BASE ?>/denuncia.js"></script>
+<script src="<?= js_url("denuncia.js") ?>"></script>
 <?php
 include_once(__DIR__."/../elements/footer.php");

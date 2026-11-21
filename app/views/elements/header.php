@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Orbitron:wght@700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
-    <link href="<?= CSS_URL_BASE ?>/style.css" rel="stylesheet">
-    <link rel="stylesheet" href="<?= CSS_URL_BASE ?>/output.css">
+    <link href="<?= css_url("style.css") ?>" rel="stylesheet">
+    <link rel="stylesheet" href="<?= css_url("output.css") ?>">
     <link rel="icon" type="image/png" href="<?= IMG_URL_BASE ?>/robodrive-logo.png">
     <title><?= $titulo ?></title>
-    <script src="<?= JS_URL_BASE ?>/tailwind.js"></script>
+    <script src="<?= js_url("tailwind.js") ?>"></script>
 </head>
 <body class="h-screen w-screen bg-[#000505] font-['Space_Grotesk']">
 <header class="relative flex h-[10dvh] w-full items-center justify-between border-b-[3px] border-[#07556A] bg-[#000505] px-4 sm:px-8">
@@ -87,7 +87,7 @@
                 alt="Foto de perfil"
                 class="h-7 w-7 object-cover"
             >
-            <span class="hidden text-xs font-bold uppercase tracking-[.08em] text-[#F2FEFE] sm:inline"><?= $_SESSION["usuario_logado"]->getNomeUsuario() ?></span>
+            <span class="hidden text-xs font-bold uppercase tracking-[.08em] text-[#F2FEFE] sm:inline"><?= texto($_SESSION["usuario_logado"]->getNomeUsuario()) ?></span>
         </a>
     <?php endif; ?>
 </header>

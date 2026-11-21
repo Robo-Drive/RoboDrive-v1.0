@@ -110,6 +110,13 @@ document.addEventListener('DOMContentLoaded', () => {
     |--------------------------------------------------------------------------
     */
 
+    // O nome vem decodificado do atributo data-nome: escapa antes de montar o HTML
+    function escaparHtml(texto) {
+        const div = document.createElement('div');
+        div.textContent = texto;
+        return div.innerHTML;
+    }
+
     function adicionarComponente(id, nome) {
 
         // Evita duplicação
@@ -137,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="flex-1">
 
                 <span class="text-white font-bold">
-                    ${nome}
+                    ${escaparHtml(nome)}
                 </span>
 
             </div>

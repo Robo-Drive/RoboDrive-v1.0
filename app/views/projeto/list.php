@@ -13,7 +13,7 @@ include_once(__DIR__."/../elements/header.php");
             </div>
             <div class="flex items-center gap-3">
                 <?php if (isset($_SERVER['REQUEST_URI']) && str_contains($_SERVER['REQUEST_URI'], '/admin')): ?>
-                    <form method="get" action="<?= URL_BASE ?>/projeto/listar/admin" class="flex items-center gap-2">
+                    <form method="get" action="<?= URL_BASE ?>/admin/projeto/listar" class="flex items-center gap-2">
                         <label for="status" class="text-xs text-[#91B5BD] uppercase font-bold">Status:</label>
                         <select name="status" id="status" onchange="this.form.submit()" class="rd-select !h-9 text-xs">
                             <option value="1" <?= ($statusFiltro ?? '1') === '1' ? 'selected' : '' ?>>Ativos</option>

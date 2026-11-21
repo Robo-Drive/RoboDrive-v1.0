@@ -9,75 +9,93 @@ use app\repositories\ComentarioRepositorySql;
 class ComentarioController extends Controller
 {
     private ComentarioRepositorySql $repositorySql;
+    private ValidadorHelper $validador;
 
     public function __construct()
     {
         $this->repositorySql = new ComentarioRepositorySql();
+        $this->validador = new ValidadorHelper();
     }
+
+    public function validar()
+    {
+        $conteudo = trim($_POST["conteudo"] ?? "");
+
+        $this->validador->obrigatorio("conteudo", $conteudo);
+
+        if (!isset($this->validador->getErros()["conteudo"]))
+        {
+            $this->validador->tamanho("conteudo", $conteudo, 3, 2000);
+        }
+
+        $this->validador->tipoComentario("tipo", trim($_POST["tipo"] ?? ""));
+        $this->validador->idPositivo("origem_id", $_POST["origem_id"] ?? "");
+    }
+
+    // Desativar: id do comentário e tipo
+    public function validarDesativar()
+    {
+        $this->validador->idPositivo("id", $_POST["id"] ?? "");
+        $this->validador->tipoComentario("tipo", trim($_POST["tipo"] ?? ""));
+    }
+
     public function salvar()
     {
         $this->loginRequired();
+        $this->validar();
 
-        $validador = new ValidadorHelper();
-
-        $validador->obrigatorio("conteudo", trim($_POST["conteudo"] ?? ""));
-        $validador->tipoComentario("tipo", trim($_POST["tipo"] ?? ""));
-        $validador->idPositivo("origem_id", $_POST["origem_id"] ?? "");
-
-        if ($validador->temErros())
+        if ($this->validador->temErros())
         {
-            $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE);
-            return;
+            $this->responderJson(["sucesso" => false, "erros" => $this->validador->getErros()], 422);
         }
 
-        $tipo = trim($_POST["tipo"]);
-        $origemId = filter_var($_POST["origem_id"], FILTER_VALIDATE_INT);
-        $conteudo = trim($_POST["conteudo"]);
+        $conteudo  = trim(filter_input(INPUT_POST, "conteudo", FILTER_SANITIZE_FULL_SPECIAL_CHARS));;
+        $tipo      = trim($_POST["tipo"]);
+        $origemId  = (int)$_POST["origem_id"];
         $usuarioId = $_SESSION["usuario_logado"]->getId();
+
+        // RN20: só comenta quem pode ver o conteúdo
+        $erroContexto = (new \app\services\ComentarioService())->validarContexto($tipo, $origemId);
+
+        if ($erroContexto)
+        {
+            $this->responderAcao(false, $erroContexto["erro"], $erroContexto["status"]);
+        }
 
         try
         {
             if ($tipo === "forum")
             {
                 $this->repositorySql->salvarForum($origemId, $usuarioId, $conteudo);
-
-                $this->redirect(URL_BASE . "/forum/perfil?id=" . $origemId);
-                return;
             }
-
-            if ($tipo === "projeto")
+            else
             {
                 $this->repositorySql->salvarProjeto($origemId, $usuarioId, $conteudo);
-
-                $this->redirect(URL_BASE . "/projeto/perfil?id=" . $origemId);
-                return;
             }
         }
         catch (\Throwable $e)
         {
             error_log("Erro ao salvar comentário: " . $e->getMessage());
 
-            $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE);
-            return;
+            $this->responderAcao(false, "Não foi possível publicar o comentário. Tente novamente.", 500);
         }
+
+        $this->responderJson(["sucesso" => true]);
     }
+
     public function desativar()
     {
         $this->loginRequired();
 
-        $validador = new ValidadorHelper();
+        $this->validarDesativar();
 
-        $validador->idPositivo("id", $_POST["id"] ?? "");
-        $validador->tipoComentario("tipo", trim($_POST["tipo"] ?? ""));
-
-        if ($validador->temErros())
+        if ($this->validador->temErros())
         {
-            $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE);
-            return;
+            $this->responderJson(["sucesso" => false, "erros" => $this->validador->getErros()], 422);
         }
 
-        $id = filter_var($_POST["id"], FILTER_VALIDATE_INT);
-        $tipo = trim($_POST["tipo"]);
+        $tipo          = trim($_POST["tipo"]);
+        $id            = (int)$_POST["id"];
         $usuarioLogado = $_SESSION["usuario_logado"];
 
         try
@@ -86,20 +104,35 @@ class ComentarioController extends Controller
 
             if (!$comentario)
             {
-                $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE);
-                return;
+                $this->responderAcao(false, "Comentário não encontrado.", 404);
             }
 
-            if ($comentario->getUsuario()->getId() == $usuarioLogado->getId() || $usuarioLogado->getRegra() === "admin")
+            $podeDesativar = $comentario->getUsuario()->getId() == $usuarioLogado->getId() || $usuarioLogado->getRegra() === "admin";
+
+            if (!$podeDesativar)
             {
-                $this->repositorySql->desativar($id, $tipo);
+                $this->responderAcao(false, "Você não tem permissão para desativar este comentário.", 403);
             }
+            
+            if ($this->exigeJustificativa((int)$comentario->getUsuario()->getId()))
+            {
+                $erroJustificativa = $this->erroJustificativa();
+
+                if ($erroJustificativa)
+                {
+                    $this->responderErroJustificativa($erroJustificativa);
+                }
+            }
+
+            $this->repositorySql->desativar($id, $tipo);
         }
         catch (\Throwable $e)
         {
             error_log("Erro ao desativar comentário: " . $e->getMessage());
+
+            $this->responderAcao(false, "Não foi possível desativar o comentário.", 500);
         }
 
-        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE);
+        $this->responderJson(["sucesso" => true]);
     }
 }

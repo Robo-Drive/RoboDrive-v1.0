@@ -24,24 +24,34 @@ $list = [
 
 $listAdmin = [
     [
-        "route" => URL_BASE."/denuncia",
+        "route" => URL_BASE."/admin/denuncia/listar",
         "nome" => "Denúncias",
         "icon" => "denuncia-icon.svg"
     ],
     [
-        "route" => URL_BASE."/usuario/listar",
+        "route" => URL_BASE."/admin/usuario/listar",
         "nome" => "Usuários",
         "icon" => "usuarios-icon.svg"
     ],
     [
-        "route" => URL_BASE."/equipe/listar",
+        "route" => URL_BASE."/admin/equipe/listar",
         "nome" => "Equipes",
         "icon" => "usuarios-icon.svg"
     ],
     [
-        "route" => URL_BASE."/projeto/listar/admin",
+        "route" => URL_BASE."/admin/projeto/listar",
         "nome" => "Projetos",
         "icon" => "projeto-icon.png"
+    ],
+    [
+        "route" => URL_BASE."/admin/forum/listar",
+        "nome" => "Fórum",
+        "icon" => "forum-icon.png"
+    ],
+    [
+        "route" => URL_BASE."/admin/componente/listar",
+        "nome" => "Componentes",
+        "icon" => "componente-icon.png"
     ]
 ];
 
@@ -64,7 +74,7 @@ if(isset($_SESSION["usuario_logado"]) && $_SESSION["usuario_logado"]->getRegra()
                 <?php $ativo = $_SERVER['REQUEST_URI'] === parse_url($l["route"], PHP_URL_PATH); ?>
                 <a href="<?= $l["route"] ?>" class="rd-nav-link <?= $ativo ? 'is-active' : '' ?>" <?= $ativo ? 'aria-current="page"' : '' ?>>
                     <img src="<?= IMG_URL_BASE."/".$l["icon"] ?>" alt="">
-                    <span class="truncate"><?= $l["nome"] ?></span>
+                    <span class="truncate"><?= texto($l["nome"]) ?></span>
                 </a>
             <?php endforeach; ?>
         </nav>
@@ -95,4 +105,4 @@ if(isset($_SESSION["usuario_logado"]) && $_SESSION["usuario_logado"]->getRegra()
     <?php endif; ?>
 
 </aside>
-<script src="<?= JS_URL_BASE ?>/sidebar.js"></script>
+<script src="<?= js_url("sidebar.js") ?>"></script>

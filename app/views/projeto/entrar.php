@@ -37,9 +37,6 @@ include_once(__DIR__ . "/../elements/header.php");
                     placeholder="Ex: 4A8E20B9C1" 
                     class="rd-input uppercase font-mono tracking-widest"
                 >
-                <?php if (isset($erros['hash'])): ?>
-                    <p class="rd-error"><?= $erros['hash'] ?></p>
-                <?php endif; ?>
             </div>
 
             <div class="rd-field">
@@ -51,9 +48,6 @@ include_once(__DIR__ . "/../elements/header.php");
                     placeholder="Digite a senha..." 
                     class="rd-input"
                 >
-                <?php if (isset($erros['senha'])): ?>
-                    <p class="rd-error"><?= $erros['senha'] ?></p>
-                <?php endif; ?>
             </div>
 
             <button type="submit" class="rd-btn rd-btn-primary w-full !py-3">

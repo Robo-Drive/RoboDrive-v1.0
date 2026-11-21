@@ -53,6 +53,7 @@
     <div class="h-[3px] w-full bg-[#F2A058]"></div>
     <form method="post" autocomplete="off" data-rota-base="<?= URL_BASE ?>" class="flex flex-col">
         <input type="hidden" name="id" data-campo="id">
+        <input type="hidden" name="tipo" data-campo="origem">
 
         <div class="flex items-start justify-between gap-4 border-b-[3px] border-[#07556A] p-5 sm:p-6">
             <div>
@@ -103,6 +104,6 @@
     </form>
 </dialog>
 
-<script src="<?= JS_URL_BASE ?>/admin.js"></script>
+<script src="<?= js_url("admin.js") ?>"></script>
 
 <?php endif; ?>

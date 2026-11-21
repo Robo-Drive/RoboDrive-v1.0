@@ -37,13 +37,13 @@ include_once(__DIR__."/../elements/header.php");
                 <?php endif; ?>
             </div>
 
-            <div class="flex flex-wrap gap-4 sm:gap-6">
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                 <?php if(isset($equipes) && count($equipes) > 0):?>
                     <?php foreach($equipes as $equipe):?>
                         <?php include(__DIR__."/elements/cardEquipe.php")?>
                     <?php endforeach;?>
                 <?php else: ?>
-                    <p class="rd-empty">Não está em nenhuma equipe ainda</p>
+                    <p class="rd-empty col-span-full">Não está em nenhuma equipe ainda</p>
                 <?php endif;?>
             </div>
         </section>
@@ -85,7 +85,7 @@ include_once(__DIR__."/../elements/header.php");
                         <?php if(!empty($categorias)): ?>
                             <?php foreach($categorias as $cat): ?>
                                 <option value="<?= $cat->getId() ?>">
-                                    <?= htmlspecialchars($cat->getNome()) ?>
+                                    <?= texto($cat->getNome()) ?>
                                 </option>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -94,13 +94,13 @@ include_once(__DIR__."/../elements/header.php");
             </div>
 
             <!-- LISTAGEM DOS PROJETOS COM AJAX -->
-            <div id="gridProjetosPerfil" class="flex flex-wrap gap-4 sm:gap-6">
+            <div id="gridProjetosPerfil" class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                 <?php if(isset($projetos) && count($projetos) > 0):?>
                     <?php foreach($projetos as $projeto):?>
                         <?php include(__DIR__."/elements/cardProjeto.php")?>
                     <?php endforeach;?>
                 <?php else: ?>
-                    <p class="rd-empty">Nenhum projeto cadastrado ainda</p>
+                    <p class="rd-empty col-span-full">Nenhum projeto cadastrado ainda</p>
                 <?php endif;?>
             </div>
         </section>
@@ -121,7 +121,7 @@ include_once(__DIR__."/../elements/header.php");
                 <select name="categoria_antiga_id" id="catAntiga" class="rd-select w-full" required onchange="filtrarNovaCategoria()">
                     <option value="">Selecione</option>
                     <?php foreach($categorias as $c): ?>
-                        <option value="<?= $c->getId() ?>"><?= htmlspecialchars($c->getNome()) ?></option>
+                        <option value="<?= $c->getId() ?>"><?= texto($c->getNome()) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -130,7 +130,7 @@ include_once(__DIR__."/../elements/header.php");
                 <select name="categoria_nova_id" id="catNova" class="rd-select w-full" required>
                     <option value="">Selecione</option>
                     <?php foreach($categorias as $c): ?>
-                        <option value="<?= $c->getId() ?>"><?= htmlspecialchars($c->getNome()) ?></option>
+                        <option value="<?= $c->getId() ?>"><?= texto($c->getNome()) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>

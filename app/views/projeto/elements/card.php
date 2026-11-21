@@ -5,12 +5,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
     // Função para exibir textos com segurança.
     // Decodifica entidades armazenadas anteriormente e depois escapa o HTML.
     $escapar = static function ($valor): string {
-        return htmlspecialchars(
-            html_entity_decode(
-                (string)($valor ?? '')
-               
-            )
-        );
+        return texto((string)($valor ?? ''));
     };
 
     $usuarioLogado = $_SESSION['usuario_logado'] ?? null;
@@ -53,10 +48,13 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
     $ehDonoDoProjeto = ($projeto->getUsuario() && (int)$projeto->getUsuario()->getId() === (int)$usuarioLogadoId);
     $ehUnicoCoordenador = ($papelUsuarioLogado === 'coordenador' && $totalCoordenadores <= 1);
     $precisaTransferir = ($ehDonoDoProjeto || $ehUnicoCoordenador);
-    $podeSairProjeto = ($eIntegrante && $totalMembros > 1);
+    $podeSairProjeto = ($eIntegrante && $totalMembros > 1 && ($projeto->isStatus() !== false));
 
     // Somente coordenadores e administradores gerenciam o projeto.
-    $podeGerenciar = $eCoordenador;
+    $projetoAtivo = ($projeto->isStatus() !== false);
+    $podeGerenciar = $eCoordenador && $projetoAtivo;
+    // Qualquer integrante (e o admin) edita; o participante só altera descrição, componentes e arquivos.
+    $podeEditar = ($eIntegrante || $eAdmin) && $projetoAtivo;
 
     // Dados auxiliares.
     $idsAutores = !empty($usuarios)
@@ -95,7 +93,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
         <div class="flex items-center gap-3 flex-wrap">
 
-            <?php if ($podeGerenciar): ?>
+            <?php if ($podeEditar): ?>
 
                 <!-- Editar projeto -->
                 <form action="<?= URL_BASE ?>/projeto/editar" method="post">
@@ -115,7 +113,24 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
                 </form>
 
-                <!-- Desativar projeto -->
+            <?php endif; ?>
+
+            <?php if ($podeGerenciar): ?>
+
+                <!-- Desativar projeto (admin em projeto de outro usuário: abre o modal com justificativa) -->
+                <?php if ($eAdmin && !$ehDonoDoProjeto): ?>
+                    <button
+                        type="button"
+                        class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition"
+                        data-desativar
+                        data-tipo="projeto"
+                        data-id="<?= (int)$projeto->getId() ?>"
+                        data-nome="<?= $escapar($projeto->getNome()) ?>"
+                        data-responsavel="<?= $escapar($projeto->getUsuario()?->getNome() ?? '') ?>"
+                    >
+                        Desativar
+                    </button>
+                <?php else: ?>
                 <form
                     action="<?= URL_BASE ?>/projeto/desativar"
                     method="post"
@@ -136,6 +151,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                     </button>
 
                 </form>
+                <?php endif; ?>
 
             <?php endif; ?>
 
@@ -156,9 +172,18 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                 <?php endif; ?>
             <?php endif; ?>
 
+            <!-- Projeto desativado: o admin pode reativar -->
+            <?php if (!$projetoAtivo): ?>
+                <span class="rd-badge rd-badge-private">Desativado</span>
+                <?php
+                $ativarAlvo = ["tipo" => "projeto", "id" => (int)$projeto->getId(), "ativo" => false];
+                include(__DIR__ . '/../../elements/ativarBotao.php');
+                ?>
+            <?php endif; ?>
+
             <!-- Voltar -->
             <a
-                href="<?= URL_BASE ?>/projeto"
+                href="<?= URL_BASE ?>/projeto/listar"
                 class="border-2 border-[#07556A] px-4 py-2 text-xs font-bold text-[#F2FEFE] hover:border-[#13F3F7] transition"
             >
                 Voltar
@@ -174,7 +199,9 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                 'classe' => 'shrink-0'
             ];
 
-            include(__DIR__ . '/../../elements/denunciaBotao.php');
+            if ($projetoAtivo) {
+                include(__DIR__ . '/../../elements/denunciaBotao.php');
+            }
             ?>
 
         </div>
@@ -560,7 +587,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                             </div>
 
                             <p class="text-xs font-bold text-[#F2FEFE] line-clamp-2">
-                                <?= htmlspecialchars(html_entity_decode($ext->getDescricao() ?? $nomeArquivoExtra)) ?>
+                                <?= texto($ext->getDescricao() ?? $nomeArquivoExtra) ?>
                             </p>
                         </div>
 
@@ -832,6 +859,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                                 <form
                                     action="<?= URL_BASE ?>/projeto/alterar-papel"
                                     method="post"
+                                    data-erro-notificacao
                                     class="flex items-center gap-2 pt-2 border-t border-[#07556A]/50"
                                 >
 
@@ -853,7 +881,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
                                     <select
                                         name="papel"
-                                        onchange="this.form.submit()"
+                                        onchange="this.form.requestSubmit()"
                                         class="bg-[#000505] text-[#13F3F7] border border-[#07556A] text-[.7rem] px-2 py-0.5 focus:outline-none"
                                     >
 
@@ -941,7 +969,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                                 >
                                 <div>
                                     <p class="text-xs font-bold text-[#F2FEFE]">
-                                        @<?= htmlspecialchars($coment->getUsuario()->getNomeUsuario()) ?>
+                                        @<?= texto($coment->getUsuario()->getNomeUsuario()) ?>
                                     </p>
                                     <span class="text-[.6rem] text-[#91B5BD] font-mono">
                                         <?= $coment->getCriadoEm() ? $coment->getCriadoEm()->format('d/m/Y H:i') : '' ?>
@@ -951,13 +979,29 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
                             <div class="flex items-center gap-2">
                                 <?php if ($coment->getUsuario()->getId() === $usuarioLogadoId || $eAdmin): ?>
-                                    <form action="<?= URL_BASE ?>/comentario/desativar" method="post" onsubmit="return confirm('Deseja desativar este comentário?');">
-                                        <input type="hidden" name="id" value="<?= $coment->getId() ?>">
-                                        <input type="hidden" name="tipo" value="projeto">
-                                        <button type="submit" title="desativar" class="text-red-400 hover:text-red-300 text-xs px-2 py-1">
+                                    <?php if ($eAdmin && $coment->getUsuario()->getId() !== $usuarioLogadoId): ?>
+                                        <button
+                                            type="button"
+                                            title="desativar"
+                                            class="text-red-400 hover:text-red-300 text-xs px-2 py-1"
+                                            data-desativar
+                                            data-tipo="comentario"
+                                            data-origem="projeto"
+                                            data-id="<?= $coment->getId() ?>"
+                                            data-nome="<?= texto(mb_strimwidth(html_entity_decode($coment->getConteudo()), 0, 50, '...')) ?>"
+                                            data-responsavel="@<?= texto($coment->getUsuario()->getNomeUsuario()) ?>"
+                                        >
                                             desativar
                                         </button>
-                                    </form>
+                                    <?php else: ?>
+                                        <form action="<?= URL_BASE ?>/comentario/desativar" method="post" onsubmit="return confirm('Deseja desativar este comentário?');">
+                                            <input type="hidden" name="id" value="<?= $coment->getId() ?>">
+                                            <input type="hidden" name="tipo" value="projeto">
+                                            <button type="submit" title="desativar" class="text-red-400 hover:text-red-300 text-xs px-2 py-1">
+                                                desativar
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 <?php endif; ?>
 
                                 <?php
@@ -975,7 +1019,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                         </div>
 
                         <p class="text-sm text-[#F2FEFE] leading-relaxed whitespace-pre-line pl-11">
-                            <?= htmlspecialchars(html_entity_decode($coment->getConteudo())) ?>
+                            <?= texto($coment->getConteudo()) ?>
                         </p>
                     </div>
                 <?php endforeach; ?>
@@ -1021,7 +1065,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                     <option value="">Selecione um integrante</option>
                     <?php foreach ($outrosMembros as $outro): ?>
                         <option value="<?= (int)$outro['id'] ?>">
-                            <?= htmlspecialchars($outro['nome']) ?> (<?= htmlspecialchars(ucfirst($outro['papel'])) ?>)
+                            <?= texto($outro['nome']) ?> (<?= htmlspecialchars(ucfirst($outro['papel'])) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -1053,7 +1097,7 @@ function copiarCodigo(elementId, btn) {
         : 'Copiar';
 
     if (!navigator.clipboard || !window.isSecureContext) {
-        alert('Não foi possível copiar automaticamente. Verifique se a página está em uma conexão segura.');
+        rdNotificar('Não foi possível copiar automaticamente. Verifique se a página está em uma conexão segura.', 'erro');
         return;
     }
 
@@ -1084,7 +1128,7 @@ function copiarCodigo(elementId, btn) {
 
         })
         .catch(() => {
-            alert('Erro ao copiar o código.');
+            rdNotificar('Erro ao copiar o código.', 'erro');
         });
 
 }

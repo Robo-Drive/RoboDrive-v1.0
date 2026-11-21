@@ -31,9 +31,6 @@ include_once(__DIR__ . "/../elements/header.php");
             <div class="relative">
                 <label for="email" class="rd-label">E-mail cadastrado</label>
                 <input type="email" name="email" id="email" class="rd-input" value="<?= htmlspecialchars($email ?? '') ?>" automcomplete="off" placeholder="seuemail@exemplo.com">
-                <?php if (isset($erros['email'])): ?>
-                    <p class="rd-error"><?= $erros['email'] ?></p>
-                <?php endif; ?>
             </div>
 
             <button type="submit" class="rd-btn rd-btn-primary w-full !py-3">
@@ -47,6 +44,6 @@ include_once(__DIR__ . "/../elements/header.php");
         </p>
     </section>
 </main>
-<script src="<?= JS_URL_BASE."/password.js" ?>"></script>
+<script src="<?= js_url("password.js") ?>"></script>
 
 <?php include_once(__DIR__ . "/../elements/footer.php"); ?>

@@ -12,6 +12,7 @@ class Componente
     private ?string $imagem;
     private ?int $quantidade;
     private ?Usuario $usuario;
+    private ?bool $status = true;
 
     public static function map(?array $componentes): array
     {
@@ -29,6 +30,7 @@ class Componente
             $componenteObj->setImagem($componente["imagem"]??null);
             $componenteObj->setQuantidade($componente["quantidade"]??null);
             $componenteObj->setUsuario(new Usuario()->setId($componente["usuario_id"]??null)->setNomeUsuario($componente["nome_usuario"]??null));
+            $componenteObj->setStatus(isset($componente["status"]) ? (bool)$componente["status"] : true);
             $ComponentesObj[] = $componenteObj;
         }
         return $ComponentesObj;
@@ -92,6 +94,16 @@ class Componente
     public function setUsuario(?Usuario $usuario): self
     {
         $this->usuario = $usuario;
+        return $this;
+    }
+
+    public function isStatus(): ?bool
+    {
+        return $this->status;
+    }
+    public function setStatus(?bool $status): self
+    {
+        $this->status = $status;
         return $this;
     }
 }

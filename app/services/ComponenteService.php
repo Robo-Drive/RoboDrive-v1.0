@@ -17,22 +17,32 @@ class ComponenteService
     {
         return $this->repositorySql->listarTodos();
     }
-    public function salvarComponente(Componente $equipe): bool
+    public function salvarComponente(Componente $componente): array
     {
-        $this->repositorySql->cadastrar($equipe);
-        return true;
+        if($this->repositorySql->existe($componente))
+        {
+            return ["resposta" => false, "erro" => "Já existe um componente com esse nome."];
+        }
+
+        $this->repositorySql->cadastrar($componente);
+        return ["resposta" => true];
     }
-    public function editarComponente(Componente $componente): bool
+    public function editarComponente(Componente $componente): array
     {
         try
         {
+            if($this->repositorySql->existe($componente))
+            {
+                return ["resposta" => false, "erro" => "Já existe um componente com esse nome."];
+            }
+
             $this->repositorySql->editar($componente);
-            return true;
+            return ["resposta" => true];
         }
         catch (\Throwable $e)
         {
             error_log($e->getMessage());
-            return false;
+            return ["resposta" => false, "erro" => "Erro interno ao atualizar o componente."];
         }
     }
     public function associar(array $posts)

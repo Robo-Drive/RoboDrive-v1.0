@@ -85,12 +85,13 @@ class ForumRepositorySql implements ForumRepositoryInterface
 
         return null;
     }
-    public function buscarId(Forum $Forum): ?Forum
+    public function buscarId(Forum $Forum, bool $incluirDesativados = false): ?Forum
     {
         $sql = "SELECT f.*, u.nome, u.nome_usuario, u.imagem, u.email 
                 FROM postagem_forum f
                 JOIN usuario u ON u.id = f.usuario_id
-                WHERE f.id = :id AND f.status = true";
+                WHERE f.id = :id"
+                . ($incluirDesativados ? "" : " AND f.status = true");
         
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':id', $Forum->getId(), PDO::PARAM_INT);
@@ -124,7 +125,7 @@ class ForumRepositorySql implements ForumRepositoryInterface
                 JOIN usuario u ON u.id = f.usuario_id 
                 WHERE f.visibilidade = 'publico' 
                   AND f.status = true 
-                  AND (f.titulo LIKE :busca OR f.conteudo LIKE :busca)
+                  AND f.conteudo LIKE :busca
                 ORDER BY f.criado_em DESC";
 
         $stmt = $this->connection->prepare($sql);
@@ -145,27 +146,40 @@ class ForumRepositorySql implements ForumRepositoryInterface
         $stmt->execute();
         return Forum::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
-    public function listarAdminTodos(): array
+    public function listarAdminTodos(?string $busca = null): array
     {
         $sql = "SELECT f.*, u.nome, u.nome_usuario, u.imagem 
                 FROM postagem_forum f 
                 JOIN usuario u ON u.id = f.usuario_id 
+                WHERE (:busca IS NULL OR f.conteudo LIKE :busca_like)
                 ORDER BY f.criado_em DESC";
         $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':busca', $busca ?: null);
+        $stmt->bindValue(':busca_like', '%' . $busca . '%');
         $stmt->execute();
         return Forum::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
-    public function listarPorStatus(bool $status): array
+    public function listarPorStatus(bool $status, ?string $busca = null): array
     {
         $sql = "SELECT f.*, u.nome, u.nome_usuario, u.imagem 
                 FROM postagem_forum f 
                 JOIN usuario u ON u.id = f.usuario_id 
                 WHERE f.status = :status 
+                  AND (:busca IS NULL OR f.conteudo LIKE :busca_like)
                 ORDER BY f.criado_em DESC";
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':status', $status, PDO::PARAM_BOOL);
+        $stmt->bindValue(':busca', $busca ?: null);
+        $stmt->bindValue(':busca_like', '%' . $busca . '%');
         $stmt->execute();
         return Forum::map($stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+    public function ativar(int $forumId): bool
+    {
+        $sql = "UPDATE postagem_forum SET status = true WHERE id = :id";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':id', $forumId, \PDO::PARAM_INT);
+        return $stmt->execute();
     }
     public function desativar(int $forumId): bool
     {

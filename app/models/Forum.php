@@ -14,6 +14,7 @@ class Forum
     private ?Usuario $usuario;
     private ?Equipe $equipe;
     private ?DateTimeImmutable $criadoEm;
+    private ?bool $status = true;
 
     public static function map(?array $foruns): array
     {
@@ -38,6 +39,7 @@ class Forum
             
             $forumObj->setUsuario($usuarioObj);
             $forumObj->setEquipe(isset($forum["equipe_id"]) ? (new Equipe)->setId($forum["equipe_id"]??null):null);
+            $forumObj->setStatus(isset($forum["status"]) ? (bool)$forum["status"] : true);
             $forumObj->setCriadoEm(isset($forum["criado_em"])? new DateTimeImmutable($forum["criado_em"] ?? null) : null);
             $forunsObj[] = $forumObj;
         }
@@ -100,6 +102,16 @@ class Forum
     public function setEquipe(?Equipe $equipe): self
     {
         $this->equipe = $equipe;
+        return $this;
+    }
+
+    public function isStatus(): ?bool
+    {
+        return $this->status;
+    }
+    public function setStatus(?bool $status): self
+    {
+        $this->status = $status;
         return $this;
     }
 }

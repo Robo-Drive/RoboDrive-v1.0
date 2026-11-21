@@ -4,15 +4,18 @@ namespace app\services;
 
 use app\models\Usuario;
 use app\repositories\UsuarioRepositorySql;
+use app\services\CategoriaService;
 use Exception;
 
 class UsuarioService
 {
     private UsuarioRepositorySql $repositorySql;
+    private CategoriaService $categoriaService;
 
     public function __construct()
     {
         $this->repositorySql = new UsuarioRepositorySql;
+        $this->categoriaService = new CategoriaService;
     }
     public function ativar(Usuario $usuario): void
     {
@@ -25,7 +28,16 @@ class UsuarioService
         $nomeUsuarioResposta = $this->repositorySql->buscarNomeUsuario($usuario);
         if(empty($emailResposta) && empty($nomeUsuarioResposta))
         {
-            $this->repositorySql->cadastrar($usuario);
+            $novoUsuario = $this->repositorySql->cadastrar($usuario);
+
+            if (!$novoUsuario)
+            {
+                return ["email" => "Não foi possível concluir o cadastro. Tente novamente."];
+            }
+
+            // Todo usuário nasce com a categoria padrão, em seu nome (ainda não há sessão no cadastro)
+            $this->categoriaService->cadastro(["categoria_nome" => "Meus projetos"], (int)$novoUsuario->getId());
+
             return true;
         }
         

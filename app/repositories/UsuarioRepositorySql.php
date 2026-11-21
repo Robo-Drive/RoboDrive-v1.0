@@ -37,7 +37,7 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
             }
 
             $usuario->setId((int) $this->connection->lastInsertId());
-
+            
             return $usuario;
         }
         catch (PDOException $e)
@@ -295,10 +295,14 @@ class UsuarioRepositorySql implements UsuarioRepositoryInterface
         return Usuario::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    public function listarTodos(): array
+    public function listarTodos(?string $busca = null): array
     {
-        $sql = 'SELECT * FROM usuario';
+        $sql = 'SELECT * FROM usuario
+                WHERE (:busca IS NULL OR nome LIKE :busca_nome OR nome_usuario LIKE :busca_usuario)';
         $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':busca', $busca ?: null);
+        $stmt->bindValue(':busca_nome', '%' . $busca . '%');
+        $stmt->bindValue(':busca_usuario', '%' . $busca . '%');
         $stmt->execute();
 
         return Usuario::map($stmt->fetchAll(PDO::FETCH_ASSOC));

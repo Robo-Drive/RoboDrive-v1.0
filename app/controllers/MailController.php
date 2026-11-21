@@ -81,6 +81,31 @@ class MailController extends Controller
         return $this->mailHelper->enviarEmail($emailDestino, null, "", $assunto, $corpoHtml);
     }
 
+    public function enviarComponenteDesativado(string $emailDestino, string $nomeDestino, string $nomeComponente, array $nomesProjetos): bool
+    {
+        $nomeLimpo = htmlspecialchars(html_entity_decode($nomeDestino), ENT_QUOTES, "UTF-8");
+        $componenteLimpo = htmlspecialchars(html_entity_decode($nomeComponente), ENT_QUOTES, "UTF-8");
+        $projetosHtml = implode("", array_map(
+            fn($nome) => "<li>" . htmlspecialchars(html_entity_decode($nome), ENT_QUOTES, "UTF-8") . "</li>",
+            $nomesProjetos
+        ));
+        $assunto = "[RoboDrive] Componente desativado";
+
+        $corpoHtml = "
+            <div style='font-family: Arial, sans-serif; background-color: #06141C; color: #F2FEFE; padding: 20px; border: 2px solid #07556A;'>
+                <h2 style='color: #F2A058;'>RoboDrive - Componente desativado</h2>
+                <p>Olá, <strong>{$nomeLimpo}</strong>,</p>
+                <p>O componente <strong>\"{$componenteLimpo}\"</strong> foi desativado e não está mais disponível na plataforma. Ele está associado ao(s) seguinte(s) projeto(s) do qual você participa:</p>
+                <ul style='color: #F2FEFE;'>{$projetosHtml}</ul>
+                <p>Recomendamos revisar o projeto e, se necessário, substituir o componente por outro.</p>
+                <hr style='border: 0; border-top: 1px solid #07556A; margin: 20px 0;'>
+                <p style='font-size: 12px; color: #91B5BD;'>Atenciosamente,<br><strong>Equipe RoboDrive</strong></p>
+            </div>
+        ";
+
+        return $this->mailHelper->enviarEmail($emailDestino, null, "", $assunto, $corpoHtml);
+    }
+
     public function enviarDesativacaoConta(string $emailDestino, string $nomeDestino, string $justificativa): bool
     {
         $nomeLimpo = htmlspecialchars(html_entity_decode($nomeDestino), ENT_QUOTES, "UTF-8");

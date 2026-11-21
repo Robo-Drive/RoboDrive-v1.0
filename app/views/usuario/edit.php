@@ -25,8 +25,8 @@ include_once(__DIR__."/../elements/header.php");
     </div>
 </div>
 
-<script src="<?= JS_URL_BASE ?>/password.js"></script>
-<script src="<?= JS_URL_BASE ?>/images.js"></script>
+<script src="<?= js_url("password.js") ?>"></script>
+<script src="<?= js_url("images.js") ?>"></script>
 <?php
 include_once(__DIR__."/../elements/footer.php");
 endif;

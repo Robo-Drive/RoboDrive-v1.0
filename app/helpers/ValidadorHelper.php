@@ -154,6 +154,168 @@ class ValidadorHelper
 
 
 
+    // Papel de integrante (equipe ou projeto)
+    public function papel(string $papel, string $campo = "papel")
+    {
+        if (!in_array($papel, ["coordenador", "participante"], true))
+        {
+            $this->erros[$campo] = "Selecione um papel válido";
+        }
+
+        return $this;
+    }
+
+    // Valor que precisa estar dentro de uma lista de opções
+    public function opcao(string $campo, mixed $valor, array $permitidos, string $mensagem)
+    {
+        if (!in_array($valor, $permitidos, true))
+        {
+            $this->erros[$campo] = $mensagem;
+        }
+
+        return $this;
+    }
+
+    // Tipo de conteúdo que pode ser denunciado
+    public function tipoDenuncia(string $campo, mixed $valor)
+    {
+        return $this->opcao($campo, $valor, ["projeto", "forum", "usuario", "equipe", "comentario", "componente"], "Conteúdo da denúncia inválido.");
+    }
+
+    // Visibilidade do fórum: "publico", "privado", "equipe" ou o id de uma equipe
+    public function visibilidadeForum(string $campo, mixed $valor)
+    {
+        $ehEquipe = is_scalar($valor) && filter_var($valor, FILTER_VALIDATE_INT) !== false && (int)$valor > 0;
+
+        if (!$ehEquipe && !in_array($valor, ["publico", "privado", "equipe"], true))
+        {
+            $this->erros[$campo] = "Selecione uma visibilidade válida";
+        }
+
+        return $this;
+    }
+
+    // Justificativa de desativação feita por um admin
+    public function justificativa(mixed $valor, string $campo = "justificativa")
+    {
+        $texto = trim((string)$valor);
+
+        if ($texto === "")
+        {
+            $this->erros[$campo] = "A justificativa é obrigatória.";
+        }
+        elseif (mb_strlen($texto) < 10 || mb_strlen($texto) > 2000)
+        {
+            $this->erros[$campo] = "A justificativa deve ter entre 10 e 2000 caracteres.";
+        }
+
+        return $this;
+    }
+
+    // Dois ids que precisam ser positivos e diferentes entre si
+    public function idsDiferentes(string $campo, mixed $primeiro, mixed $segundo, string $mensagem)
+    {
+        $a = filter_var($primeiro, FILTER_VALIDATE_INT);
+        $b = filter_var($segundo, FILTER_VALIDATE_INT);
+
+        if ($a === false || $b === false || $a <= 0 || $b <= 0 || $a === $b)
+        {
+            $this->erros[$campo] = $mensagem;
+        }
+
+        return $this;
+    }
+
+    // Categoria do projeto: uma existente ou "criar" (com nome da nova)
+    public function categoria(mixed $categoria, mixed $novaCategoria)
+    {
+        $categoria = trim((string)$categoria);
+        $this->obrigatorio("categoria", $categoria, "Selecione ou crie uma categoria.");
+
+        if ($categoria === "criar")
+        {
+            $novaCategoria = trim((string)$novaCategoria);
+            $this->obrigatorio("nova_categoria", $novaCategoria, "Informe o nome da nova categoria.");
+
+            if (!isset($this->erros["nova_categoria"]))
+            {
+                $this->tamanho("nova_categoria", $novaCategoria, 3, 100, "A nova categoria precisa ter no mínimo 3 caracteres e no máximo 100");
+            }
+        }
+        elseif ($categoria !== "" && (filter_var($categoria, FILTER_VALIDATE_INT) === false || (int)$categoria <= 0))
+        {
+            $this->erros["categoria"] = "Categoria inválida.";
+        }
+
+        return $this;
+    }
+
+    // Componentes do projeto: id positivo e quantidade maior que zero
+    public function componentes(array $componentes)
+    {
+        foreach ($componentes as $id => $dados)
+        {
+            if ((int)$id <= 0)
+            {
+                continue;
+            }
+
+            $this->componenteQuantidade((int)($dados["quantidade"] ?? 0));
+        }
+
+        return $this;
+    }
+
+    // Verifica se algum arquivo foi realmente enviado em um campo múltiplo
+    public function possuiArquivos(array $arquivoCampo): bool
+    {
+        if (empty($arquivoCampo["name"]) || !is_array($arquivoCampo["name"]))
+        {
+            return false;
+        }
+
+        foreach ($arquivoCampo["name"] as $nome)
+        {
+            if (trim((string)$nome) !== "")
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // Cada arquivo enviado precisa ter uma descrição
+    public function descricoesArquivos(array $arquivos, array $descricoes, string $campoPrefixo, string $rotulo)
+    {
+        if (!$this->possuiArquivos($arquivos))
+        {
+            return $this;
+        }
+
+        foreach ($arquivos["name"] as $i => $nomeArquivo)
+        {
+            $nomeLimpo = trim((string)$nomeArquivo);
+
+            if ($nomeLimpo === "")
+            {
+                continue;
+            }
+
+            $campo = $campoPrefixo . "_" . $i;
+            $desc = trim((string)($descricoes[$i] ?? ""));
+
+            $this->obrigatorio($campo, $desc, "A descrição de {$rotulo} {$nomeLimpo} é obrigatória.");
+
+            if (!isset($this->erros[$campo]))
+            {
+                $this->tamanho($campo, $desc, 3, 255, "Descrição de {$rotulo}");
+            }
+        }
+
+        return $this;
+    }
+
     private function validarGrupoArquivo(string $campo, array $arquivos, array $extensoesPermitidas, string $tipoNome)
     {
         if (empty($arquivos) || !isset($arquivos['name']))
@@ -196,7 +358,7 @@ class ValidadorHelper
 
     public function temImagem(array $imagem, bool $erro = true)
     {
-        if ($imagem["imagem"]["error"] != 4)
+        if (($imagem["imagem"]["error"] ?? UPLOAD_ERR_NO_FILE) != UPLOAD_ERR_NO_FILE)
         {
             return [
                 "status" => true,

@@ -7,11 +7,12 @@ if (isset($componente)):
     $eAdmin = ($usuarioLogado && $usuarioLogado->getRegra() === "admin");
     $autorId = $componente->getUsuario() ? $componente->getUsuario()->getId() : null;
     $eAutor = ($usuarioLogado && $autorId && $usuarioLogado->getId() === $autorId);
+    $componenteAtivo = ($componente->isStatus() !== false);
 
     // Formatações contra script injection mantendo acentuação e quebras de linha
-    $nomeFormatado = htmlspecialchars(html_entity_decode($componente->getNome() ?? 'Componente', ENT_QUOTES, 'UTF-8'));
-    $descricaoFormatada = nl2br(htmlspecialchars(html_entity_decode($componente->getDescricao() ?? 'Sem descrição cadastrada.', ENT_QUOTES, 'UTF-8')));
-    $nomeUsuarioFormatado = htmlspecialchars(html_entity_decode($componente->getUsuario()?->getNomeUsuario() ?? 'Desconhecido', ENT_QUOTES, 'UTF-8'));
+    $nomeFormatado = texto($componente->getNome() ?? 'Componente');
+    $descricaoFormatada = nl2br(texto($componente->getDescricao() ?? 'Sem descrição cadastrada.'));
+    $nomeUsuarioFormatado = texto($componente->getUsuario()?->getNomeUsuario() ?? 'Desconhecido');
     $imagemUrl = !empty($componente->getImagem())
         ? URL_BASE . "/arquivo?arquivo=" . urlencode($componente->getImagem())
         : IMG_URL_BASE . "/projeto-icon.png";
@@ -31,7 +32,15 @@ if (isset($componente)):
             </div>
 
             <div class="flex items-center gap-3">
-                <?php if ($eAdmin || $eAutor): ?>
+                <?php if (!$componenteAtivo): ?>
+                    <span class="rd-badge rd-badge-private">Desativado</span>
+                    <?php
+                    $ativarAlvo = ["tipo" => "componente", "id" => (int) $componente->getId(), "ativo" => false];
+                    include(__DIR__ . "/../elements/ativarBotao.php");
+                    ?>
+                <?php endif; ?>
+
+                <?php if (($eAdmin || $eAutor) && $componenteAtivo): ?>
                     <form action="<?= URL_BASE ?>/componente/editar" method="post">
                         <input type="hidden" name="id" value="<?= $componente->getId() ?>">
                         <button type="submit" class="rd-btn rd-btn-primary !py-2 !px-4 text-xs">
@@ -39,15 +48,17 @@ if (isset($componente)):
                         </button>
                     </form>
 
-                    <form action="<?= URL_BASE ?>/componente/desativar" method="post" onsubmit="return confirm('Deseja realmente desativar ou desativar este componente?');">
-                        <input type="hidden" name="id" value="<?= $componente->getId() ?>">
-                        <button type="submit" class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition">
-                            Desativar
-                        </button>
-                    </form>
+                    <?php if ($eAutor): ?>
+                        <form action="<?= URL_BASE ?>/componente/desativar" method="post" onsubmit="return confirm('Deseja realmente desativar este componente?');">
+                            <input type="hidden" name="id" value="<?= $componente->getId() ?>">
+                            <button type="submit" class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition">
+                                Desativar
+                            </button>
+                        </form>
+                    <?php endif; ?>
                 <?php endif; ?>
 
-                <a href="<?= URL_BASE ?>/componente" class="border-2 border-[#07556A] px-4 py-2 text-xs font-bold text-[#F2FEFE] hover:border-[#13F3F7] transition">
+                <a href="<?= URL_BASE ?>/componente/listar" class="border-2 border-[#07556A] px-4 py-2 text-xs font-bold text-[#F2FEFE] hover:border-[#13F3F7] transition">
                     Voltar
                 </a>
 
@@ -59,7 +70,9 @@ if (isset($componente)):
                     "autores" => $autorId ? [$autorId] : [],
                     "classe"  => "shrink-0"
                 ];
-                include(__DIR__ . "/../elements/denunciaBotao.php");
+                if ($componenteAtivo) {
+                    include(__DIR__ . "/../elements/denunciaBotao.php");
+                }
                 ?>
             </div>
         </div>
@@ -104,7 +117,7 @@ if (isset($componente)):
                 </div>
 
                 <!-- PAINEL ADMINISTRATIVO (SE FOR ADMIN) -->
-                <?php if ($eAdmin): ?>
+                <?php if ($eAdmin && !$eAutor && $componenteAtivo): ?>
                     <div class="w-full">
                         <?php
                         $adminAlvo = [

@@ -53,6 +53,6 @@
     </form>
 </dialog>
 
-<script src="<?= JS_URL_BASE ?>/denunciar.js"></script>
+<script src="<?= js_url("denunciar.js") ?>"></script>
 
 <?php endif; ?>

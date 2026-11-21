@@ -25,7 +25,6 @@ class AutenticacaoService
             return true;
         }
         return "Usuário ou senha incorretos";
-        return "Usuário ou senha incorretos" ;
     }
     public function logout()
     {

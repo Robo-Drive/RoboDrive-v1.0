@@ -11,14 +11,9 @@
             name="nome"
             placeholder="Digite o nome da equipe..."
             class="rd-input"
-            value="<?= htmlspecialchars($_POST["nome"] ?? (isset($equipe) ? (is_object($equipe) ? $equipe->getNome() : ($equipe["nome"] ?? "")) : "")) ?>"
+            value="<?= texto($_POST["nome"] ?? (isset($equipe) ? (is_object($equipe) ? $equipe->getNome() : ($equipe["nome"] ?? "")) : "")) ?>"
         >
 
-        <?php if (isset($erros["nome"])): ?>
-            <p class="rd-error text-xs text-rose-500 font-bold mt-1.5">
-                <?= htmlspecialchars($erros["nome"]) ?>
-            </p>
-        <?php endif; ?>
     </div>
 
     <!-- Descrição -->
@@ -31,13 +26,8 @@
             rows="5"
             placeholder="Conte um pouco sobre a equipe"
             class="rd-textarea"
-        ><?= htmlspecialchars($_POST["descricao"] ?? (isset($equipe) ? (is_object($equipe) ? $equipe->getDescricao() : ($equipe["descricao"] ?? "")) : "")) ?></textarea>
+        ><?= texto($_POST["descricao"] ?? (isset($equipe) ? (is_object($equipe) ? $equipe->getDescricao() : ($equipe["descricao"] ?? "")) : "")) ?></textarea>
 
-        <?php if (isset($erros["descricao"])): ?>
-            <p class="rd-error text-xs text-rose-500 font-bold mt-1.5">
-                <?= htmlspecialchars($erros["descricao"]) ?>
-            </p>
-        <?php endif; ?>
     </div>
 
     <!-- Senha -->
@@ -68,11 +58,6 @@
 
         </div>
 
-        <?php if (isset($erros["senha"])): ?>
-            <p class="rd-error text-xs text-rose-500 font-bold mt-1.5">
-                <?= htmlspecialchars($erros["senha"]) ?>
-            </p>
-        <?php endif; ?>
     </div>
 
     <!-- Confirmar Senha -->
@@ -103,11 +88,6 @@
 
         </div>
 
-        <?php if (isset($erros["confirmar_senha"])): ?>
-            <p class="rd-error text-xs text-rose-500 font-bold mt-1.5">
-                <?= htmlspecialchars($erros["confirmar_senha"]) ?>
-            </p>
-        <?php endif; ?>
     </div>
 
     <!-- ID oculto -->

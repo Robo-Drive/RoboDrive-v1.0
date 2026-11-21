@@ -19,6 +19,7 @@ class Projeto
     private ?DateTimeImmutable $criadoEm = null;
     private ?string $hashAcesso = null;
     private ?string $senha = null;
+    private ?bool $status = true;
 
     public static function map(?array $projetos): array
     {
@@ -39,6 +40,7 @@ class Projeto
             $projetoObj->setVisibilidade($projeto["visibilidade"] ?? null);
             
             // Adicionado o mapeamento do hash e da senha
+            $projetoObj->setStatus(isset($projeto["status"]) ? (bool)$projeto["status"] : true);
             $projetoObj->setHashAcesso($projeto["hash_acesso"] ?? null);
             $projetoObj->setSenha($projeto["senha"] ?? null);
 
@@ -206,6 +208,17 @@ class Projeto
     public function setUsuario(?Usuario $usuario): self
     {
         $this->usuario = $usuario;
+        return $this;
+    }
+
+    public function isStatus(): ?bool
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?bool $status): self
+    {
+        $this->status = $status;
         return $this;
     }
 }

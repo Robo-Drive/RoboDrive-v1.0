@@ -41,6 +41,7 @@ document.addEventListener("click", evento => {
     const gatilho = evento.target.closest("[data-denunciar]");
     if (gatilho)
     {
+        evento.preventDefault();
         abrirDenuncia(gatilho.dataset);
     }
 });

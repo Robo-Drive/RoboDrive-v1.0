@@ -22,9 +22,12 @@ class UsuarioController extends Controller
     private ProjetoRepositorySql $projetoRepositorySql;
     private UploadService $uploadService;
     private MailController $mailController;
+    private ValidadorHelper $validador;
+    private array $posts = [];
 
     public function __construct()
     {
+        $this->validador = new ValidadorHelper();
         $this->service = new UsuarioService();
         if (isset($_SESSION["usuario_logado"]))
         {
@@ -39,7 +42,15 @@ class UsuarioController extends Controller
     public function listar()
     {
         $this->loginRequired();
-        $data["usuarios"] = $this->repositorySql->listarTodos();
+
+        if (!$this->adminRequired())
+        {
+            $this->redirect(URL_BASE . "/usuario/perfil");
+        }
+
+        $busca = trim(filter_input(INPUT_GET, "busca", FILTER_SANITIZE_FULL_SPECIAL_CHARS)??"");
+        $data["busca_atual"] = $busca;
+        $data["usuarios"] = $this->repositorySql->listarTodos($busca);
         $this->view("usuario/list", $data);
     }
     public function cadastrar()
@@ -48,95 +59,158 @@ class UsuarioController extends Controller
         $this->view("usuario/create");
     }
     
+    public function validar(bool $editar = false)
+    {
+        $nome = trim($_POST["nome"] ?? "");
+        $nomeUsuario = trim($_POST["nome_usuario"] ?? "");
+        $email = trim($_POST["email"] ?? "");
+        $senha = $_POST["senha"] ?? "";
+
+        if ($editar)
+        {
+            $this->validador->idPositivo("id", $_POST["id"] ?? "");
+        }
+
+        $this->validador->obrigatorio("nome_usuario", $nomeUsuario, "O campo de nome de usuário é obrigatório");
+        $this->validador->obrigatorio("nome", $nome);
+        $this->validador->obrigatorio("email", $email);
+
+        if (!isset($this->validador->getErros()["nome_usuario"]))
+        {
+            $this->validador->tamanho("nome_usuario", $nomeUsuario, 3, $editar ? 50 : 100, "nome de usuario");
+        }
+
+        if (!isset($this->validador->getErros()["nome"]))
+        {
+            $this->validador->tamanho("nome", $nome, 3, 100);
+        }
+
+        if (!isset($this->validador->getErros()["email"]))
+        {
+            $this->validador->email($email);
+        }
+
+        // No cadastro a senha é obrigatória; na edição só é validada se for preenchida
+        if (!$editar)
+        {
+            $this->validador->obrigatorio("senha", $senha);
+            $this->validador->obrigatorio("confirmar_senha", $_POST["confirmar_senha"] ?? "", "O campo de confirmação de senha é obrigatório");
+        }
+
+        if ($senha !== "")
+        {
+            $this->validador->tamanho("senha", $senha, 8, 100, "senha");
+
+            if ($editar)
+            {
+                $this->validador->obrigatorio("confirmar_senha", $_POST["confirmar_senha"] ?? "", "O campo de confirmação de senha é obrigatório");
+            }
+        }
+
+        if (!isset($this->validador->getErros()["senha"]) && !isset($this->validador->getErros()["confirmar_senha"]) && ($senha !== "" || !$editar))
+        {
+            $this->validador->confirmarValor($senha, $_POST["confirmar_senha"] ?? "", "confirmar_senha", "A senha digitada é diferente da do campo senha");
+        }
+
+        if ($editar)
+        {
+            $respostaImagem = $this->validador->temImagem($_FILES, false);
+            $this->posts["imagem"] = null;
+
+            if ($respostaImagem["status"] && !$this->validador->temErros())
+            {
+                $resposta = $this->uploadService->upload($_FILES["imagem"]);
+
+                if ($resposta["status"])
+                {
+                    $this->posts["imagem"] = $resposta["mensagem"];
+                }
+                else
+                {
+                    $this->validador->setErroImagem($resposta["mensagem"]);
+                }
+            }
+            elseif (!$respostaImagem["status"] && !empty($_POST["remover_imagem"]))
+            {
+                // Imagem vazia faz o repository gravar NULL no banco
+                $this->posts["imagem"] = "";
+            }
+        }
+    }
+
+    // Id de usuário enviado por POST (desativar, ativar e comunicado)
+    public function validarId()
+    {
+        $this->validador->idPositivo("id", $_POST["id"] ?? "");
+    }
+
+    public function validarComunicado()
+    {
+        $this->validarId();
+
+        $mensagem = trim($_POST["mensagem"] ?? "");
+
+        $this->validador->obrigatorio("mensagem", $mensagem, "A mensagem do comunicado é obrigatória.");
+
+        if (!isset($this->validador->getErros()["mensagem"]))
+        {
+            $this->validador->tamanho("mensagem", $mensagem, 10, 1000, "mensagem");
+        }
+    }
+
+    public function validarCategoria()
+    {
+        $this->validador->idsDiferentes(
+            "categoria_nova_id",
+            $_POST["categoria_antiga_id"] ?? "",
+            $_POST["categoria_nova_id"] ?? "",
+            "Selecione uma categoria diferente para receber os projetos."
+        );
+    }
+
     public function salvar()
     {
-        $validador = new ValidadorHelper();
+        $this->validar();
 
-        $validador->obrigatorio("nome_usuario", $_POST["nome_usuario"], "O campo de nome de usuário é obrigatório");
-        $validador->obrigatorio("nome", $_POST["nome"]);
-        $validador->obrigatorio("email", $_POST["email"]);
-        $validador->obrigatorio("senha", $_POST["senha"]);
-        $validador->obrigatorio("confirmar_senha", $_POST["confirmar_senha"], "O campo de confirmação de senha é obrigatório");
-
-        if (!isset($validador->getErros()["nome_usuario"]))
+        if ($this->validador->temErros())
         {
-            $validador->tamanho("nome_usuario", $_POST["nome_usuario"], 3, 100, "nome de usuario");
+            $this->responderJson(["sucesso" => false, "erros" => $this->validador->getErros()], 422);
         }
 
-        if (!isset($validador->getErros()["nome"]))
+        $posts["nome_usuario"] = filter_input(INPUT_POST, "nome_usuario", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $posts["nome"] = filter_input(INPUT_POST, "nome", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $posts["email"] = filter_input(INPUT_POST, "email", FILTER_SANITIZE_EMAIL);
+        $posts["senha"] = $_POST["senha"];
+
+        $usuario = Usuario::map([$posts])[0];
+
+        $resposta = $this->service->salvarUsuario($usuario);
+
+        if (is_array($resposta))
         {
-            $validador->tamanho("nome", $_POST["nome"], 3, 100);
+            $erros = array_filter([
+                "email" => $resposta["email"] ?? null,
+                "nome_usuario" => $resposta["nome_usuario"] ?? null
+            ]);
+
+            $this->responderJson(["sucesso" => false, "erros" => $erros], 422);
         }
 
-        if (!isset($validador->getErros()["senha"]))
-        {
-            $validador->tamanho("senha", $_POST["senha"], 8, 100);
-        }
-
-        if (!isset($validador->getErros()["senha"]) && !isset($validador->getErros()["confirmar_senha"]))
-        {
-            $validador->confirmarValor($_POST["senha"], $_POST["confirmar_senha"], "confirmar_senha", "A senha digitada é diferente da do campo senha");
-        }
-
-        if (!isset($validador->getErros()["email"]))
-        {
-            $validador->email($_POST["email"]);
-        }
-
-        if ($validador->temErros())
-        {
-            $data["usuario"] = $_POST;
-            $data["erros"] = $validador->getErros();
-
-            if ($this->requisicaoAjax())
-            {
-                $this->responderJson(["sucesso" => false, "erros" => $validador->getErros()], 422);
-            }
-
-            $this->view("cadastro/cadastro", $data);
-            return;
-        }
-        else
-        {
-            $posts["nome_usuario"] = filter_input(INPUT_POST, "nome_usuario", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-            $posts["nome"] = filter_input(INPUT_POST, "nome", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-            $posts["email"] = filter_input(INPUT_POST, "email", FILTER_SANITIZE_EMAIL);
-            $posts["senha"] = $_POST["senha"];
-
-            $usuario = Usuario::map([$posts])[0];
-
-            $resposta = $this->service->salvarUsuario($usuario);
-
-            if (!is_array($resposta))
-            {
-                if ($this->requisicaoAjax())
-                {
-                    $this->responderJson(["sucesso" => true, "mensagem" => "Cadastro realizado com sucesso!", "redirect" => URL_BASE . "/login"]);
-                }
-
-                (new AutenticacaoController())->logar();
-            }
-            else
-            {
-                $data["usuario"] = $posts;
-                $data["erros"]["email"] = $resposta["email"];
-                $data["erros"]["nome_usuario"] = $resposta["nome_usuario"];
-
-                if ($this->requisicaoAjax())
-                {
-                    $this->responderJson(["sucesso" => false, "erros" => array_filter($data["erros"])], 422);
-                }
-
-                $this->view("cadastro/cadastro", $data);
-            }
-        }
+        $this->responderAcao(true, "Cadastro realizado com sucesso!", 200, URL_BASE . "/login");
     }
 
     public function editar()
     {
         $this->loginRequired();
+        $this->validarId();
+
+        if ($this->validador->temErros())
+        {
+            $this->redirect(URL_BASE . "/usuario/perfil");
+        }
+
         $usuario = new Usuario();
-        $usuario->setId($_POST["id"]);
+        $usuario->setId((int)$_POST["id"]);
         $data["usuario"] = $this->repositorySql->buscarId($usuario);
         if ($data["usuario"]->getNome() != null)
         {
@@ -150,63 +224,17 @@ class UsuarioController extends Controller
     public function atualizar()
     {
         $this->loginRequired();
-        $validador = new ValidadorHelper();
+        $this->validar(true);
 
-        $validador->obrigatorio("id", $_POST["id"] ?? "");
-        $validador->obrigatorio("nome", trim($_POST["nome"] ?? ""));
-        $validador->obrigatorio("nome_usuario", trim($_POST["nome_usuario"] ?? ""));
-        $validador->obrigatorio("email", trim($_POST["email"] ?? ""));
-        $validador->tamanho("nome", trim($_POST["nome"] ?? ""), 3, 100, "Nome");
-        $validador->tamanho("nome_usuario", trim($_POST["nome_usuario"] ?? ""), 3, 50, "Nome de usuário");
-        $validador->email(trim($_POST["email"] ?? ""));
-
-        if (!empty($_POST["senha"]))
+        if ($this->validador->temErros())
         {
-            $validador->tamanho("senha", $_POST["senha"], 8, 100, "Senha");
-            $validador->obrigatorio("confirmar_senha", $_POST["confirmar_senha"] ?? "", "O campo de confirmação de senha é obrigatório");
-            if (!isset($validador->getErros()["senha"]) && !isset($validador->getErros()["confirmar_senha"]))
-            {
-                $validador->confirmarValor($_POST["senha"], $_POST["confirmar_senha"], "confirmar_senha", "A senha digitada é diferente da do campo senha");
-            }
+            $this->responderJson([
+                "sucesso" => false,
+                "erros" => $this->validador->getErros()
+            ], 422);
         }
 
-        $respostaImagem = $validador->temImagem($_FILES, false);
-        $posts["imagem"] = null;
-
-        if ($respostaImagem["status"])
-        {
-            $resposta = $this->uploadService->upload($_FILES["imagem"]);
-            if ($resposta["status"])
-            {
-                $posts["imagem"] = $resposta["mensagem"];
-            }
-            else
-            {
-                $validador->setErroImagem($resposta["mensagem"]);
-            }
-        }
-        else if (!empty($_POST["remover_imagem"]))
-        {
-            // Marca a imagem como string vazia para o repository setar NULL no banco
-            $posts["imagem"] = "";
-        }
-
-        if ($validador->temErros())
-        {
-            if ($this->requisicaoAjax())
-            {
-                $this->responderJson([
-                    "sucesso" => false,
-                    "erros" => $validador->getErros()
-                ], 422);
-            }
-
-            $data["usuario"] = $_POST;
-            $data["erros"] = $validador->getErros();
-            $this->view("usuario/edit", $data);
-            return;
-        }
-
+        $posts["imagem"] = $this->posts["imagem"];
         $posts["id"] = $_POST["id"];
         $posts["nome"] = filter_input(INPUT_POST, "nome", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $posts["nome_usuario"] = filter_input(INPUT_POST, "nome_usuario", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
@@ -235,17 +263,12 @@ class UsuarioController extends Controller
                 }
             }
 
-            if ($this->requisicaoAjax())
-            {
-                $this->responderJson([
-                    "sucesso" => true,
-                    "mensagem" => "Perfil atualizado com sucesso!",
-                    "redirect" => URL_BASE . "/usuario/perfil"
-                ]);
-            }
+            $this->responderAcao(true, "Perfil atualizado com sucesso!", 200, URL_BASE . "/usuario/perfil");
+        }
 
-            $this->redirect(URL_BASE . "/usuario/perfil");
-            return;
+        if ($resposta === false)
+        {
+            $this->responderAcao(false, "Não foi possível atualizar o perfil.", 500);
         }
 
         // Erros de duplicidade (email ou nome de usuário)
@@ -254,23 +277,26 @@ class UsuarioController extends Controller
             "nome_usuario" => $resposta["nome_usuario"] ?? null
         ]);
 
-        if ($this->requisicaoAjax())
-        {
-            $this->responderJson([
-                "sucesso" => false,
-                "erros" => $errosUnicidade
-            ], 422);
-        }
-
-        $data["usuario"] = $posts;
-        $data["erros"] = $errosUnicidade;
-        $this->view("usuario/edit", $data);
+        $this->responderJson([
+            "sucesso" => false,
+            "erros" => $errosUnicidade
+        ], 422);
     }
     public function perfil()
     {
         $this->loginRequired();
 
         $usuarioId = $_GET["id"] ?? $_SESSION["usuario_logado"]->getId();
+
+        $this->validador->idPositivo("id", $usuarioId);
+
+        if ($this->validador->temErros())
+        {
+            $this->redirect(URL_BASE . "/usuario/perfil?id=" . $_SESSION["usuario_logado"]->getId());
+            return;
+        }
+
+        $usuarioId = (int)$usuarioId;
         $busca = trim($_GET["busca"] ?? "");
         $categoriaId = $_GET["categoria_id"] ?? null;
 
@@ -306,7 +332,7 @@ class UsuarioController extends Controller
             } 
             else 
             {
-                echo '<p class="rd-empty w-full">Nenhum projeto encontrado nesta categoria.</p>';
+                echo '<p class="rd-empty col-span-full">Nenhum projeto encontrado nesta categoria.</p>';
             }
             exit;
         }
@@ -325,119 +351,120 @@ class UsuarioController extends Controller
     {
         $this->loginRequired();
 
-        $id = filter_input(INPUT_POST, "id", FILTER_VALIDATE_INT);
-        $justificativa = trim(filter_input(INPUT_POST, "justificativa", FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? "");
+        $voltar = $_SERVER["HTTP_REFERER"] ?? URL_BASE . "/admin/usuario/listar";
+        $this->validarId();
 
-        if (!$id)
+        if ($this->validador->temErros())
         {
-            $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . "/usuario/perfil");
-            return;
+            $this->responderAcao(false, "Usuário inválido.", 422, null, $this->validador->getErros());
         }
 
+        $id = (int)$_POST["id"];
+        $logadoId = (int)$_SESSION["usuario_logado"]->getId();
         $eAdmin = ($_SESSION["usuario_logado"]->getRegra() === "admin");
 
-        if (!$eAdmin && $_SESSION["usuario_logado"]->getId() !== $id)
+        if (!$eAdmin && $logadoId !== $id)
         {
-            $this->redirect(URL_BASE . "/usuario/perfil");
-            return;
+            $this->responderAcao(false, "Acesso negado.", 403);
         }
 
         $usuario = new Usuario();
         $usuario->setId($id);
         $usuarioAlvo = $this->repositorySql->buscarId($usuario);
 
-        if ($usuarioAlvo)
+        if (!$usuarioAlvo)
         {
-            $this->service->deletar($usuario);
-            if (!empty($usuarioAlvo->getEmail()))
+            $this->responderAcao(false, "Usuário não encontrado.", 404);
+        }
+
+        // Justificativa só quando um admin desativa a conta de outro usuário
+        $comJustificativa = $this->exigeJustificativa($id);
+        $justificativa = "";
+
+        if ($comJustificativa)
+        {
+            $erro = $this->erroJustificativa();
+
+            if ($erro)
             {
-                try
-                {
-                    $this->mailController->enviarDesativacaoConta($usuarioAlvo->getEmail(), $usuarioAlvo->getNome(), $justificativa ?? "");
-                }
-                catch (\Throwable $e)
-                {
-                    error_log("Erro ao enviar e-mail de desativação de conta: " . $e->getMessage());
-                }
+                $this->responderErroJustificativa($erro);
+            }
+
+            $justificativa = $this->justificativaEnviada();
+        }
+
+        $this->service->deletar($usuario);
+
+        if ($comJustificativa && !empty($usuarioAlvo->getEmail()))
+        {
+            try
+            {
+                $this->mailController->enviarDesativacaoConta($usuarioAlvo->getEmail(), $usuarioAlvo->getNome(), $justificativa);
+            }
+            catch (\Throwable $e)
+            {
+                error_log("Erro ao enviar e-mail de desativação de conta: " . $e->getMessage());
             }
         }
 
-        if ($id === $_SESSION["usuario_logado"]->getId())
+        // Desativou a própria conta: encerra a sessão e volta para o início
+        if ($id === $logadoId)
         {
-            (new AutenticacaoController())->logout();
-            return;
+            (new \app\services\AutenticacaoService())->logout();
+
+            $this->responderAcao(true, "Sua conta foi desativada.", 200, URL_BASE);
         }
 
-        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/usuario');
+        $this->responderAcao(true, "Usuário desativado com sucesso.", 200, $voltar);
     }
     public function ativar()
     {
         $this->loginRequired();
-        $this->adminRequired();
 
-        $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-        if ($id)
+        if (!$this->adminRequired())
         {
-            $usuario = new Usuario();
-            $usuario->setId($id);
-            $this->service->ativar($usuario);
+            $this->responderAcao(false, "Acesso negado.", 403);
         }
 
-        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . '/usuario');
+        $this->validarId();
+
+        if ($this->validador->temErros())
+        {
+            $this->responderAcao(false, "Usuário inválido.", 422, null, $this->validador->getErros());
+        }
+
+        $id = (int)$_POST["id"];
+
+        $usuario = new Usuario();
+        $usuario->setId($id);
+        $this->service->ativar($usuario);
+
+        $this->responderAcao(true, "Usuário reativado com sucesso.");
     }
     public function comunicado()
     {
         $this->loginRequired();
-        
-        $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
 
         if (!$this->adminRequired())
         {
-            if ($isAjax)
-            {
-                http_response_code(403);
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['sucesso' => false, 'mensagem' => 'Acesso negado. Apenas administradores podem enviar comunicados.']);
-                exit;
-            }
-            $this->redirect(URL_BASE);
-            return;
+            $this->responderAcao(false, "Acesso negado. Apenas administradores podem enviar comunicados.", 403);
         }
 
-        $id = filter_input(INPUT_POST,"id", FILTER_VALIDATE_INT);
-        $mensagemTexto = trim(filter_input(INPUT_POST, "mensagem", FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
+        $this->validarComunicado();
 
-        $validador = new ValidadorHelper();
-        $validador->obrigatorio("mensagem",$mensagemTexto);
-        $validador->tamanho("mensagem",$mensagemTexto,10,1000);
-        if ($validador->temErros())
+        if ($this->validador->temErros())
         {
-            if ($isAjax)
-            {
-                http_response_code(422);
-                header("Content-Type: application/json; charset=utf-8");
-                echo json_encode([
-                    "sucesso" => false,
-                    "mensagem" => "A mensagem do comunicado é obrigatória e deve ter pelo menos 10 caracteres."
-                ]);
-                exit;
-            }
-            $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . "/denuncia");
-            return;
+            $erros = $this->validador->getErros();
+
+            $this->responderJson([
+                "sucesso" => false,
+                "mensagem" => $erros["mensagem"] ?? reset($erros),
+                "erros" => $erros
+            ], 422);
         }
 
-        if (!$id)
-        {
-            if ($isAjax)
-            {
-                http_response_code(422);
-                header("Content-Type: application/json; charset=utf-8");
-                echo json_encode(["sucesso" => false, "mensagem" => 'Destinatário inválido.']);
-                exit;
-            }
-            $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . "/denuncia");
-            return;
-        }
+        $id = (int)$_POST["id"];
+        $mensagemTexto = trim(filter_input(INPUT_POST, "mensagem", FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? "");
 
         $usuario = new Usuario();
         $usuario->setId($id);
@@ -445,59 +472,40 @@ class UsuarioController extends Controller
 
         if (!$destinatario || empty($destinatario->getEmail()))
         {
-            if ($isAjax)
-            {
-                http_response_code(404);
-                header("Content-Type: application/json; charset=utf-8");
-                echo json_encode(["sucesso" => false, "mensagem" => "Usuário não encontrado ou sem e-mail cadastrado."]);
-                exit;
-            }
-            $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . "/denuncia");
-            return;
+            $this->responderAcao(false, "Usuário não encontrado ou sem e-mail cadastrado.", 404);
         }
 
         try
         {
             $this->mailController->enviarComunicado($destinatario->getEmail(), $destinatario->getNome(), $mensagemTexto);
-
-            if ($isAjax)
-            {
-                header("Content-Type: application/json; charset=utf-8");
-                echo json_encode([
-                    "sucesso" => true,
-                    "mensagem" => "Comunicado enviado com sucesso para o usuário!"
-                ]);
-                exit;
-            }
         } 
         catch(\Throwable $e) 
         {
             error_log("Erro ao enviar comunicado: " . $e->getMessage());
-            if($isAjax) 
-            {
-                http_response_code(500);
-                header("Content-Type: application/json; charset=utf-8");
-                echo json_encode(["sucesso" => false, "mensagem" => "Erro ao enviar o e-mail de comunicado."]);
-                exit;
-            }
+
+            $this->responderAcao(false, "Erro ao enviar o e-mail de comunicado.", 500);
         }
 
-        $this->redirect($_SERVER["HTTP_REFERER"] ?? URL_BASE . "/denuncia");
+        $this->responderAcao(true, "Comunicado enviado com sucesso para o usuário!");
     }
     public function excluirCategoria()
     {
         $this->loginRequired();
 
-        $categoriaAntigaId = $_POST["categoria_antiga_id"] ?? null;
-        $categoriaNovaId = $_POST["categoria_nova_id"] ?? null;
-        $usuarioId = $_SESSION["usuario_logado"]->getId();
+        $this->validarCategoria();
 
-        if ($categoriaAntigaId && $categoriaNovaId && $categoriaAntigaId != $categoriaNovaId) 
+        if ($this->validador->temErros())
         {
-            $categoriaRepository = new \app\repositories\CategoriaRepositorySql();
-            $categoriaRepository->reatribuirProjetosEDesativar($categoriaAntigaId, $categoriaNovaId, $usuarioId);
+            $this->responderAcao(false, $this->validador->getErros()["categoria_nova_id"], 422, null, $this->validador->getErros());
         }
 
-        $this->redirect(URL_BASE . "/usuario/perfil");
+        $categoriaAntigaId = (int)$_POST["categoria_antiga_id"];
+        $categoriaNovaId = (int)$_POST["categoria_nova_id"];
+        $usuarioId = $_SESSION["usuario_logado"]->getId();
+
+        $categoriaRepository = new \app\repositories\CategoriaRepositorySql();
+        $categoriaRepository->reatribuirProjetosEDesativar($categoriaAntigaId, $categoriaNovaId, $usuarioId);
+
+        $this->responderAcao(true, "Categoria apagada e projetos transferidos com sucesso.");
     }
 }

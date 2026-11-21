@@ -44,7 +44,8 @@ if (!empty($usuarios)) {
 }
 
 $ehUnicoCoordenador = ($papelUsuarioLogado === 'coordenador' && $totalCoordenadores <= 1);
-$podeSairEquipe = ($eIntegrante && $totalMembros > 1);
+$equipeAtiva = ($equipe->isStatus() !== false);
+$podeSairEquipe = ($eIntegrante && $totalMembros > 1 && $equipeAtiva);
 
 $urlImagemEquipe = static function ($imagem, $fallback = null) {
     $imagem = is_string($imagem) ? trim($imagem) : '';
@@ -79,7 +80,7 @@ $obterImagem = static function ($item) {
         <div>
             <div class="flex items-center gap-3">
                 <h1 class="font-['Orbitron'] text-2xl sm:text-4xl font-black text-[#F2FEFE]">
-                    <?= htmlspecialchars(html_entity_decode($equipe->getNome())) ?>
+                    <?= texto($equipe->getNome()) ?>
                 </h1>
                 <span class="text-[.65rem] font-bold uppercase tracking-[.2em] px-2.5 py-1 border border-[#0795A5] text-[#13F3F7] bg-[#07556A]/20">
                     <?= $eCoordenador ? 'Coordenador' : ($eIntegrante ? 'Membro' : 'Visitante') ?>
@@ -87,21 +88,32 @@ $obterImagem = static function ($item) {
             </div>
             <?php if (method_exists($equipe, 'getDescricao') && $equipe->getDescricao()): ?>
                 <p class="text-[#91B5BD] text-xs sm:text-sm mt-2 max-w-3xl leading-relaxed whitespace-pre-line">
-                    <?= htmlspecialchars(html_entity_decode($equipe->getDescricao())) ?>
+                    <?= texto($equipe->getDescricao()) ?>
                 </p>
             <?php endif; ?>
         </div>
 
         <div class="flex items-center gap-3">
-            <?php if ($eCoordenador): ?>
+            <?php if ($eCoordenador && $equipeAtiva): ?>
                 <form action="<?= URL_BASE ?>/equipe/editar" method="post">
                     <input type="hidden" name="id" value="<?= (int) $equipe->getId() ?>">
                     <button type="submit" class="rd-btn rd-btn-primary !py-2 !px-4 text-xs">Editar Equipe</button>
                 </form>
-                <form action="<?= URL_BASE ?>/equipe/desativar" method="post" onsubmit="return confirm('Deseja realmente desativar esta equipe?');">
-                    <input type="hidden" name="id" value="<?= (int) $equipe->getId() ?>">
-                    <button type="submit" class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition">Desativar</button>
-                </form>
+                <?php if ($eAdmin && $papelUsuarioLogado !== 'coordenador'): ?>
+                    <button
+                        type="button"
+                        class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition"
+                        data-desativar
+                        data-tipo="equipe"
+                        data-id="<?= (int) $equipe->getId() ?>"
+                        data-nome="<?= texto($equipe->getNome()) ?>"
+                    >Desativar</button>
+                <?php else: ?>
+                    <form action="<?= URL_BASE ?>/equipe/desativar" method="post" onsubmit="return confirm('Deseja realmente desativar esta equipe?');">
+                        <input type="hidden" name="id" value="<?= (int) $equipe->getId() ?>">
+                        <button type="submit" class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition">Desativar</button>
+                    </form>
+                <?php endif; ?>
             <?php endif; ?>
             <?php if ($podeSairEquipe): ?>
                 <?php if ($ehUnicoCoordenador): ?>
@@ -117,6 +129,15 @@ $obterImagem = static function ($item) {
                         </button>
                     </form>
                 <?php endif; ?>
+            <?php endif; ?>
+
+            <!-- Equipe desativada: o admin pode reativar -->
+            <?php if (!$equipeAtiva): ?>
+                <span class="rd-badge rd-badge-private">Desativada</span>
+                <?php
+                $ativarAlvo = ["tipo" => "equipe", "id" => (int) $equipe->getId(), "ativo" => false];
+                include(__DIR__ . "/../../elements/ativarBotao.php");
+                ?>
             <?php endif; ?>
 
             <a href="<?= URL_BASE ?>/usuario/perfil" class="border-2 border-[#07556A] px-4 py-2 text-xs font-bold text-[#F2FEFE] hover:border-[#13F3F7] transition">
@@ -135,7 +156,9 @@ $obterImagem = static function ($item) {
                 "autores" => $idsMembros,
                 "classe"  => "shrink-0"
             ];
-            include(__DIR__ . "/../../elements/denunciaBotao.php");
+            if ($equipeAtiva) {
+                include(__DIR__ . "/../../elements/denunciaBotao.php");
+            }
             ?>
         </div>
     </div>
@@ -181,19 +204,19 @@ $obterImagem = static function ($item) {
                         <div>
                             <div class="flex items-center justify-between gap-2 mb-2">
                                 <span class="text-[.6rem] font-bold uppercase tracking-wider px-2 py-0.5 border border-[#0795A5] text-[#13F3F7] bg-[#07556A]/20 font-mono">
-                                    <?= htmlspecialchars((string)($pCat ?? 'Geral')) ?>
+                                    <?= texto($pCat ?? 'Geral') ?>
                                 </span>
                                 <span class="text-[.65rem] text-[#91B5BD] uppercase font-mono">Projeto</span>
                             </div>
 
                             <a href="<?= URL_BASE ?>/projeto/perfil?id=<?= (int)$pId ?>" class="block mt-1">
                                 <h3 class="font-['Orbitron'] text-sm font-bold text-[#F2FEFE] group-hover:text-[#13F3F7] transition truncate">
-                                    <?= htmlspecialchars(html_entity_decode((string)$projetoNome)) ?>
+                                    <?= texto((string)$projetoNome) ?>
                                 </h3>
                             </a>
 
                             <p class="text-xs text-[#91B5BD] line-clamp-3 mt-2 leading-relaxed">
-                                <?= htmlspecialchars(html_entity_decode((string)$projetoDescricao)) ?>
+                                <?= texto((string)$projetoDescricao) ?>
                             </p>
                         </div>
 
@@ -227,18 +250,18 @@ $obterImagem = static function ($item) {
                     $imagemAutor = $autorForum ? $obterImagem($autorForum) : null;
                     $imagemAutorUrl = $urlImagemEquipe($imagemAutor, IMG_URL_BASE . '/perfil.png');
                     $nomeUsuarioForum = $autorForum && method_exists($autorForum, 'getNomeUsuario') ? $autorForum->getNomeUsuario() : 'usuario';
-                    $conteudoForum = method_exists($forum, 'getConteudo') ? htmlspecialchars(html_entity_decode($forum->getConteudo())) : '';
+                    $conteudoForum = method_exists($forum, 'getConteudo') ? texto($forum->getConteudo()) : '';
                     $fId = method_exists($forum, 'getId') ? $forum->getId() : ($forum['id'] ?? null);
                     ?>
                     <div class="border-2 border-[#07556A] bg-[#06141C] p-4 hover:border-[#13F3F7] transition flex flex-col justify-between group">
                         <div>
                             <div class="flex items-center gap-3 mb-3">
                                 <img src="<?= htmlspecialchars($imagemAutorUrl) ?>"
-                                     alt="Foto de <?= htmlspecialchars($nomeUsuarioForum) ?>"
+                                     alt="Foto de <?= texto($nomeUsuarioForum) ?>"
                                      class="w-10 h-10 object-cover border border-[#07556A] shrink-0"
                                      loading="lazy"
                                      onerror="this.onerror=null;this.src='<?= htmlspecialchars(IMG_URL_BASE . '/perfil.png') ?>';">
-                                <p class="text-xs text-[#13F3F7] font-bold">@<?= htmlspecialchars(html_entity_decode($nomeUsuarioForum)) ?></p>
+                                <p class="text-xs text-[#13F3F7] font-bold">@<?= texto($nomeUsuarioForum) ?></p>
                             </div>
                             
                             <!-- Link no texto do fórum -->
@@ -288,8 +311,8 @@ $obterImagem = static function ($item) {
                     <?php foreach ($solicitacoesPendentes as $pendente): ?>
                         <div class="py-2.5 flex items-center justify-between gap-3">
                             <div>
-                                <p class="text-xs font-bold text-white"><?= htmlspecialchars($pendente['nome']) ?></p>
-                                <p class="text-[.65rem] text-gray-400">@<?= htmlspecialchars($pendente['nome_usuario']) ?></p>
+                                <p class="text-xs font-bold text-white"><?= texto($pendente['nome']) ?></p>
+                                <p class="text-[.65rem] text-gray-400">@<?= texto($pendente['nome_usuario']) ?></p>
                             </div>
                             <div class="flex items-center gap-2">
                                 <form action="<?= URL_BASE ?>/equipe/aprovar-solicitacao" method="post">
@@ -355,7 +378,7 @@ $obterImagem = static function ($item) {
 
                             <img
                                 src="<?= htmlspecialchars($uImagemUrl, ENT_QUOTES, 'UTF-8') ?>"
-                                alt="Foto de <?= htmlspecialchars($uNome, ENT_QUOTES, 'UTF-8') ?>"
+                                alt="Foto de <?= texto($uNome) ?>"
                                 class="w-12 h-12 rounded-full object-cover
                                     border border-[#07556A] shrink-0"
                                 loading="lazy"
@@ -365,11 +388,7 @@ $obterImagem = static function ($item) {
                             <div class="min-w-0">
                                 <p class="text-xs font-bold text-[#F2FEFE]
                                         truncate group-hover:text-[#13F3F7] transition">
-                                    <?= htmlspecialchars(
-                                        html_entity_decode((string)$uNome),
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?>
+                                    <?= texto((string)$uNome) ?>
                                 </p>
 
                                 <span class="inline-block text-[.6rem] font-bold
@@ -421,6 +440,7 @@ $obterImagem = static function ($item) {
                         <form
                             action="<?= URL_BASE ?>/equipe/alterar-papel"
                             method="POST"
+                            data-erro-notificacao
                             class="flex items-center justify-between gap-2
                                 pt-3 border-t border-[#07556A]/50"
                         >
@@ -442,7 +462,7 @@ $obterImagem = static function ($item) {
 
                             <select
                                 name="papel"
-                                onchange="this.form.submit()"
+                                onchange="this.form.requestSubmit()"
                                 class="bg-[#000505] text-[#13F3F7]
                                     border border-[#07556A]
                                     text-[.7rem] px-2 py-1
@@ -501,7 +521,7 @@ $obterImagem = static function ($item) {
                     <option value="">Selecione um integrante</option>
                     <?php foreach ($outrosMembros as $outro): ?>
                         <option value="<?= (int) $outro['id'] ?>">
-                            <?= htmlspecialchars($outro['nome']) ?> (<?= htmlspecialchars(ucfirst($outro['papel'])) ?>)
+                            <?= texto($outro['nome']) ?> (<?= htmlspecialchars(ucfirst($outro['papel'])) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>

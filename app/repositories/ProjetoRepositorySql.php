@@ -231,13 +231,13 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
         return $stmt->execute() ? $projeto : null;
     }
 
-    public function buscarId(Projeto $projeto): ?Projeto
+    public function buscarId(Projeto $projeto, bool $incluirDesativados = false): ?Projeto
     {
         $sql = "SELECT p.*, c.nome AS categoria_nome
                 FROM projeto p
                 LEFT JOIN categoria c ON c.id = p.categoria_id
-                WHERE p.id = :id
-                  AND p.status = 1";
+                WHERE p.id = :id"
+                . ($incluirDesativados ? "" : " AND p.status = 1");
 
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':id', $projeto->getId(), PDO::PARAM_INT);
@@ -569,6 +569,17 @@ class ProjetoRepositorySql implements ProjetoRepositoryInterface
     {
         $sql = "UPDATE projeto
                 SET status = 0
+                WHERE id = :id";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':id', $projetoId, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+    public function ativar(int $projetoId): bool
+    {
+        $sql = "UPDATE projeto
+                SET status = 1
                 WHERE id = :id";
 
         $stmt = $this->connection->prepare($sql);

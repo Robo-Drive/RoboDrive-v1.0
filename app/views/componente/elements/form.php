@@ -9,17 +9,11 @@
             class="rd-input"
             value="<?= isset($componente) ? (is_object($componente) ? $componente->getNome() : (isset($componente["nome"]) ? $componente["nome"] : "")) : "" ?>"
         >
-        <?php if (isset($erros["nome"])): ?>
-            <p class="rd-error"><?= $erros["nome"] ?></p>
-        <?php endif; ?>
     </div>
 
     <div class="rd-field">
         <label for="descricao" class="rd-label">Descrição</label>
         <textarea name="descricao" id="descricao" rows="4" class="rd-textarea"><?= isset($componente) ? (is_object($componente) ? $componente->getDescricao() : (isset($componente["descricao"]) ? $componente["descricao"] : "")) : "" ?></textarea>
-        <?php if (isset($erros["descricao"])): ?>
-            <p class="rd-error"><?= $erros["descricao"] ?></p>
-        <?php endif; ?>
     </div>
 
     <div class="rd-field">
@@ -27,9 +21,6 @@
         <button type="button" onclick="adicionarImagens()" class="rd-file-btn">Adicionar imagens</button>
         <input type="file" name="imagem" id="imagens" accept="image/*" style="display:none;">
         <ul id="listaImagens" class="rd-file-list"></ul>
-        <?php if (isset($erros['imagem'])): ?>
-            <p class="rd-error"><?= $erros['imagem'] ?></p>
-        <?php endif; ?>
     </div>
 
     <?php if (isset($_POST["id"]) || isset($componente)): ?>

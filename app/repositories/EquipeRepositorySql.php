@@ -426,12 +426,12 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
     }
 
     // Buscar equipe por ID
-    public function buscarId(Equipe $equipe): ?Equipe
+    public function buscarId(Equipe $equipe, bool $incluirDesativados = false): ?Equipe
     {
         $sql = "SELECT *
                 FROM equipe
-                WHERE id = :id
-                AND status = 1
+                WHERE id = :id"
+                . ($incluirDesativados ? "" : " AND status = 1") . "
                 LIMIT 1";
 
         $stmt = $this->connection->prepare($sql);
@@ -544,28 +544,34 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
     }
 
     // Listar todas as equipes para administração
-    public function listarAdminTodos(): array
+    public function listarAdminTodos(?string $busca = null): array
     {
         $sql = "SELECT *
                 FROM equipe
+                WHERE (:busca IS NULL OR nome LIKE :busca_like)
                 ORDER BY id DESC";
 
         $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':busca', $busca ?: null);
+        $stmt->bindValue(':busca_like', '%' . $busca . '%');
         $stmt->execute();
 
         return Equipe::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
     // Listar equipes por status
-    public function listarPorStatus(bool $status): array
+    public function listarPorStatus(bool $status, ?string $busca = null): array
     {
         $sql = "SELECT *
                 FROM equipe
                 WHERE status = :status
+                  AND (:busca IS NULL OR nome LIKE :busca_like)
                 ORDER BY id DESC";
 
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':status', $status ? 1 : 0, PDO::PARAM_INT);
+        $stmt->bindValue(':busca', $busca ?: null);
+        $stmt->bindValue(':busca_like', '%' . $busca . '%');
         $stmt->execute();
 
         return Equipe::map($stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -586,6 +592,18 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
     }
 
     // Compatibilidade com o nome utilizado anteriormente no controller
+    public function ativar(int $equipeId): bool
+    {
+        $sql = "UPDATE equipe
+                SET status = 1
+                WHERE id = :id";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':id', $equipeId, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
     public function desativar(int $equipeId): bool
     {
         $equipe = new Equipe();

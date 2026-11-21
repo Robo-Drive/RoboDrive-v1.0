@@ -9,9 +9,6 @@
             class="rd-input"
             value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getNomeUsuario() : (isset($usuario['nome_usuario']) ? $usuario['nome_usuario'] : '')) : '' ?>"
         >
-        <?php if (isset($erros['nome_usuario'])): ?>
-            <p class="rd-error"><?= $erros['nome_usuario'] ?></p>
-        <?php endif; ?>
     </div>
 
     <div class="rd-field">
@@ -23,9 +20,6 @@
             class="rd-input"
             value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getNome() : (isset($usuario['nome']) ? $usuario['nome'] : '')) : '' ?>"
         >
-        <?php if (isset($erros['nome'])): ?>
-            <p class="rd-error"><?= $erros['nome'] ?></p>
-        <?php endif; ?>
     </div>
 
     <div class="rd-field">
@@ -42,9 +36,6 @@
                 ? $usuario->getBiografia()
                 : (isset($usuario['biografia']) ? $usuario['biografia'] : ''))
             : '' ?></textarea>
-        <?php if (isset($erros['biografia'])): ?>
-            <p class="rd-error"><?= $erros['biografia'] ?></p>
-        <?php endif; ?>
     </div>
 
     <div class="rd-field">
@@ -56,9 +47,6 @@
             class="rd-input"
             value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getEmail() : (isset($usuario['email']) ? $usuario['email'] : '')) : '' ?>"
         >
-        <?php if (isset($erros['email'])): ?>
-            <p class="rd-error"><?= $erros['email'] ?></p>
-        <?php endif; ?>
     </div>
 
     <div class="rd-field">
@@ -75,9 +63,6 @@
                 <img class="passwordButton h-4 w-4" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
             </button>
         </div>
-        <?php if (isset($erros['senha'])): ?>
-            <p class="rd-error"><?= $erros['senha'] ?></p>
-        <?php endif; ?>
     </div>
 
     <div class="rd-field">
@@ -89,11 +74,6 @@
             </button>
         </div>
         <p class="confirmarErro rd-error">
-            <?php if(isset($erros)): ?>
-                <?php if(isset($erros["confirmar_senha"])): ?>
-                    <?= $erros["confirmar_senha"] ?>
-                <?php endif;?>
-            <?php endif;?>
         </p>
     </div>
 
@@ -134,9 +114,6 @@
         <button type="button" onclick="adicionarImagens()" class="rd-file-btn">Selecionar imagem</button>
         <input type="file" name="imagem" id="imagens" accept="image/*" style="display:none;">
         <ul id="listaImagens" class="rd-file-list"></ul>
-        <?php if (isset($erros['imagem'])): ?>
-            <p class="rd-error"><?= $erros['imagem'] ?></p>
-        <?php endif; ?>
     </div>
 
     <?php if($_SESSION["usuario_logado"]->getRegra() == "admin"): ?>
@@ -147,9 +124,6 @@
                 <option value="admin" <?= isset($usuario) ? (is_object($usuario) ? ($usuario->getRegra() == "admin" ? "selected" : "") : (isset($usuario["regra"]) ? ($usuario["regra"] == "admin" ? "selected" : "") : "")) : "" ?>>Admin</option>
                 <option value="usuario" <?= isset($usuario) ? (is_object($usuario) ? ($usuario->getRegra() == "usuario" ? "selected" : "") : (isset($usuario["regra"]) ? ($usuario["regra"] == "usuario" ? "selected" : "") : "")) : "" ?>>Usuário</option>
             </select>
-            <?php if (isset($erros['regra'])): ?>
-                <p class="rd-error"><?= $erros['regra'] ?></p>
-            <?php endif; ?>
         </div>
     <?php endif; ?>
 

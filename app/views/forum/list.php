@@ -16,31 +16,34 @@ include_once(__DIR__."/../elements/header.php");
                     <p class="text-xs text-[#91B5BD] mt-1">Discussões, dúvidas e projetos da comunidade RoboDrive</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <?php if (isset($_SESSION["usuario_logado"]) && $_SESSION["usuario_logado"]->getRegra() === 'admin'): ?>
-                        <form method="get" action="<?= URL_BASE ?>/forum/listar" class="flex items-center gap-2">
-                            <label for="status" class="text-xs text-[#91B5BD] uppercase font-bold">Status:</label>
-                            <select name="status" id="status" onchange="this.form.submit()" class="rd-select !h-9 text-xs">
-                                <option value="1" <?= ($statusFiltro ?? '1') === '1' ? 'selected' : '' ?>>Ativos</option>
-                                <option value="0" <?= ($statusFiltro ?? '1') === '0' ? 'selected' : '' ?>>Desativados</option>
-                                <option value="todos" <?= ($statusFiltro ?? '1') === 'todos' ? 'selected' : '' ?>>Todos</option>
-                            </select>
-                        </form>
-                    <?php endif; ?>
                     <a href="<?= URL_BASE ?>/forum/cadastro" class="rd-btn rd-btn-primary w-fit">
                         + Nova publicação
                     </a>
                 </div>
             </section>
 
+            <!-- BUSCA POR CONTEÚDO -->
+            <form data-busca method="get" action="<?= URL_BASE ?>/forum/listar" class="flex gap-3">
+                <input
+                    type="text"
+                    name="busca"
+                    value="<?= htmlspecialchars($busca_atual ?? '') ?>"
+                    placeholder="Pesquisar postagens pelo conteúdo..."
+                    class="rd-input w-full flex-1"
+                    autocomplete="off"
+                >
+                <button type="submit" class="rd-btn rd-btn-secondary !py-2 !px-4 text-xs">Buscar</button>
+            </form>
+
             <!-- FEED DE POSTAGENS (ESTILO LINHA / LISTA DA EQUIPE) -->
-            <section class="space-y-4">
+            <section data-resultados class="space-y-4">
                 <?php if(isset($foruns) && count($foruns) > 0): ?>
                     <?php foreach($foruns as $forum): ?>
                         <?php include(__DIR__."/elements/card.php") ?>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <div class="border-2 border-dashed border-[#07556A] bg-[#000505] p-8 text-center text-[#91B5BD] text-xs">
-                        Nenhuma postagem realizada no fórum até o momento.
+                        <?= !empty($busca_atual) ? "Nenhuma postagem encontrada para a busca." : "Nenhuma postagem realizada no fórum até o momento." ?>
                     </div>
                 <?php endif; ?>
             </section>
@@ -51,5 +54,8 @@ include_once(__DIR__."/../elements/header.php");
 <?php
 include_once(__DIR__."/../elements/adminModais.php");
 include_once(__DIR__."/../elements/denunciaModal.php");
+?>
+<script src="<?= js_url("busca.js") ?>"></script>
+<?php
 include_once(__DIR__."/../elements/footer.php");
 ?>

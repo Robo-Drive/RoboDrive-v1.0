@@ -16,11 +16,12 @@
                 type="text"
                 id="nome"
                 name="nome"
-                class="rd-input"
+                class="rd-input <?= (isset($projeto) && empty($ehCoordenador)) ? 'cursor-not-allowed opacity-60' : '' ?>"
                 value="<?= isset($projeto) ? (is_object($projeto) ? $projeto->getNome() : (isset($projeto['nome']) ? $projeto['nome'] : '')) : '' ?>"
+                <?= (isset($projeto) && empty($ehCoordenador)) ? 'readonly' : '' ?>
             >
-            <?php if (isset($erros['nome'])): ?>
-                <p class="rd-error"><?= $erros['nome'] ?></p>
+            <?php if (isset($projeto) && empty($ehCoordenador)): ?>
+                <p class="mt-1 text-xs text-[#91B5BD]">Só os coordenadores podem alterar o nome, a categoria e a visibilidade do projeto.</p>
             <?php endif; ?>
         </div>
 
@@ -34,9 +35,6 @@
                 placeholder="Conte o objetivo do projeto, como ele funciona e o que foi usado..."
                 class="rd-textarea"
             ><?= isset($projeto) ? (is_object($projeto) ? $projeto->getDescricao() : (isset($projeto['descricao']) ? $projeto['descricao'] : '')) : '' ?></textarea>
-            <?php if (isset($erros['descricao'])): ?>
-                <p class="rd-error"><?= $erros['descricao'] ?></p>
-            <?php endif; ?>
         </div>
 
         <?php if (isset($projeto)): ?>
@@ -74,9 +72,6 @@
                     </button>
                 </div>
                 <p class="mt-1 text-xs text-[#91B5BD]">Esta senha será exigida junto ao Hash para novos membros solicitarem entrada.</p>
-                <?php if (isset($erros['senha'])): ?>
-                    <p class="rd-error"><?= $erros['senha'] ?></p>
-                <?php endif; ?>
             </div>
 
             <!-- Confirmar Senha do Projeto -->
@@ -95,9 +90,6 @@
                     </button>
                 </div>
                 <p class="confirmarErro mt-1.5 sm:mt-2 text-xs sm:text-sm font-medium text-[#13F3F7]">
-                    <?php if (isset($erros['confirmar_senha'])): ?>
-                        <?= $erros['confirmar_senha'] ?>
-                    <?php endif; ?>
                 </p>
             </div>
         <?php endif; ?>
@@ -137,7 +129,7 @@
                     id="pesquisaCategoria"
                     placeholder="Pesquisar categoria..."
                     autocomplete="off"
-                    value="<?= htmlspecialchars(html_entity_decode($catNomeSelecionado)) ?>"
+                    value="<?= texto($catNomeSelecionado) ?>"
                     class="rd-input pr-11"
                 >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true" class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#91B5BD]"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
@@ -149,7 +141,7 @@
                 <?php if(isset($categorias)): ?>
                     <?php foreach($categorias as $cat): ?>
                         <option value="<?= $cat->getId() ?>" <?= ($cat->getId() == $catIdSelecionada) ? 'selected' : '' ?>>
-                            <?= $cat->getNome() ?>
+                            <?= texto($cat->getNome()) ?>
                         </option>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -166,9 +158,9 @@
                         <div
                             class="categoria-option cursor-pointer border-b border-[#07556A]/60 px-4 py-3 text-sm text-[#F2FEFE] transition-colors duration-150 hover:bg-[#13F3F7]/10 hover:text-[#13F3F7]"
                             data-value="<?= $cat->getId() ?>"
-                            data-nome="<?= strtolower($cat->getNome()) ?>"
+                            data-nome="<?= mb_strtolower(texto($cat->getNome())) ?>"
                         >
-                            <?= $cat->getNome() ?>
+                            <?= texto($cat->getNome()) ?>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -198,13 +190,7 @@
                     class="rd-input"
                 >
             </div>
-            </div>
 
-            <?php if (isset($erros['categoria'])): ?>
-                <p class="rd-error">
-                    <?= $erros['categoria'] ?>
-                </p>
-            <?php endif; ?>
         </div>
         <?php endif; ?>
 
@@ -260,9 +246,6 @@
                 <?php endif; ?>
             </p>
 
-            <?php if (isset($erros['visibilidade'])): ?>
-                <p class="rd-error"><?= $erros['visibilidade'] ?></p>
-            <?php endif; ?>
         </div>
         <?php endif; ?>
 
@@ -301,11 +284,11 @@
                         <?php foreach ($componentes as $componente): ?>
                             <?php
                                 $id = $componente->getId();
-                                $nome = $componente->getNome();
+                                $nome = texto($componente->getNome());
                             ?>
                             <label
                                 class="componente-option flex cursor-pointer items-center gap-3 border-b border-[#07556A]/60 px-4 py-3 text-sm text-[#F2FEFE] transition-colors duration-150 hover:bg-[#13F3F7]/10 has-[:checked]:bg-[#13F3F7]/10"
-                                data-nome="<?= strtolower($nome) ?>"
+                                data-nome="<?= mb_strtolower($nome) ?>"
                             >
                                 <input
                                     type="checkbox"
@@ -326,12 +309,12 @@
                 </div>
 
                 <!-- Componentes selecionados -->
-                <div id="componentesSelecionados" class="border-t-2 border-[#07556A] p-2 space-y-2">
+                <div id="componentesSelecionados" class="hidden has-[.componente-selecionado]:block border-t-2 border-[#07556A] p-2 space-y-2">
                     <?php if (!empty($componentesAtuais)): ?>
                         <?php foreach ($componentesAtuais as $comp): ?>
                             <div class="componente-selecionado flex items-center gap-3 bg-black/80 border border-white/20 p-3" data-id="<?= $comp->getId() ?>">
                                 <div class="flex-1">
-                                    <span class="text-white font-bold"><?= htmlspecialchars(html_entity_decode($comp->getNome())) ?></span>
+                                    <span class="text-white font-bold"><?= texto($comp->getNome()) ?></span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <label class="text-gray-400 text-sm">Quantidade</label>
@@ -343,11 +326,6 @@
                     <?php endif; ?>
                 </div>
             </div>
-            <?php if (isset($erros["componentes"])): ?>
-                <p class="rd-error">
-                    <?= $erros["componentes"] ?>
-                </p>
-            <?php endif; ?>
         </div>
     </fieldset>
 
@@ -371,8 +349,8 @@
                         <label class="flex items-center gap-3 cursor-pointer">
                             <input type="checkbox" name="codigos_manter[]" value="<?= $cod->getId() ?>" checked class="accent-[#13F3F7] h-4 w-4">
                             <div>
-                                <span class="font-mono font-bold text-[#F2FEFE]"><?= htmlspecialchars(html_entity_decode(basename($cod->getCaminho()))) ?></span>
-                                <span class="block text-[.65rem] text-[#91B5BD]"><?= htmlspecialchars(html_entity_decode($cod->getDescricao() ?? 'Sem descrição')) ?></span>
+                                <span class="font-mono font-bold text-[#F2FEFE]"><?= texto(basename($cod->getCaminho())) ?></span>
+                                <span class="block text-[.65rem] text-[#91B5BD]"><?= texto($cod->getDescricao() ?? 'Sem descrição') ?></span>
                             </div>
                         </label>
                         <span class="text-[.6rem] text-[#4E6B72] uppercase font-mono">Manter na versão</span>
@@ -423,17 +401,7 @@
 
             <ul id="listaCodigos" class="mt-3 flex flex-col gap-2 empty:hidden"></ul>
 
-            <?php if (isset($erros['codigos'])): ?>
-                <p class="rd-error">
-                    <?= htmlspecialchars(html_entity_decode($erros['codigos'])) ?>
-                </p>
-            <?php endif; ?>
 
-            <?php if (isset($erros['codigos_descricao'])): ?>
-                <p class="rd-error">
-                    <?= htmlspecialchars(html_entity_decode($erros['codigos_descricao'])) ?>
-                </p>
-            <?php endif; ?>
         </div>
         
         <!-- FOTOS ATUAIS DO PROJETO -->
@@ -508,9 +476,6 @@
 
             <ul id="listaImagens" class="mt-3 grid grid-cols-2 gap-3 empty:hidden sm:grid-cols-3"></ul>
 
-            <?php if (isset($erros['imagens'])): ?>
-                <p class="rd-error"><?= $erros['imagens'] ?></p>
-            <?php endif; ?>
         </div>
                 <!-- EXTRAS ATUAIS DA VERSÃO (NA EDIÇÃO - DESMARQUE PARA RETIRAR) -->
         <?php if (!empty($extrasAtuais)): ?>
@@ -531,10 +496,10 @@
                             >
                             <div>
                                 <span class="font-mono font-bold text-[#F2FEFE]">
-                                    <?= htmlspecialchars(html_entity_decode(basename($ext->getCaminho()))) ?>
+                                    <?= texto(basename($ext->getCaminho())) ?>
                                 </span>
                                 <span class="block text-[.65rem] text-[#91B5BD]">
-                                    <?= htmlspecialchars(html_entity_decode($ext->getDescricao() ?? 'Sem descrição')) ?>
+                                    <?= texto($ext->getDescricao() ?? 'Sem descrição') ?>
                                 </span>
                             </div>
                         </label>
@@ -568,12 +533,6 @@
             <input type="file" name="extras[]" id="extras" style="display:none;" multiple>
             <ul id="listaExtras" class="mt-3 flex flex-col gap-2 empty:hidden"></ul>
 
-            <?php if (isset($erros['extras'])): ?>
-                <p class="rd-error"><?= htmlspecialchars(html_entity_decode($erros['extras'])) ?></p>
-            <?php endif; ?>
-            <?php if (isset($erros['extras_descricao'])): ?>
-                <p class="rd-error"><?= htmlspecialchars(html_entity_decode($erros['extras_descricao'])) ?></p>
-            <?php endif; ?>
         </div>
     </fieldset>
 

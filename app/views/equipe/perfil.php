@@ -9,5 +9,7 @@ include_once(__DIR__."/../elements/header.php");
 </div>
 
 <?php
+include_once(__DIR__."/../elements/adminModais.php");
+include_once(__DIR__."/../elements/denunciaModal.php");
 include_once(__DIR__."/../elements/footer.php");
 endif;
