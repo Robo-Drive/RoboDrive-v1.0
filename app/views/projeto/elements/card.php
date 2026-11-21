@@ -941,7 +941,6 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                     id="comentarioProjetoConteudo" 
                     name="conteudo" 
                     rows="3" 
-                    required 
                     maxlength="2000" 
                     placeholder="Deixe um comentário sobre este projeto..." 
                     class="rd-textarea !bg-[#06141C]"
@@ -1061,7 +1060,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
             <div class="rd-field">
                 <label for="novoCoordenadorProjeto" class="rd-label">Novo Responsável / Coordenador</label>
-                <select id="novoCoordenadorProjeto" name="novo_coordenador_id" required class="rd-select">
+                <select id="novoCoordenadorProjeto" name="novo_coordenador_id" class="rd-select">
                     <option value="">Selecione um integrante</option>
                     <?php foreach ($outrosMembros as $outro): ?>
                         <option value="<?= (int)$outro['id'] ?>">

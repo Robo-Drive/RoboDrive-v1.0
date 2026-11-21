@@ -517,7 +517,7 @@ $obterImagem = static function ($item) {
 
             <div class="rd-field">
                 <label for="novoCoordenadorEquipe" class="rd-label">Novo Coordenador da Equipe</label>
-                <select id="novoCoordenadorEquipe" name="novo_coordenador_id" required class="rd-select">
+                <select id="novoCoordenadorEquipe" name="novo_coordenador_id" class="rd-select">
                     <option value="">Selecione um integrante</option>
                     <?php foreach ($outrosMembros as $outro): ?>
                         <option value="<?= (int) $outro['id'] ?>">

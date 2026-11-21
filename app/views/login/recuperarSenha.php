@@ -30,7 +30,7 @@ include_once(__DIR__ . "/../elements/header.php");
         <form action="<?= URL_BASE ?>/recuperar-senha" autocomplete="off" method="post" class="space-y-5">
             <div class="relative">
                 <label for="email" class="rd-label">E-mail cadastrado</label>
-                <input type="email" name="email" id="email" class="rd-input" value="<?= htmlspecialchars($email ?? '') ?>" automcomplete="off" placeholder="seuemail@exemplo.com">
+                <input type="text" inputmode="email" name="email" id="email" class="rd-input" value="<?= htmlspecialchars($email ?? '') ?>" automcomplete="off" placeholder="seuemail@exemplo.com">
             </div>
 
             <button type="submit" class="rd-btn rd-btn-primary w-full !py-3">

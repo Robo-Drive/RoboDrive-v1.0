@@ -75,6 +75,13 @@ class UsuarioController extends Controller
         $this->validador->obrigatorio("nome", $nome);
         $this->validador->obrigatorio("email", $email);
 
+        $biografia = trim($_POST["biografia"] ?? "");
+
+        if ($biografia !== "")
+        {
+            $this->validador->tamanho("biografia", $biografia, 0, 500, "biografia");
+        }
+
         if (!isset($this->validador->getErros()["nome_usuario"]))
         {
             $this->validador->tamanho("nome_usuario", $nomeUsuario, 3, $editar ? 50 : 100, "nome de usuario");

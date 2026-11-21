@@ -143,7 +143,6 @@ $fotoAutor = $forum->getUsuario()->getImagem()
                         id="comentarioConteudo" 
                         name="conteudo" 
                         rows="3" 
-                        required 
                         maxlength="2000" 
                         placeholder="Escreva sua resposta para esta postagem..." 
                         class="rd-textarea !bg-[#000505] w-full"

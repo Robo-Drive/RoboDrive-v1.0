@@ -22,6 +22,13 @@ class DenunciaController extends Controller
         $this->validador->tipoDenuncia("tipo", trim($_POST["tipo"] ?? ""));
         $this->validador->idPositivo("id", $_POST["id"] ?? "");
         $this->validador->obrigatorio("motivo", trim($_POST["motivo"] ?? ""), "Selecione o motivo da denúncia.");
+
+        $descricao = trim($_POST["descricao"] ?? "");
+
+        if ($descricao !== "")
+        {
+            $this->validador->tamanho("descricao", $descricao, 0, 2000, "detalhes");
+        }
     }
 
     // Descartar denúncias: só tipo e id do conteúdo

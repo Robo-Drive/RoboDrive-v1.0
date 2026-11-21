@@ -118,7 +118,7 @@ include_once(__DIR__."/../elements/header.php");
         <form action="<?= URL_BASE ?>/usuario/excluir-categoria" method="post" class="space-y-4">
             <div>
                 <label class="rd-label">Categoria a ser excluída:</label>
-                <select name="categoria_antiga_id" id="catAntiga" class="rd-select w-full" required onchange="filtrarNovaCategoria()">
+                <select name="categoria_antiga_id" id="catAntiga" class="rd-select w-full" onchange="filtrarNovaCategoria()">
                     <option value="">Selecione</option>
                     <?php foreach($categorias as $c): ?>
                         <option value="<?= $c->getId() ?>"><?= texto($c->getNome()) ?></option>
@@ -127,7 +127,7 @@ include_once(__DIR__."/../elements/header.php");
             </div>
             <div>
                 <label class="rd-label">Mover projetos para:</label>
-                <select name="categoria_nova_id" id="catNova" class="rd-select w-full" required>
+                <select name="categoria_nova_id" id="catNova" class="rd-select w-full">
                     <option value="">Selecione</option>
                     <?php foreach($categorias as $c): ?>
                         <option value="<?= $c->getId() ?>"><?= texto($c->getNome()) ?></option>
