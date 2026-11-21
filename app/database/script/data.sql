@@ -216,18 +216,17 @@ CREATE TABLE IF NOT EXISTS extra_versao (
     FOREIGN KEY (extra_id) REFERENCES extra(id)
 );
 
--- INSERTS DOS 3 PRIMEIROS USUARIOS
-INSERT INTO `usuario` (`id`, `nome`, `nome_usuario`, `email`, `senha`, `biografia`, `imagem`, `regra`, `status`, `criado_em`) VALUES
-    (1,'Walmonn Eduardo','WalmonnEduardo','walmonn.eduardo.tds2023@gmail.com','$2y$12$ih4V7SmaYKHc/UP0qvoV6.p2F7fas3o7ULlsEqQ6qctKfq36MUyQW','Desenvolvedor e entusiasta de rob&oacute;tica.','store/users/user-1/img/1a36a43e55d06281855fb503334e24a9.jpg','admin',1,'2026-10-07 15:27:40'),
-    (2,'Guilherme Canever Wernke','guilherme','guilherme.wernke.tds2023@gmail.com','$2y$12$pIqRCJLzv2Ia0jGlzk9VSOTAIK4YZk4/UB0Zs/3gjUerizr0DSTpW','Professor de rob&oacute;tica.','store/users/user-2/img/4b4c5d887ba820581966f5215c2d7b8e.jpg','admin',1,'2026-10-07 15:27:40'),
-    (3,'Petrus Mito de Souza','petrus','petrus.souza.tds2023@gmail.com','$2y$12$ECX23EPvPazaiSUN2asdwOLf0carz.YsWft/4Y93ziODDBmoq08PW','Especialista em eletr&ocirc;nica.','store/users/user-3/img/f79dc89b68ade760f62dd93b3d8479a1.jpg','admin',1,'2026-10-07 15:27:40');
-    (4,'RoboDrive Admin','robodriveadmin','robodriveifpr@gmail.com','$2y$12$LRIGiSrp3PoAKh/aXD.jA.YzNcmAxuT8OdpKIaZp2.57arOk.EfNK','admin.','store/users/user-3/img/f79dc89b68ade760f62dd93b3d8479a1.jpg','admin',1,'2026-10-07 15:27:40');
-
+-- INSERTS DOS 4 PRIMEIROS USUARIOS
+INSERT INTO `usuario` (`id`, `nome`, `nome_usuario`, `email`, `senha`, `biografia`, `imagem`, `regra`, `status`, `criado_em`) VALUES 
+(1,'Walmonn Eduardo','WalmonnEduardo','walmonn.eduardo.tds2023@gmail.com','$2y$12$ih4V7SmaYKHc/UP0qvoV6.p2F7fas3o7ULlsEqQ6qctKfq36MUyQW','Desenvolvedor e entusiasta de rob&oacute;tica.','store/users/user-1/img/1a36a43e55d06281855fb503334e24a9.jpg','admin',1,'2026-10-07 15:27:40'), 
+(2,'Guilherme Canever Wernke','guilherme','guilherme.wernke.tds2023@gmail.com','$2y$12$pIqRCJLzv2Ia0jGlzk9VSOTAIK4YZk4/UB0Zs/3gjUerizr0DSTpW','Professor de rob&oacute;tica.','store/users/user-2/img/4b4c5d887ba820581966f5215c2d7b8e.jpg','admin',1,'2026-10-07 15:27:40'), 
+(3,'Petrus Mito de Souza','petrus','petrus.souza.tds2023@gmail.com','$2y$12$ECX23EPvPazaiSUN2asdwOLf0carz.YsWft/4Y93ziODDBmoq08PW','Especialista em eletr&ocirc;nica.','store/users/user-3/img/f79dc89b68ade760f62dd93b3d8479a1.jpg','admin',1,'2026-10-07 15:27:40'), 
+(4,'RoboDrive Admin','robodriveadmin','robodriveifpr@gmail.com','$2y$12$LRIGiSrp3PoAKh/aXD.jA.YzNcmAxuT8OdpKIaZp2.57arOk.EfNK',NULL,NULL,'admin',1,'2026-10-07 15:27:40');
 -- INSERTS DAS CATEGORIAS DOS USUARIOS
 INSERT INTO `categoria` (`id`, `nome`, `usuario_id`, `status`) VALUES
     (1,'Meus projetos',1,1),
     (2,'Meus projetos',2,1),
-    (3,'Meus projetos',3,1);
+    (3,'Meus projetos',3,1),
     (4,'Meus projetos',4,1);
 
 -- INSERTS DOS COMPONENTES

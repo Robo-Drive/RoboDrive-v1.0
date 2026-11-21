@@ -44,6 +44,7 @@ Sem essas duas linhas, o sistema funciona normalmente, mas nenhum e-mail é envi
 Na pasta do projeto, no mesmo terminal dos passos anteriores:
 
 ```bash
+cd public/
 php -S localhost:8080
 ```
 
