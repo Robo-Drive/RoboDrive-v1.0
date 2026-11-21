@@ -53,13 +53,11 @@ Abra [http://localhost:8080/login](http://localhost:8080/login) e **recarregue a
 
 Depois disso, crie sua conta pelo cadastro e pronto, o sistema está funcionando.
 
-### 6. (Opcional) Torne-se administrador
+### 6. Entre como administrador
 
-Depois de criar sua conta, rode no terminal:
+usuario = robodriveifpr@gmail.com
+senha = robodriveadmin
 
-```bash
-mysql -u seu_usuario -p robo_drive -e "UPDATE usuario SET regra = 'admin' WHERE email = 'seu@email.com';"
-```
 
 ## Problemas comuns
 
