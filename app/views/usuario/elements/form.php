@@ -21,7 +21,7 @@ $marcado = 'group-has-[input[name=remover_imagem]:checked]';
 
         <div class="flex w-full flex-col gap-2 sm:w-auto">
             <button type="button" id="btnSelecionarImagem" onclick="adicionarImagens()" class="rd-file-btn sm:w-auto sm:px-6">Selecionar imagem</button>
-            <input type="file" name="imagem" id="imagens" accept="image/*" style="display:none;">
+            <input type="file" name="imagem" id="imagens" accept="image/*" style="display:none;" data-recorte-largura="512" data-recorte-altura="512" data-recorte-tipo="image/png" data-recorte-nome="perfil" data-recorte-titulo="Recortar foto de perfil" data-recorte-dica="Formato quadrado (1:1)">
 
             <?php if (!empty($fotoAtual)): ?>
                 <label class="flex min-h-11 cursor-pointer items-center gap-3 text-sm font-bold text-[#F2A058]">

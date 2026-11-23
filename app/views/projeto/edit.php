@@ -22,6 +22,9 @@ include_once(__DIR__."/../elements/header.php");
 <script src="<?= js_url("categoria.js") ?>"></script>
 <script src="<?= js_url("componente.js") ?>"></script>
 <script src="<?= js_url("inputFiles.js") ?>"></script>
+<?php include_once(__DIR__."/../elements/modalRecorte.php") ?>
 <script src="<?= js_url("images.js") ?>"></script>
+<script src="<?= js_url("cropper.min.js") ?>"></script>
+<script src="<?= js_url("cropperImagem.js") ?>"></script>
 <?php
 include_once(__DIR__."/../elements/footer.php");

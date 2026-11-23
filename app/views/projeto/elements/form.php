@@ -465,7 +465,7 @@
                 </span>
                 <span class="flex min-w-0 flex-1 flex-col">
                     <span class="text-xs font-black uppercase tracking-[.08em] text-[#F2FEFE]">Adicionar imagens</span>
-                    <span class="text-xs leading-snug text-[#91B5BD]">.jpg, .png, .gif, .svg, .webp</span>
+                    <span class="text-xs leading-snug text-[#91B5BD]">.jpg, .png, .gif, .webp</span>
                 </span>
                 <span class="text-2xl font-light leading-none text-[#13F3F7]" aria-hidden="true">+</span>
             </button>
@@ -474,7 +474,7 @@
                 type="file"
                 name="imagens[]"
                 id="imagens"
-                accept="image/*"
+                accept="image/*" data-recorte-largura="1280" data-recorte-altura="720" data-recorte-tipo="image/jpeg" data-recorte-qualidade="0.9" data-recorte-nome="projeto" data-recorte-titulo="Recortar foto do projeto" data-recorte-dica="Mesmo formato da galeria (16:9)"
                 style="display:none;"
                 multiple
             >

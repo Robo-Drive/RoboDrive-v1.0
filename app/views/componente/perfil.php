@@ -82,11 +82,24 @@ if (isset($componente)):
 
             <!-- FOTO EM DESTAQUE -->
             <div class="lg:col-span-5 border-2 border-[#07556A] bg-[#06141C] p-4 flex flex-col items-center justify-center">
-                <div class="w-full aspect-square bg-[#000505] border border-[#07556A] overflow-hidden flex items-center justify-center">
-                    <img 
-                        src="<?= $imagemUrl ?>" 
-                        alt="Foto do componente <?= $nomeFormatado ?>" 
-                        class="w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-300"
+                <!-- Card como aparece na listagem -->
+                <div class="relative aspect-video w-full overflow-hidden bg-[#082B3A]">
+                    <div class="absolute inset-0 z-0">
+                        <img src="<?= $imagemUrl ?>" alt="" aria-hidden="true" class="h-full w-full border-[3px] border-[#07556A] object-cover opacity-20">
+                    </div>
+                    <div class="relative z-10 flex h-full w-full flex-col justify-between p-4">
+                        <h3 class="truncate text-left font-['Orbitron'] text-lg font-black text-[#F2FEFE]"><?= $nomeFormatado ?></h3>
+                        <p class="line-clamp-3 text-sm text-[#91B5BD]"><?= texto($componente->getDescricao()) ?></p>
+                        <p class="text-right text-[.65rem] font-bold uppercase tracking-[.15em] text-[#91B5BD]">Cadastrado por @<?= $nomeUsuarioFormatado ?></p>
+                    </div>
+                </div>
+
+                <!-- Imagem limpa, no mesmo formato do card (16:9) -->
+                <div class="mt-4 aspect-video w-full overflow-hidden border border-[#07556A] bg-[#000505]">
+                    <img
+                        src="<?= $imagemUrl ?>"
+                        alt="Foto do componente <?= $nomeFormatado ?>"
+                        class="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                         onerror="this.onerror=null;this.src='<?= IMG_URL_BASE ?>/projeto-icon.png';"
                     >
                 </div>
