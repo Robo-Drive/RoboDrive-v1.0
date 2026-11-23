@@ -108,7 +108,7 @@
             <!-- Rodapé -->
             <div class="flex items-center justify-between mt-auto pt-5">
 
-                <span class="text-[.65rem] font-mono text-[#4E6B72]">
+                <span class="text-[.65rem] font-mono text-[#91B5BD]">
                     TEAM_<?= str_pad($idEquipe, 4, '0', STR_PAD_LEFT) ?>
                 </span>
 

@@ -26,7 +26,7 @@
         <label for="imagem" class="rd-label">Imagem</label>
         <button type="button" onclick="adicionarImagens()" class="rd-file-btn">Adicionar imagens</button>
         <input type="file" name="imagem" id="imagens" accept="image/*" style="display:none;">
-        <ul id="listaImagens" class="rd-file-list"></ul>
+        <ul id="listaImagens" class="rd-file-list [&>li]:bg-[#06141C] [&>li]:border-[#07556A] [&>li]:text-[#F2FEFE] [&>li:hover]:border-[#13F3F7] [&_img]:border-[#07556A] [&_.text-gray-400]:text-[#91B5BD]"></ul>
         <?php if (isset($erros['imagem'])): ?>
             <p class="rd-error"><?= $erros['imagem'] ?></p>
         <?php endif; ?>

@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () =>
                     return;
                 }
 
-                alert(data.mensagem || 'Operação realizada com sucesso!');
+                rdAviso(data.mensagem || 'Operação realizada com sucesso!', 'sucesso', true);
                 window.location.reload();
                 return;
             }

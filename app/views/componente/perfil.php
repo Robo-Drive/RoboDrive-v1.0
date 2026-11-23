@@ -39,7 +39,7 @@ if (isset($componente)):
                         </button>
                     </form>
 
-                    <form action="<?= URL_BASE ?>/componente/desativar" method="post" onsubmit="return confirm('Deseja realmente desativar ou desativar este componente?');">
+                    <form action="<?= URL_BASE ?>/componente/desativar" method="post" data-confirmar="Deseja realmente desativar ou desativar este componente?">
                         <input type="hidden" name="id" value="<?= $componente->getId() ?>">
                         <button type="submit" class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition">
                             Desativar

@@ -264,7 +264,7 @@
           <div class="text-[.65rem] font-bold uppercase tracking-[.15em] text-[#91B5BD] sm:tracking-[.25em]">Equipe Alpha &nbsp;·&nbsp; Cascavel &nbsp;·&nbsp; Python</div>
         </div>
         <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 sm:mt-0">
-          <span class="border-2 border-[#07556A] bg-[#082B3A] px-2.5 py-1 text-[.65rem] font-bold uppercase tracking-[.1em] text-[#4E6B72] sm:px-4 sm:py-1.5 sm:text-[.7rem]">PRIVADO</span>
+          <span class="border-2 border-[#07556A] bg-[#082B3A] px-2.5 py-1 text-[.65rem] font-bold uppercase tracking-[.1em] text-[#91B5BD] sm:px-4 sm:py-1.5 sm:text-[.7rem]">PRIVADO</span>
           <span class="text-[.75rem] font-bold text-[#91B5BD] sm:text-[.85rem]">6 componentes</span>
         </div>
       </div>
@@ -412,14 +412,14 @@
       </div>
 
       <div class="relative p-6 sm:p-8 lg:p-12">
-        <div class="mb-4 inline-block border-2 border-[#07556A] px-3.5 py-1 text-[.65rem] font-bold uppercase tracking-[.15em] text-[#4E6B72] sm:mb-6 sm:text-[.7rem]">VISITANTE</div>
+        <div class="mb-4 inline-block border-2 border-[#07556A] px-3.5 py-1 text-[.65rem] font-bold uppercase tracking-[.15em] text-[#91B5BD] sm:mb-6 sm:text-[.7rem]">VISITANTE</div>
         <h3 class="mb-3 sm:mb-4 text-xl sm:text-[1.75rem] font-black tracking-[-.03em]">Leitor</h3>
-        <ul class="list-none p-0 text-xs leading-[1.8] text-[#4E6B72] sm:text-sm sm:leading-[2] md:text-[.95rem]">
+        <ul class="list-none p-0 text-xs leading-[1.8] text-[#91B5BD] sm:text-sm sm:leading-[2] md:text-[.95rem]">
           <li>→ &nbsp;Ver projetos públicos</li>
           <li>→ &nbsp;Explorar componentes públicos</li>
           <li>→ &nbsp;Ler threads do fórum</li>
-          <li class="text-[#4E6B72]">✕ &nbsp;Criar projetos</li>
-          <li class="text-[#4E6B72]">✕ &nbsp;Participar de equipes</li>
+          <li class="text-[#91B5BD]">✕ &nbsp;Criar projetos</li>
+          <li class="text-[#91B5BD]">✕ &nbsp;Participar de equipes</li>
         </ul>
       </div>
 

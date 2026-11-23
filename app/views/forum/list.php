@@ -19,7 +19,7 @@ include_once(__DIR__."/../elements/header.php");
                     <?php if (isset($_SESSION["usuario_logado"]) && $_SESSION["usuario_logado"]->getRegra() === 'admin'): ?>
                         <form method="get" action="<?= URL_BASE ?>/forum/listar" class="flex items-center gap-2">
                             <label for="status" class="text-xs text-[#91B5BD] uppercase font-bold">Status:</label>
-                            <select name="status" id="status" onchange="this.form.submit()" class="rd-select !h-9 text-xs">
+                            <select name="status" id="status" onchange="this.form.submit()" class="rd-select !h-9 text-xs [color-scheme:dark] [&>option]:bg-[#000505] [&>option]:text-[#F2FEFE] !border-[#0795A5] focus-visible:ring-2 focus-visible:ring-[#54FBFE] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000505]">
                                 <option value="1" <?= ($statusFiltro ?? '1') === '1' ? 'selected' : '' ?>>Ativos</option>
                                 <option value="0" <?= ($statusFiltro ?? '1') === '0' ? 'selected' : '' ?>>Desativados</option>
                                 <option value="todos" <?= ($statusFiltro ?? '1') === 'todos' ? 'selected' : '' ?>>Todos</option>

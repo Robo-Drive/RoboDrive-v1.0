@@ -5,7 +5,7 @@ include_once(__DIR__."/../elements/header.php");
 ?>
 <div class="h-[90dvh] w-full grid grid-cols-12 grid-rows-12">
     <?php include_once(__DIR__."/../elements/sidebar.php") ?>
-    <div class="main usa overflow-y-auto col-span-12 lg:col-span-10 row-span-12 bg-black">
+    <div class="main usa overflow-y-auto col-span-12 lg:col-span-10 row-span-12 bg-[#000505]">
         <section class="rd-section flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <p class="rd-eyebrow">BIBLIOTECA</p>

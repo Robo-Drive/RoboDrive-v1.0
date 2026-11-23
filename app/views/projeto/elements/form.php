@@ -1,7 +1,7 @@
-<div class="space-y-10">
+<div class="space-y-9">
 
     <fieldset class="min-w-0 space-y-6">
-        <legend class="mb-6 w-full">
+        <legend class="-mb-2 w-full">
             <span class="flex items-center gap-3 text-[.65rem] font-bold uppercase tracking-[.25em] text-[#91B5BD]">
                 <span class="font-['Orbitron'] font-black text-[#13F3F7]">01</span>
                 Informações
@@ -42,14 +42,14 @@
         <?php if (isset($projeto)): ?>
         <div class="rd-field mb-6">
             <label for="descricao_alteracao" class="rd-label">Notas da Nova Versão (O que mudou?)</label>
-            <input type="text" id="descricao_alteracao" name="descricao_alteracao" placeholder="Ex: Substituído servo motor por motor de passo e ajustado script de calibração" class="rd-input">
+            <input type="text" id="descricao_alteracao" name="descricao_alteracao" placeholder="Ex: Substituído servo motor por motor de passo e ajustado seu script" class="rd-input">
             <p class="mt-1 text-xs text-[#91B5BD]">Se você alterar componentes ou códigos, uma nova versão do projeto será criada automaticamente.</p>
         </div>
         <?php endif; ?>
     </fieldset>
 
     <fieldset class="min-w-0 space-y-6">
-        <legend class="mb-6 w-full">
+        <legend class="-mb-2 w-full">
             <span class="flex items-center gap-3 text-[.65rem] font-bold uppercase tracking-[.25em] text-[#91B5BD]">
                 <span class="font-['Orbitron'] font-black text-[#13F3F7]">02</span>
                 Organização
@@ -172,7 +172,7 @@
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <div class="px-4 py-3 text-gray-400">
+                    <div class="px-4 py-3 text-[#91B5BD]">
                         Nenhuma categoria cadastrada.
                     </div>
                 <?php endif; ?>
@@ -197,7 +197,6 @@
                     aria-label="Nome da nova categoria"
                     class="rd-input"
                 >
-            </div>
             </div>
 
             <?php if (isset($erros['categoria'])): ?>
@@ -268,7 +267,7 @@
     </fieldset>
 
     <fieldset class="min-w-0 space-y-6">
-        <legend class="mt-6 w-full">
+        <legend class="-mb-2 w-full">
             <span class="flex items-center gap-3 text-[.65rem] font-bold uppercase tracking-[.25em] text-[#91B5BD]">
                 <span class="font-['Orbitron'] font-black text-[#13F3F7]">03</span>
                 Componentes
@@ -287,7 +286,7 @@
                         id="pesquisaComponente"
                         placeholder="Pesquisar componente..."
                         autocomplete="off"
-                        class="h-11 w-full bg-transparent pl-4 pr-11 text-sm text-[#F2FEFE] outline-none placeholder:text-[#4E6B72]"
+                        class="h-11 w-full bg-transparent pl-4 pr-11 text-sm text-[#F2FEFE] outline-none placeholder:text-[#91B5BD]"
                     >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true" class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#91B5BD]"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
                 </div>
@@ -325,16 +324,21 @@
                 </div>
 
                 <!-- Componentes selecionados -->
-                <div id="componentesSelecionados" class="border-t-2 border-[#07556A] p-2 space-y-2">
+                <div id="componentesSelecionados" class="border-t-2 border-[#07556A] p-2 space-y-2
+                    [&>.componente-selecionado]:flex-wrap [&>.componente-selecionado]:bg-[#06141C] [&>.componente-selecionado]:border [&>.componente-selecionado]:border-[#07556A] [&>.componente-selecionado]:border-l-[3px] [&>.componente-selecionado]:border-l-[#13F3F7] [&>.componente-selecionado]:p-4 [&>.componente-selecionado]:hover:border-[#13F3F7]
+                    [&_.componente-selecionado_span]:text-[#F2FEFE] [&_.componente-selecionado_span]:font-bold [&_.componente-selecionado_span]:break-words
+                    [&_.componente-selecionado_label]:text-[#91B5BD] [&_.componente-selecionado_label]:text-xs [&_.componente-selecionado_label]:uppercase [&_.componente-selecionado_label]:tracking-[.08em]
+                    [&_.componente-selecionado_input]:bg-[#000505] [&_.componente-selecionado_input]:border-2 [&_.componente-selecionado_input]:border-[#0795A5] [&_.componente-selecionado_input]:text-[#F2FEFE] [&_.componente-selecionado_input]:focus-visible:border-[#13F3F7] [&_.componente-selecionado_input]:focus-visible:ring-2 [&_.componente-selecionado_input]:focus-visible:ring-[#54FBFE]
+                    [&_.remover-componente]:flex [&_.remover-componente]:h-11 [&_.remover-componente]:w-11 [&_.remover-componente]:items-center [&_.remover-componente]:justify-center [&_.remover-componente]:p-0 [&_.remover-componente]:text-[#F2A058] [&_.remover-componente]:hover:text-[#F2FEFE] [&_.remover-componente]:focus-visible:outline-none [&_.remover-componente]:focus-visible:ring-2 [&_.remover-componente]:focus-visible:ring-[#54FBFE]">
                     <?php if (!empty($componentesAtuais)): ?>
                         <?php foreach ($componentesAtuais as $comp): ?>
-                            <div class="componente-selecionado flex items-center gap-3 bg-black/80 border border-white/20 p-3" data-id="<?= $comp->getId() ?>">
+                            <div class="componente-selecionado flex items-center gap-3 bg-[#06141C] border border-[#07556A] hover:border-[#13F3F7] p-3" data-id="<?= $comp->getId() ?>">
                                 <div class="flex-1">
-                                    <span class="text-white font-bold"><?= htmlspecialchars(html_entity_decode($comp->getNome())) ?></span>
+                                    <span class="text-[#F2FEFE] font-bold"><?= htmlspecialchars(html_entity_decode($comp->getNome())) ?></span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <label class="text-gray-400 text-sm">Quantidade</label>
-                                    <input type="number" name="componentes[<?= $comp->getId() ?>][quantidade]" value="<?= $comp->getQuantidade() ?>" class="w-20 h-9 bg-black border border-white px-2 text-white text-center outline-none focus:border-[#00F5F5]">
+                                    <label class="text-[#91B5BD] text-sm">Quantidade</label>
+                                    <input type="number" name="componentes[<?= $comp->getId() ?>][quantidade]" value="<?= $comp->getQuantidade() ?>" class="w-20 h-9 bg-[#000505] border border-[#0795A5] px-2 text-[#F2FEFE] text-center outline-none focus:border-[#13F3F7]">
                                 </div>
                                 <button type="button" class="remover-componente text-red-400 hover:text-red-300 px-2 text-xl" data-id="<?= $comp->getId() ?>" title="Remover componente">×</button>
                             </div>
@@ -351,7 +355,7 @@
     </fieldset>
 
     <fieldset class="min-w-0 space-y-6">
-        <legend class="mb-6 w-full">
+        <legend class="-mb-2 w-full">
             <span class="flex items-center gap-3 text-[.65rem] font-bold uppercase tracking-[.25em] text-[#91B5BD]">
                 <span class="font-['Orbitron'] font-black text-[#13F3F7]">04</span>
                 Arquivos
@@ -374,7 +378,7 @@
                                 <span class="block text-[.65rem] text-[#91B5BD]"><?= htmlspecialchars(html_entity_decode($cod->getDescricao() ?? 'Sem descrição')) ?></span>
                             </div>
                         </label>
-                        <span class="text-[.6rem] text-[#4E6B72] uppercase font-mono">Manter na versão</span>
+                        <span class="text-[.6rem] text-[#91B5BD] uppercase font-mono">Manter na versão</span>
                     </li>
                 <?php endforeach; ?>
             </ul>
@@ -420,7 +424,7 @@
                 multiple
             >
 
-            <ul id="listaCodigos" class="mt-3 flex flex-col gap-2 empty:hidden"></ul>
+            <ul id="listaCodigos" class="mt-3 flex flex-col gap-2 empty:hidden [&_li]:text-[#F2FEFE] [&_input]:text-[#F2FEFE]"></ul>
 
             <?php if (isset($erros['codigos'])): ?>
                 <p class="rd-error">
@@ -448,14 +452,14 @@
                                 href="<?= URL_BASE ?>/arquivo?arquivo=<?= urlencode($img->getCaminho()) ?>" 
                                 target="_blank" 
                                 title="Clique para abrir imagem em tamanho real" 
-                                class="block aspect-square overflow-hidden bg-black mb-2 relative"
+                                class="block aspect-square overflow-hidden bg-[#000505] mb-2 relative"
                             >
                                 <img 
                                     src="<?= URL_BASE ?>/arquivo?arquivo=<?= urlencode($img->getCaminho()) ?>" 
                                     alt="Foto do projeto" 
                                     class="w-full h-full object-cover group-hover:scale-105 transition duration-200"
                                 >
-                                <span class="absolute bottom-1 right-1 bg-black/80 text-[.6rem] text-[#13F3F7] px-1.5 py-0.5 border border-[#07556A]">
+                                <span class="absolute bottom-1 right-1 bg-[#000505]/80 text-[.6rem] text-[#13F3F7] px-1.5 py-0.5 border border-[#07556A]">
                                     🔍 Ver
                                 </span>
                             </a>
@@ -505,7 +509,7 @@
                 multiple
             >
 
-            <ul id="listaImagens" class="mt-3 grid grid-cols-2 gap-3 empty:hidden sm:grid-cols-3"></ul>
+            <ul id="listaImagens" class="mt-3 grid grid-cols-2 gap-3 empty:hidden sm:grid-cols-3 [&>li]:bg-[#06141C] [&>li]:border-[#07556A] [&>li]:text-[#F2FEFE] [&>li:hover]:border-[#13F3F7] [&_img]:border-[#07556A] [&_.text-gray-400]:text-[#91B5BD]"></ul>
 
             <?php if (isset($erros['imagens'])): ?>
                 <p class="rd-error"><?= $erros['imagens'] ?></p>
@@ -537,7 +541,7 @@
                                 </span>
                             </div>
                         </label>
-                        <span class="text-[.6rem] text-[#4E6B72] uppercase font-mono">
+                        <span class="text-[.6rem] text-[#91B5BD] uppercase font-mono">
                             Manter na versão
                         </span>
                     </li>
@@ -555,7 +559,9 @@
                 class="group flex w-full items-center gap-4 border-2 border-[#07556A] bg-[#000505] px-4 py-3 text-left transition-colors duration-200 hover:border-[#13F3F7] focus-visible:border-[#13F3F7] focus-visible:outline-none cursor-pointer"
             >
                 <span class="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-[#07556A] text-[#13F3F7] transition-colors duration-200 group-hover:border-[#13F3F7]">
-                    📁
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true" class="h-5 w-5">
+                        <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>
+                    </svg>
                 </span>
                 <span class="flex min-w-0 flex-1 flex-col">
                     <span class="text-xs font-black uppercase tracking-[.08em] text-[#F2FEFE]">Adicionar arquivos extras</span>
@@ -565,7 +571,7 @@
             </button>
 
             <input type="file" name="extras[]" id="extras" style="display:none;" multiple>
-            <ul id="listaExtras" class="mt-3 flex flex-col gap-2 empty:hidden"></ul>
+            <ul id="listaExtras" class="mt-3 flex flex-col gap-2 empty:hidden [&_li]:text-[#F2FEFE] [&_input]:text-[#F2FEFE]"></ul>
 
             <?php if (isset($erros['extras'])): ?>
                 <p class="rd-error"><?= htmlspecialchars(html_entity_decode($erros['extras'])) ?></p>

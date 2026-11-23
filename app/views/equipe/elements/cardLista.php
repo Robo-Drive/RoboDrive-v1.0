@@ -69,7 +69,7 @@
                 </div>
 
                 <div class="min-w-0 flex-1">
-                    <span class="block text-[.55rem] font-mono text-[#4E6B72]
+                    <span class="block text-[.55rem] font-mono text-[#91B5BD]
                                  tracking-[.15em] mb-1">
                         TEAM_ID_<?= str_pad($idEquipe, 4, '0', STR_PAD_LEFT) ?>
                     </span>
@@ -97,17 +97,17 @@
             <div class="grid grid-cols-3 gap-1 mt-3 pt-2 border-t border-[#07556A]/50">
 
                 <div>
-                    <span class="block text-[.5rem] text-[#4E6B72] font-mono">TYPE</span>
+                    <span class="block text-[.5rem] text-[#91B5BD] font-mono">TYPE</span>
                     <span class="text-[.6rem] text-[#91B5BD] font-mono">TEAM</span>
                 </div>
 
                 <div>
-                    <span class="block text-[.5rem] text-[#4E6B72] font-mono">STATUS</span>
+                    <span class="block text-[.5rem] text-[#91B5BD] font-mono">STATUS</span>
                     <span class="text-[.6rem] text-[#13F3F7] font-mono">READY</span>
                 </div>
 
                 <div>
-                    <span class="block text-[.5rem] text-[#4E6B72] font-mono">ACCESS</span>
+                    <span class="block text-[.5rem] text-[#91B5BD] font-mono">ACCESS</span>
                     <span class="text-[.6rem] text-[#91B5BD] font-mono">OPEN</span>
                 </div>
 
@@ -116,7 +116,7 @@
 
         <!-- Rodapé -->
         <div class="flex items-center justify-between mt-3 px-1">
-            <span class="text-[.6rem] font-mono text-[#4E6B72] uppercase">
+            <span class="text-[.6rem] font-mono text-[#91B5BD] uppercase">
                 Membro ativo
             </span>
 

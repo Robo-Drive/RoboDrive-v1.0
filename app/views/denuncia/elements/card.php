@@ -17,7 +17,7 @@ $diasPendente = $primeiraDenuncia->diff(new DateTimeImmutable())->days;
         <div class="flex min-w-0 flex-1 flex-col gap-3">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
                 <span class="rd-badge"><?= $tipoDenuncia["rotulo"] ?></span>
-                <span class="text-[.65rem] font-bold uppercase tracking-[.15em] text-[#4E6B72]">
+                <span class="text-[.65rem] font-bold uppercase tracking-[.15em] text-[#91B5BD]">
                     Desde <?= $primeiraDenuncia->format("d/m/Y") ?> · <?= $diasPendente == 0 ? "hoje" : ($diasPendente == 1 ? "há 1 dia" : "há $diasPendente dias") ?>
                 </span>
             </div>

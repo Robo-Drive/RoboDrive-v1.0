@@ -46,12 +46,4 @@ if (listaDenuncias)
         filtro.addEventListener("click", () => filtrarDenuncias(filtro.dataset.filtro));
     });
 
-    listaDenuncias.querySelectorAll("form[data-confirmar]").forEach(form => {
-        form.addEventListener("submit", evento => {
-            if (!confirm(form.dataset.confirmar))
-            {
-                evento.preventDefault();
-            }
-        });
-    });
 }

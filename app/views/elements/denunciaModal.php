@@ -38,7 +38,7 @@
             <div class="rd-field">
                 <label for="denunciaDescricao" class="rd-label">Detalhes (opcional)</label>
                 <textarea id="denunciaDescricao" name="descricao" rows="4" maxlength="2000" placeholder="Conte o que aconteceu para ajudar a administração a analisar..." class="rd-textarea"></textarea>
-                <p class="mt-2 text-right text-[.65rem] font-bold tracking-[.1em] text-[#4E6B72]"><span data-contador>0</span>/2000</p>
+                <p class="mt-2 text-right text-[.65rem] font-bold tracking-[.1em] text-[#91B5BD]"><span data-contador>0</span>/2000</p>
             </div>
 
             <p class="border-l-4 border-[#F0ED06] pl-4 text-sm leading-relaxed text-[#91B5BD]">

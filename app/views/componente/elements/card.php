@@ -11,7 +11,7 @@
     <div class="relative z-10 flex h-full w-full flex-col justify-between p-4">
         <h3 class="truncate pr-10 text-left font-['Orbitron'] text-lg font-black text-[#F2FEFE]"><?= $componente->getNome() ?></h3>
         <p class="line-clamp-3 text-sm text-[#91B5BD]"><?= $componente->getDescricao() ?></p>
-        <p class="text-right text-[.65rem] font-bold uppercase tracking-[.15em] text-[#4E6B72]">Cadastrado por @<?= $componente->getUsuario()->getNomeUsuario() ?></p>
+        <p class="text-right text-[.65rem] font-bold uppercase tracking-[.15em] text-[#91B5BD]">Cadastrado por @<?= $componente->getUsuario()->getNomeUsuario() ?></p>
     </div>
 
     <?php

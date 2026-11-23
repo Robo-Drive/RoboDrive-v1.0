@@ -110,7 +110,7 @@ include_once(__DIR__."/../elements/header.php");
 
 <?php if($perfilProprio && !empty($categorias) && count($categorias) > 1): ?>
 <!-- MODAL DE EXCLUIR CATEGORIA COM REATRIBUIÇÃO OBRIGATÓRIA -->
-<div id="modalGerenciarCategorias" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 hidden">
+<div id="modalGerenciarCategorias" class="fixed inset-0 z-50 flex items-center justify-center bg-[#000505]/85 p-4 hidden">
     <div class="rd-card !p-6 max-w-md w-full border-2 border-[#07556A] bg-[#000505]">
         <h3 class="font-['Orbitron'] text-lg font-bold text-[#13F3F7] mb-2">Apagar Categoria</h3>
         <p class="text-xs text-[#91B5BD] mb-4">Como os projetos não podem ficar sem categoria, selecione a categoria a ser removida e para qual categoria seus projetos serão transferidos:</p>

@@ -1,6 +1,6 @@
 <?php if(isset($componente)):?>
 <a href="<?= URL_BASE ?>/componente/perfil?id=<?= $componente->getId() ?>" class="border p-4 w-[500px] gap-3">
-    <h1 class="text-white font-bold text-center">
+    <h1 class="text-[#F2FEFE] font-bold text-center">
         <?= $componente->getNome()?>
     </h1>
     <hr>

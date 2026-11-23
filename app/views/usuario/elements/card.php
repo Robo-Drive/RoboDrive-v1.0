@@ -8,7 +8,7 @@ $visaoAdmin = $_SESSION["usuario_logado"]->getRegra() == "admin" && $usuario->ge
             <img
                 src="<?= $usuario->getImagem() ? URL_BASE."/arquivo?arquivo=".$usuario->getImagem() : IMG_URL_BASE."/perfil.png" ?>"
                 alt="Foto de perfil"
-                class="h-32 w-32 border-[3px] border-[#13F3F7] object-cover shadow-[0_0_24px_rgba(19,243,247,.35)] sm:h-40 sm:w-40"
+                class="aspect-square h-32 w-32 rounded-full border-[3px] border-[#13F3F7] object-cover shadow-[0_0_24px_rgba(19,243,247,.35)] sm:h-40 sm:w-40"
             >
             <div class="text-center">
                 <p class="rd-eyebrow">USUÁRIO</p>

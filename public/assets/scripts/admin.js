@@ -183,6 +183,7 @@ if (modalComunicado) {
         e.preventDefault();
 
         // Remove erro anterior se houver
+        formComunicado.querySelectorAll(".rd-aviso-sucesso").forEach(el => el.remove());
         const erroAntigo = formComunicado.querySelector(".rd-error-ajax");
         if (erroAntigo) erroAntigo.remove();
 
@@ -215,9 +216,9 @@ if (modalComunicado) {
             const data = await response.json();
 
             if (response.ok && data.sucesso) {
-                alert(data.mensagem || "Comunicado enviado com sucesso!");
-                modalComunicado.close();
                 formComunicado.reset();
+                atualizarTextarea(textarea);
+                exibirSucessoComunicado(textarea, data.mensagem || "Comunicado enviado com sucesso!");
             } else {
                 exibirErroComunicado(textarea, data.mensagem || "Não foi possível enviar o comunicado.");
             }
@@ -231,6 +232,18 @@ if (modalComunicado) {
                 submitBtn.innerText = textoOriginal;
             }
         }
+    });
+
+    function exibirSucessoComunicado(elemento, mensagem) {
+        const aviso = document.createElement("div");
+        aviso.setAttribute("role", "status");
+        aviso.className = "rd-aviso-sucesso border-2 border-[#00D6B5] bg-[#06141C] p-3.5 text-xs font-bold tracking-wider text-[#00D6B5] font-['Orbitron']";
+        aviso.textContent = mensagem;
+        elemento.closest(".rd-field").parentElement.insertAdjacentElement("afterbegin", aviso);
+    }
+
+    modalComunicado.addEventListener("close", () => {
+        formComunicado.querySelectorAll(".rd-aviso-sucesso").forEach(el => el.remove());
     });
 
     function exibirErroComunicado(elemento, mensagem) {

@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     }
 
                     if (data.mensagem) {
-                        alert(data.mensagem);
+                        rdAviso(data.mensagem, "sucesso", true);
                     }
 
                     window.location.reload();

@@ -87,7 +87,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
             <p class="text-[#91B5BD] text-xs mt-1">
                 Categoria:
 
-                <span class="text-white font-semibold">
+                <span class="text-[#F2FEFE] font-semibold">
                     <?= $escapar($projeto->getCategoria()?->getNome() ?? 'Geral') ?>
                 </span>
             </p>
@@ -116,26 +116,16 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                 </form>
 
                 <!-- Desativar projeto -->
-                <form
-                    action="<?= URL_BASE ?>/projeto/desativar"
-                    method="post"
-                    onsubmit="return confirm('Deseja realmente desativar este projeto?');"
+                <button
+                    type="button"
+                    data-desativar
+                    data-tipo="projeto"
+                    data-id="<?= (int)$projeto->getId() ?>"
+                    data-nome="<?= $escapar($projeto->getNome()) ?>"
+                    class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition"
                 >
-
-                    <input
-                        type="hidden"
-                        name="id"
-                        value="<?= (int)$projeto->getId() ?>"
-                    >
-
-                    <button
-                        type="submit"
-                        class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition"
-                    >
-                        Desativar
-                    </button>
-
-                </form>
+                    Desativar
+                </button>
 
             <?php endif; ?>
 
@@ -146,7 +136,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                         Sair do Projeto
                     </button>
                 <?php else: ?>
-                    <form action="<?= URL_BASE ?>/projeto/remover-membro" method="post" onsubmit="return confirm('Deseja realmente sair deste projeto?');">
+                    <form action="<?= URL_BASE ?>/projeto/remover-membro" method="post" data-confirmar="Deseja realmente sair deste projeto?">
                         <input type="hidden" name="projeto_id" value="<?= (int)$projeto->getId() ?>">
                         <input type="hidden" name="usuario_id" value="<?= (int)$usuarioLogadoId ?>">
                         <button type="submit" class="border-2 border-red-500/80 text-red-400 hover:bg-red-500/10 px-4 py-2 text-xs font-bold transition">
@@ -253,7 +243,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
                     <?php else: ?>
 
-                        <span class="text-white font-semibold">
+                        <span class="text-[#F2FEFE] font-semibold">
                             Desconhecido
                         </span>
 
@@ -275,7 +265,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
                         Notas da versão:
 
-                        <span class="text-white">
+                        <span class="text-[#F2FEFE]">
                             <?= $escapar($versaoExibida['descricao_alteracao']) ?>
                         </span>
 
@@ -561,7 +551,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                             download="<?= htmlspecialchars($nomeArquivoExtra) ?>"
                             class="rd-btn rd-btn-secondary !py-1.5 !px-3 text-xs flex items-center justify-center gap-2 w-full text-center"
                         >
-                            <span>📥 Baixar Arquivo</span>
+                            <span>Baixar Arquivo</span>
                         </a>
                     </div>
                 <?php endforeach; ?>
@@ -609,7 +599,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
                 </div>
 
-                <span class="font-mono text-base font-black px-3 py-1 bg-black border border-[#13F3F7] text-white tracking-widest select-all break-all">
+                <span class="font-mono text-base font-black px-3 py-1 bg-[#000505] border border-[#13F3F7] text-[#F2FEFE] tracking-widest select-all break-all">
                     <?= $escapar($projeto->getHashAcesso() ?? 'INDISPONÍVEL') ?>
                 </span>
 
@@ -651,11 +641,11 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
                                 <div>
 
-                                    <p class="text-xs font-bold text-white">
+                                    <p class="text-xs font-bold text-[#F2FEFE]">
                                         <?= $escapar($pendente['nome'] ?? 'Usuário') ?>
                                     </p>
 
-                                    <p class="text-[.65rem] text-gray-400">
+                                    <p class="text-[.65rem] text-[#91B5BD]">
                                         @<?= $escapar($pendente['nome_usuario'] ?? '') ?>
                                     </p>
 
@@ -762,7 +752,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                                             : IMG_URL_BASE . '/perfil.png' ?>"
                                         alt="Foto do usuário"
                                         loading="lazy"
-                                        class="w-10 h-10 object-cover border border-[#07556A] shrink-0"
+                                        class="w-10 h-10 rounded-full object-cover border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)] shrink-0"
                                     >
 
                                     <div class="min-w-0">
@@ -786,7 +776,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                                     <form
                                         action="<?= URL_BASE ?>/projeto/remover-membro"
                                         method="post"
-                                        onsubmit="return confirm('Deseja realmente remover este participante do projeto?');"
+                                        data-confirmar="Deseja realmente remover este participante do projeto?"
                                         class="shrink-0"
                                     >
 
@@ -929,7 +919,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                                 <img 
                                     src="<?= $coment->getUsuario()->getImagem() ? URL_BASE . '/arquivo?arquivo=' . urlencode($coment->getUsuario()->getImagem()) : IMG_URL_BASE . '/perfil.png' ?>" 
                                     alt="Foto" 
-                                    class="w-8 h-8 object-cover border border-[#07556A]"
+                                    class="w-8 h-8 rounded-full object-cover border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)]"
                                 >
                                 <div>
                                     <p class="text-xs font-bold text-[#F2FEFE]">
@@ -943,7 +933,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
                             <div class="flex items-center gap-2">
                                 <?php if ($coment->getUsuario()->getId() === $usuarioLogadoId || $eAdmin): ?>
-                                    <form action="<?= URL_BASE ?>/comentario/desativar" method="post" onsubmit="return confirm('Deseja desativar este comentário?');">
+                                    <form action="<?= URL_BASE ?>/comentario/desativar" method="post" data-confirmar="Deseja desativar este comentário?">
                                         <input type="hidden" name="id" value="<?= $coment->getId() ?>">
                                         <input type="hidden" name="tipo" value="projeto">
                                         <button type="submit" title="desativar" class="text-red-400 hover:text-red-300 text-xs px-2 py-1">
@@ -1045,7 +1035,7 @@ function copiarCodigo(elementId, btn) {
         : 'Copiar';
 
     if (!navigator.clipboard || !window.isSecureContext) {
-        alert('Não foi possível copiar automaticamente. Verifique se a página está em uma conexão segura.');
+        rdAviso('Não foi possível copiar automaticamente. Verifique se a página está em uma conexão segura.', 'erro');
         return;
     }
 
@@ -1076,7 +1066,7 @@ function copiarCodigo(elementId, btn) {
 
         })
         .catch(() => {
-            alert('Erro ao copiar o código.');
+            rdAviso('Erro ao copiar o código.', 'erro');
         });
 
 }

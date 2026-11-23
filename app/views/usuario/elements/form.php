@@ -1,157 +1,192 @@
-<div class="space-y-6">
+<?php
+$erros = $erros ?? [];
+$fotoAtual = null;
+if (isset($usuario)) {
+    $fotoAtual = is_object($usuario) ? $usuario->getImagem() : ($usuario['imagem'] ?? null);
+}
+// Atributos de acessibilidade para campo com erro vindo do servidor
+$ariaErro = function ($campo, $extra = '') use ($erros) {
+    $ids = trim($extra . (isset($erros[$campo]) ? " erro-$campo" : ''));
+    return ($ids !== '' ? 'aria-describedby="' . $ids . '"' : '') . (isset($erros[$campo]) ? ' aria-invalid="true"' : '');
+};
+$estrela = '<span aria-hidden="true" class="text-red-400">*</span>';
+$marcado = 'group-has-[input[name=remover_imagem]:checked]';
+?>
+<div class="space-y-9">
 
-    <div class="rd-field">
-        <label for="nome_usuario" class="rd-label">Nome de usuário</label>
-        <input
-            type="text"
-            id="nome_usuario"
-            name="nome_usuario"
-            class="rd-input"
-            value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getNomeUsuario() : (isset($usuario['nome_usuario']) ? $usuario['nome_usuario'] : '')) : '' ?>"
+    <p class="text-xs text-[#91B5BD]"><span aria-hidden="true" class="text-red-400">*</span> Campos obrigatórios</p>
+
+    <!-- Foto de perfil -->
+    <div class="group flex flex-col items-center gap-4 sm:flex-row">
+        <img
+            id="avatarPerfil"
+            src="<?= !empty($fotoAtual) ? URL_BASE . '/arquivo?arquivo=' . urlencode($fotoAtual) : IMG_URL_BASE . '/perfil.png' ?>"
+            alt="Foto de perfil"
+            class="aspect-square h-24 w-24 shrink-0 overflow-hidden rounded-full border-2 border-[#13F3F7] object-cover shadow-[0_0_24px_rgba(19,243,247,.35)] transition-opacity motion-reduce:transition-none <?= $marcado ?>:opacity-40"
         >
-        <?php if (isset($erros['nome_usuario'])): ?>
-            <p class="rd-error"><?= $erros['nome_usuario'] ?></p>
-        <?php endif; ?>
+
+        <div class="flex w-full flex-col gap-2 sm:w-auto">
+            <button type="button" id="btnSelecionarImagem" onclick="adicionarImagens()" class="rd-file-btn sm:w-auto sm:px-6">Selecionar imagem</button>
+            <input type="file" name="imagem" id="imagens" accept="image/*" style="display:none;" <?= $ariaErro('imagem') ?>>
+
+            <?php if (!empty($fotoAtual)): ?>
+                <label class="flex min-h-11 cursor-pointer items-center gap-3 text-sm font-bold text-red-400">
+                    <input type="checkbox" name="remover_imagem" value="1" class="peer sr-only">
+                    <span class="flex h-5 w-5 shrink-0 items-center justify-center border-2 border-[#07556A] bg-[#06141C] text-transparent peer-checked:border-[#13F3F7] peer-checked:bg-[#13F3F7] peer-checked:text-[#000505] peer-focus-visible:ring-2 peer-focus-visible:ring-[#54FBFE] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#06141C]">
+                        <svg viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>
+                    </span>
+                    <span class="select-none">Remover foto atual</span>
+                </label>
+                <p role="status" class="hidden text-xs text-[#91B5BD] <?= $marcado ?>:block">A foto será removida ao salvar.</p>
+            <?php endif; ?>
+        </div>
     </div>
 
-    <div class="rd-field">
-        <label for="nome" class="rd-label">Nome</label>
-        <input
-            type="text"
-            id="nome"
-            name="nome"
-            class="rd-input"
-            value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getNome() : (isset($usuario['nome']) ? $usuario['nome'] : '')) : '' ?>"
-        >
-        <?php if (isset($erros['nome'])): ?>
-            <p class="rd-error"><?= $erros['nome'] ?></p>
-        <?php endif; ?>
-    </div>
+    <ul id="listaImagens" class="rd-file-list [&>li]:bg-[#06141C] [&>li]:border-[#07556A] [&>li]:text-[#F2FEFE] [&>li]:p-4 [&>li:hover]:border-[#13F3F7] [&_img]:rounded-full [&_img]:border-[#13F3F7] [&_p:last-child]:text-[#91B5BD] [&>li>button]:flex [&>li>button]:h-11 [&>li>button]:w-11 [&>li>button]:items-center [&>li>button]:justify-center"></ul>
+    <?php if (isset($erros['imagem'])): ?>
+        <p id="erro-imagem" class="rd-error"><?= $erros['imagem'] ?></p>
+    <?php endif; ?>
 
-    <div class="rd-field">
-        <label for="biografia" class="rd-label">Biografia</label>
-        <textarea
-            name="biografia"
-            id="biografia"
-            rows="5"
-            maxlength="500"
-            placeholder="Conte um pouco sobre você..."
-            class="rd-textarea"
-        ><?= isset($usuario)
-            ? (is_object($usuario)
-                ? $usuario->getBiografia()
-                : (isset($usuario['biografia']) ? $usuario['biografia'] : ''))
-            : '' ?></textarea>
-        <?php if (isset($erros['biografia'])): ?>
-            <p class="rd-error"><?= $erros['biografia'] ?></p>
-        <?php endif; ?>
-    </div>
+    <fieldset class="min-w-0 space-y-6">
+        <legend class="mb-3 w-full">
+            <span class="flex items-center gap-3 text-[.65rem] font-bold uppercase tracking-[.25em] text-[#91B5BD]">
+                <span class="font-['Orbitron'] font-black text-[#13F3F7]">01</span>
+                Dados pessoais
+                <span class="h-[2px] flex-1 bg-[#07556A]"></span>
+            </span>
+        </legend>
 
-    <div class="rd-field">
-        <label for="email" class="rd-label">Email</label>
-        <input
-            type="text"
-            id="email"
-            name="email"
-            class="rd-input"
-            value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getEmail() : (isset($usuario['email']) ? $usuario['email'] : '')) : '' ?>"
-        >
-        <?php if (isset($erros['email'])): ?>
-            <p class="rd-error"><?= $erros['email'] ?></p>
-        <?php endif; ?>
-    </div>
-
-    <div class="rd-field">
-        <label for="senha" class="rd-label">Senha</label>
-        <div class="flex w-full">
+        <div class="rd-field">
+            <label for="nome_usuario" class="rd-label">Nome de usuário <?= $estrela ?></label>
             <input
-                type="password"
-                id="senha"
-                name="senha"
-                class="password rd-input flex-1 border-r-0"
-                value="<?= isset($usuario) ? (is_object($usuario) ? '' : (isset($usuario['senha']) ? $usuario['senha'] : '')) : '' ?>"
+                type="text"
+                id="nome_usuario"
+                name="nome_usuario"
+                class="rd-input"
+                required
+                <?= $ariaErro('nome_usuario') ?>
+                value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getNomeUsuario() : (isset($usuario['nome_usuario']) ? $usuario['nome_usuario'] : '')) : '' ?>"
             >
-            <button type="button" onclick="passowrdChange()" class="flex h-11 w-11 shrink-0 items-center justify-center border-2 border-[#07556A] bg-[#000505] transition-colors duration-200 hover:border-[#13F3F7]">
-                <img class="passwordButton h-4 w-4" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
-            </button>
+            <?php if (isset($erros['nome_usuario'])): ?>
+                <p id="erro-nome_usuario" class="rd-error"><?= $erros['nome_usuario'] ?></p>
+            <?php endif; ?>
         </div>
-        <?php if (isset($erros['senha'])): ?>
-            <p class="rd-error"><?= $erros['senha'] ?></p>
-        <?php endif; ?>
-    </div>
 
-    <div class="rd-field">
-        <label for="confirmar_senha" class="rd-label">Confirmar senha</label>
-        <div class="flex w-full">
-            <input type="password" id="confirmar_senha" name="confirmar_senha" class="confirmarPassword rd-input flex-1 border-r-0">
-            <button type="button" onclick="confirmarPassowrdChange()" class="flex h-11 w-11 shrink-0 items-center justify-center border-2 border-[#07556A] bg-[#000505] transition-colors duration-200 hover:border-[#13F3F7]">
-                <img class="confirmarPasswordButton h-4 w-4" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
-            </button>
+        <div class="rd-field">
+            <label for="nome" class="rd-label">Nome <?= $estrela ?></label>
+            <input
+                type="text"
+                id="nome"
+                name="nome"
+                class="rd-input"
+                required
+                <?= $ariaErro('nome') ?>
+                value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getNome() : (isset($usuario['nome']) ? $usuario['nome'] : '')) : '' ?>"
+            >
+            <?php if (isset($erros['nome'])): ?>
+                <p id="erro-nome" class="rd-error"><?= $erros['nome'] ?></p>
+            <?php endif; ?>
         </div>
-        <p class="confirmarErro rd-error">
-            <?php if(isset($erros)): ?>
+
+        <div class="rd-field">
+            <label for="biografia" class="rd-label">Biografia</label>
+            <textarea
+                name="biografia"
+                id="biografia"
+                rows="5"
+                maxlength="500"
+                placeholder="Conte um pouco sobre você..."
+                class="rd-textarea"
+                <?= $ariaErro('biografia', 'contador-biografia') ?>
+            ><?= isset($usuario)
+                ? (is_object($usuario)
+                    ? $usuario->getBiografia()
+                    : (isset($usuario['biografia']) ? $usuario['biografia'] : ''))
+                : '' ?></textarea>
+            <p id="contador-biografia" aria-live="polite" class="mt-1 text-right text-xs text-[#91B5BD]">0/500</p>
+            <?php if (isset($erros['biografia'])): ?>
+                <p id="erro-biografia" class="rd-error"><?= $erros['biografia'] ?></p>
+            <?php endif; ?>
+        </div>
+
+        <div class="rd-field">
+            <label for="email" class="rd-label">E-mail <?= $estrela ?></label>
+            <input
+                type="email"
+                id="email"
+                name="email"
+                class="rd-input"
+                autocomplete="email"
+                required
+                <?= $ariaErro('email') ?>
+                value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getEmail() : (isset($usuario['email']) ? $usuario['email'] : '')) : '' ?>"
+            >
+            <?php if (isset($erros['email'])): ?>
+                <p id="erro-email" class="rd-error"><?= $erros['email'] ?></p>
+            <?php endif; ?>
+        </div>
+
+        <?php if($_SESSION["usuario_logado"]->getRegra() == "admin"): ?>
+            <div class="rd-field">
+                <label for="regra" class="rd-label">Regra</label>
+                <select name="regra" id="regra" class="rd-select" <?= $ariaErro('regra') ?>>
+                    <option value="">Selecione</option>
+                    <option value="admin" <?= isset($usuario) ? (is_object($usuario) ? ($usuario->getRegra() == "admin" ? "selected" : "") : (isset($usuario["regra"]) ? ($usuario["regra"] == "admin" ? "selected" : "") : "")) : "" ?>>Admin</option>
+                    <option value="usuario" <?= isset($usuario) ? (is_object($usuario) ? ($usuario->getRegra() == "usuario" ? "selected" : "") : (isset($usuario["regra"]) ? ($usuario["regra"] == "usuario" ? "selected" : "") : "")) : "" ?>>Usuário</option>
+                </select>
+                <?php if (isset($erros['regra'])): ?>
+                    <p id="erro-regra" class="rd-error"><?= $erros['regra'] ?></p>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+    </fieldset>
+
+    <fieldset class="min-w-0 space-y-6">
+        <legend class="mb-3 w-full">
+            <span class="flex items-center gap-3 text-[.65rem] font-bold uppercase tracking-[.25em] text-[#91B5BD]">
+                <span class="font-['Orbitron'] font-black text-[#13F3F7]">02</span>
+                Segurança
+                <span class="h-[2px] flex-1 bg-[#07556A]"></span>
+            </span>
+        </legend>
+
+        <div class="rd-field">
+            <label for="senha" class="rd-label">Nova senha</label>
+            <div class="flex w-full">
+                <input
+                    type="password"
+                    id="senha"
+                    name="senha"
+                    autocomplete="new-password"
+                    class="password rd-input flex-1 border-r-0"
+                    <?= $ariaErro('senha', 'dica-senha') ?>
+                    value="<?= isset($usuario) ? (is_object($usuario) ? '' : (isset($usuario['senha']) ? $usuario['senha'] : '')) : '' ?>"
+                >
+                <button type="button" onclick="passowrdChange()" class="flex h-11 w-11 shrink-0 items-center justify-center border-2 border-[#07556A] bg-[#000505] transition-colors duration-200 hover:border-[#13F3F7] focus-visible:outline-2 focus-visible:outline-[#54FBFE]">
+                    <img class="passwordButton h-4 w-4" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
+                </button>
+            </div>
+            <p id="dica-senha" class="mt-2 text-xs text-[#91B5BD]">Deixe em branco para manter a senha atual.</p>
+            <?php if (isset($erros['senha'])): ?>
+                <p id="erro-senha" class="rd-error"><?= $erros['senha'] ?></p>
+            <?php endif; ?>
+        </div>
+
+        <div class="rd-field">
+            <label for="confirmar_senha" class="rd-label">Confirmar nova senha</label>
+            <div class="flex w-full">
+                <input type="password" id="confirmar_senha" name="confirmar_senha" autocomplete="new-password" class="confirmarPassword rd-input flex-1 border-r-0" <?= $ariaErro('confirmar_senha') ?>>
+                <button type="button" onclick="confirmarPassowrdChange()" class="flex h-11 w-11 shrink-0 items-center justify-center border-2 border-[#07556A] bg-[#000505] transition-colors duration-200 hover:border-[#13F3F7] focus-visible:outline-2 focus-visible:outline-[#54FBFE]">
+                    <img class="confirmarPasswordButton h-4 w-4" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
+                </button>
+            </div>
+            <p id="erro-confirmar_senha" class="confirmarErro rd-error">
                 <?php if(isset($erros["confirmar_senha"])): ?>
                     <?= $erros["confirmar_senha"] ?>
                 <?php endif;?>
-            <?php endif;?>
-        </p>
-    </div>
-
-        <!-- Foto Atual com opção de retirar (estilo projetos) -->
-    <?php 
-        if(isset($usuario))
-        {
-            $fotoAtual = is_object($usuario) ? $usuario->getImagem() : ($usuario['imagem'] ?? null);
-        }
-    ?>
-    <?php if (!empty($fotoAtual)): ?>
-        <div class="rd-field mb-4">
-            <label class="rd-label">Foto de Perfil Atual</label>
-            <div class="flex items-center gap-4 border-2 border-[#07556A] bg-[#06141C] p-3">
-                <img 
-                    src="<?= URL_BASE ?>/arquivo?arquivo=<?= urlencode($fotoAtual) ?>" 
-                    alt="Foto de Perfil" 
-                    class="h-16 w-16 object-cover border-2 border-[#13F3F7]"
-                >
-                <label class="flex items-center gap-2 cursor-pointer bg-[#000505] p-2 border border-[#07556A] text-xs">
-                    <input 
-                        type="checkbox" 
-                        name="remover_imagem" 
-                        value="1" 
-                        class="accent-[#13F3F7] h-4 w-4"
-                    >
-                    <span class="text-xs text-rose-400 font-bold uppercase select-none">
-                        Remover foto de perfil
-                    </span>
-                </label>
-            </div>
+            </p>
         </div>
-    <?php endif; ?>
-
-    <!-- Nova Imagem -->
-    <div class="rd-field">
-        <label for="imagem" class="rd-label"><?= !empty($fotoAtual) ? 'Alterar foto de perfil' : 'Foto de perfil' ?></label>
-        <button type="button" onclick="adicionarImagens()" class="rd-file-btn">Selecionar imagem</button>
-        <input type="file" name="imagem" id="imagens" accept="image/*" style="display:none;">
-        <ul id="listaImagens" class="rd-file-list"></ul>
-        <?php if (isset($erros['imagem'])): ?>
-            <p class="rd-error"><?= $erros['imagem'] ?></p>
-        <?php endif; ?>
-    </div>
-
-    <?php if($_SESSION["usuario_logado"]->getRegra() == "admin"): ?>
-        <div class="rd-field">
-            <label for="regra" class="rd-label">Regra</label>
-            <select name="regra" id="regra" class="rd-select">
-                <option value="">Selecione</option>
-                <option value="admin" <?= isset($usuario) ? (is_object($usuario) ? ($usuario->getRegra() == "admin" ? "selected" : "") : (isset($usuario["regra"]) ? ($usuario["regra"] == "admin" ? "selected" : "") : "")) : "" ?>>Admin</option>
-                <option value="usuario" <?= isset($usuario) ? (is_object($usuario) ? ($usuario->getRegra() == "usuario" ? "selected" : "") : (isset($usuario["regra"]) ? ($usuario["regra"] == "usuario" ? "selected" : "") : "")) : "" ?>>Usuário</option>
-            </select>
-            <?php if (isset($erros['regra'])): ?>
-                <p class="rd-error"><?= $erros['regra'] ?></p>
-            <?php endif; ?>
-        </div>
-    <?php endif; ?>
+    </fieldset>
 
     <?php if(isset($_POST["id"]) || isset($usuario)): ?>
         <input type="hidden" name="id" value="<?= isset($_POST['id']) ? $_POST['id'] : (isset($usuario) ? (is_object($usuario) ? $usuario->getId() : (isset($usuario['id']) ? $usuario['id'] : '')) : '') ?>">
@@ -160,5 +195,5 @@
 </div>
 
 <div class="flex items-center justify-center p-4 pt-6">
-    <button type="submit" class="rd-btn rd-btn-primary">Enviar</button>
+    <button type="submit" class="rd-btn rd-btn-primary w-full sm:w-auto">Salvar alterações</button>
 </div>

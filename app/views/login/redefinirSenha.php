@@ -9,7 +9,7 @@ include_once(__DIR__ . "/../elements/header.php");
         
         <div class="mb-6">
             <p class="mb-2 text-[.65rem] font-bold uppercase tracking-[.25em] text-[#91B5BD]">NOVA SENHA</p>
-            <h1 class="font-['Orbitron'] text-2xl sm:text-3xl font-black text-white">
+            <h1 class="font-['Orbitron'] text-2xl sm:text-3xl font-black text-[#F2FEFE]">
                 CADASTRAR <span class="text-[#13F3F7]">SENHA</span>
             </h1>
             <p class="mt-2 text-xs text-[#91B5BD]">Informe sua nova senha de acesso.</p>

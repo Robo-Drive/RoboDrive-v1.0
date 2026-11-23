@@ -122,7 +122,7 @@
                         border-t border-[#07556A] pt-2">
 
                 <div class="flex items-center justify-between gap-2">
-                    <span class="text-[.48rem] font-mono tracking-[.15em] text-[#4E6B72]">
+                    <span class="text-[.48rem] font-mono tracking-[.15em] text-[#91B5BD]">
                         PROJECT_<?= str_pad($idProjeto, 4, '0', STR_PAD_LEFT) ?>
                     </span>
 
@@ -144,7 +144,7 @@
                 </p>
 
                 <div class="flex justify-between items-center mt-1">
-                    <span class="text-[.48rem] font-mono text-[#4E6B72]">
+                    <span class="text-[.48rem] font-mono text-[#91B5BD]">
                         <?= $dataProjeto ?>
                     </span>
 

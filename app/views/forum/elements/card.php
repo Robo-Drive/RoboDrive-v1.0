@@ -22,7 +22,7 @@
             <img 
                 src="<?= htmlspecialchars($imagemAutor) ?>" 
                 alt="Foto de <?= htmlspecialchars($nomeUsuarioForum) ?>" 
-                class="w-10 h-10 object-cover border border-[#07556A] shrink-0"
+                class="w-10 h-10 rounded-full object-cover border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)] shrink-0"
                 loading="lazy" 
                 onerror="this.onerror=null;this.src='<?= IMG_URL_BASE ?>/perfil.png';"
             >
@@ -44,10 +44,10 @@
 
     <!-- RODAPÉ: VER DISCUSSÃO / COMENTÁRIOS -->
     <div class="mt-4 pt-3 border-t border-[#07556A]/50 flex items-center justify-between">
-        <a href="<?= URL_BASE ?>/forum/perfil?id=<?= (int)$fId ?>" class="text-xs font-bold text-[#13F3F7] hover:underline flex items-center gap-1">
-            💬 Ver discussão e respostas →
+        <a href="<?= URL_BASE ?>/forum/perfil?id=<?= (int)$fId ?>" class="text-xs font-bold text-[#13F3F7] hover:underline inline-flex items-center py-1 focus-visible:ring-2 focus-visible:ring-[#54FBFE] focus-visible:ring-offset-2 focus-visible:ring-offset-[#000505]">
+            Ver discussão e respostas →
         </a>
-        <span class="text-[.65rem] text-[#91B5BD] uppercase font-mono">
+        <span class="text-[.7rem] text-[#91B5BD] uppercase font-mono">
             <?= htmlspecialchars(ucfirst($forum->getVisibilidade() ?? 'Público')) ?>
         </span>
     </div>

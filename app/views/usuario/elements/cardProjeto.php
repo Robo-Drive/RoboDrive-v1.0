@@ -104,7 +104,7 @@
             <div class="flex items-center justify-between
                         mt-auto pt-5">
 
-                <span class="text-[.65rem] font-mono text-[#4E6B72]">
+                <span class="text-[.65rem] font-mono text-[#91B5BD]">
                     <?= $dataProjeto ?>
                 </span>
 

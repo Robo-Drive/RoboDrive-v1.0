@@ -36,7 +36,7 @@ $fotoAutor = $forum->getUsuario()->getImagem()
                         </button>
                     </form>
 
-                    <form action="<?= URL_BASE ?>/forum/desativar" method="post" onsubmit="return confirm('Deseja realmente desativar esta postagem?');">
+                    <form action="<?= URL_BASE ?>/forum/desativar" method="post" data-confirmar="Deseja realmente desativar esta postagem?">
                         <input type="hidden" name="id" value="<?= $forum->getId() ?>">
                         <button type="submit" class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition">
                             Desativar
@@ -59,7 +59,7 @@ $fotoAutor = $forum->getUsuario()->getImagem()
                     <img 
                         src="<?= htmlspecialchars($fotoAutor) ?>" 
                         alt="Foto do autor" 
-                        class="w-12 h-12 object-cover border-2 border-[#07556A] shrink-0"
+                        class="w-12 h-12 rounded-full object-cover border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)] shrink-0"
                         loading="lazy"
                         onerror="this.onerror=null;this.src='<?= IMG_URL_BASE ?>/perfil.png';"
                     >
@@ -147,7 +147,7 @@ $fotoAutor = $forum->getUsuario()->getImagem()
                                     <img 
                                         src="<?= htmlspecialchars($fotoComent) ?>" 
                                         alt="Foto" 
-                                        class="w-9 h-9 object-cover border border-[#07556A] shrink-0"
+                                        class="w-9 h-9 rounded-full object-cover border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)] shrink-0"
                                         loading="lazy"
                                         onerror="this.onerror=null;this.src='<?= IMG_URL_BASE ?>/perfil.png';"
                                     >
@@ -163,7 +163,7 @@ $fotoAutor = $forum->getUsuario()->getImagem()
 
                                 <div class="flex items-center gap-2 shrink-0">
                                     <?php if ($coment->getUsuario()->getId() === $usuarioLogado->getId() || $eAdmin): ?>
-                                        <form action="<?= URL_BASE ?>/comentario/desativar" method="post" onsubmit="return confirm('Deseja desativar este comentário?');">
+                                        <form action="<?= URL_BASE ?>/comentario/desativar" method="post" data-confirmar="Deseja desativar este comentário?">
                                             <input type="hidden" name="id" value="<?= $coment->getId() ?>">
                                             <input type="hidden" name="tipo" value="forum">
                                             <button type="submit" title="Desativar comentário" class="text-red-400 hover:text-red-300 text-xs px-2 py-1 font-bold">

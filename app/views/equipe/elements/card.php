@@ -98,7 +98,7 @@ $obterImagem = static function ($item) {
                     <input type="hidden" name="id" value="<?= (int) $equipe->getId() ?>">
                     <button type="submit" class="rd-btn rd-btn-primary !py-2 !px-4 text-xs">Editar Equipe</button>
                 </form>
-                <form action="<?= URL_BASE ?>/equipe/desativar" method="post" onsubmit="return confirm('Deseja realmente desativar esta equipe?');">
+                <form action="<?= URL_BASE ?>/equipe/desativar" method="post" data-confirmar="Deseja realmente desativar esta equipe?">
                     <input type="hidden" name="id" value="<?= (int) $equipe->getId() ?>">
                     <button type="submit" class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition">Desativar</button>
                 </form>
@@ -109,7 +109,7 @@ $obterImagem = static function ($item) {
                         Sair da Equipe
                     </button>
                 <?php else: ?>
-                    <form action="<?= URL_BASE ?>/equipe/remover-membro" method="post" onsubmit="return confirm('Deseja realmente sair desta equipe?');">
+                    <form action="<?= URL_BASE ?>/equipe/remover-membro" method="post" data-confirmar="Deseja realmente sair desta equipe?">
                         <input type="hidden" name="equipe_id" value="<?= (int) $equipe->getId() ?>">
                         <input type="hidden" name="usuario_id" value="<?= (int) $usuarioLogadoId ?>">
                         <button type="submit" class="border-2 border-red-500/80 text-red-400 hover:bg-red-500/10 px-4 py-2 text-xs font-bold transition">
@@ -141,7 +141,7 @@ $obterImagem = static function ($item) {
         <div class="flex items-center gap-2">
             <span class="text-xs uppercase text-[#91B5BD] tracking-wider font-['Orbitron']">Visualização:</span>
             <img id="iconeSecaoAtual" src="<?= IMG_URL_BASE ?>/projeto-icon.png" alt="" class="w-5 h-5 object-contain">
-            <span class="text-xs text-white" id="tituloSecaoAtual">Projetos da Equipe</span>
+            <span class="text-xs text-[#F2FEFE]" id="tituloSecaoAtual">Projetos da Equipe</span>
         </div>
         <div class="flex items-center gap-2 w-full sm:w-auto">
             <label for="seletorAbaEquipe" class="text-xs text-[#91B5BD] font-bold uppercase whitespace-nowrap">Exibir:</label>
@@ -231,7 +231,7 @@ $obterImagem = static function ($item) {
                             <div class="flex items-center gap-3 mb-3">
                                 <img src="<?= htmlspecialchars($imagemAutorUrl) ?>"
                                      alt="Foto de <?= htmlspecialchars($nomeUsuarioForum) ?>"
-                                     class="w-10 h-10 object-cover border border-[#07556A] shrink-0"
+                                     class="w-10 h-10 rounded-full object-cover border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)] shrink-0"
                                      loading="lazy"
                                      onerror="this.onerror=null;this.src='<?= htmlspecialchars(IMG_URL_BASE . '/perfil.png') ?>';">
                                 <p class="text-xs text-[#13F3F7] font-bold">@<?= htmlspecialchars(html_entity_decode($nomeUsuarioForum)) ?></p>
@@ -268,7 +268,7 @@ $obterImagem = static function ($item) {
                 <p class="text-xs text-[#91B5BD] mt-0.5">Envie este código e a senha para novos membros solicitarem entrada.</p>
             </div>
             <div class="flex items-center gap-2">
-                <span class="font-mono text-base font-black px-3 py-1 bg-black border border-[#13F3F7] text-white tracking-widest select-all">
+                <span class="font-mono text-base font-black px-3 py-1 bg-[#000505] border border-[#13F3F7] text-[#F2FEFE] tracking-widest select-all">
                     <?= htmlspecialchars($equipe->getHashAcesso() ?? 'INDISPONÍVEL') ?>
                 </span>
             </div>
@@ -284,8 +284,8 @@ $obterImagem = static function ($item) {
                     <?php foreach ($solicitacoesPendentes as $pendente): ?>
                         <div class="py-2.5 flex items-center justify-between gap-3">
                             <div>
-                                <p class="text-xs font-bold text-white"><?= htmlspecialchars($pendente['nome']) ?></p>
-                                <p class="text-[.65rem] text-gray-400">@<?= htmlspecialchars($pendente['nome_usuario']) ?></p>
+                                <p class="text-xs font-bold text-[#F2FEFE]"><?= htmlspecialchars($pendente['nome']) ?></p>
+                                <p class="text-[.65rem] text-[#91B5BD]">@<?= htmlspecialchars($pendente['nome_usuario']) ?></p>
                             </div>
                             <div class="flex items-center gap-2">
                                 <form action="<?= URL_BASE ?>/equipe/aprovar-solicitacao" method="post">
@@ -353,7 +353,7 @@ $obterImagem = static function ($item) {
                                 src="<?= htmlspecialchars($uImagemUrl, ENT_QUOTES, 'UTF-8') ?>"
                                 alt="Foto de <?= htmlspecialchars($uNome, ENT_QUOTES, 'UTF-8') ?>"
                                 class="w-12 h-12 rounded-full object-cover
-                                    border border-[#07556A] shrink-0"
+                                    border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)] shrink-0"
                                 loading="lazy"
                                 onerror="this.onerror=null;this.src='<?= htmlspecialchars(IMG_URL_BASE . '/perfil.png', ENT_QUOTES, 'UTF-8') ?>';"
                             >
@@ -382,7 +382,7 @@ $obterImagem = static function ($item) {
                             <form
                                 action="<?= URL_BASE ?>/equipe/remover-membro"
                                 method="POST"
-                                onsubmit="return confirm('Deseja realmente remover este participante da equipe?');"
+                                data-confirmar="Deseja realmente remover este participante da equipe?"
                                 class="shrink-0"
                             >
                                 <input

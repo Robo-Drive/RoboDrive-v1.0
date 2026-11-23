@@ -4,7 +4,7 @@ if(isset($projeto)):
 $header = "Projeto";
 include_once(__DIR__."/../elements/header.php");
 ?>
-<div class="h-[90dvh] w-full grid grid-cols-12 grid-rows-12 bg-black">
+<div class="h-[90dvh] w-full grid grid-cols-12 grid-rows-12 bg-[#000505]">
     <?php include_once(__DIR__."/../elements/sidebar.php") ?>
     <?php include_once(__DIR__."/elements/card.php")?>
 </div>
