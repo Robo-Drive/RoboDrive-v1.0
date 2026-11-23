@@ -134,6 +134,19 @@ class ForumController extends Controller
     {
         $this->loginRequired();
 
+        // Mesmo padrão do desativar: só o autor ou um admin
+        $postagemAtual = $this->service->buscarPostagem((int)($_POST["id"] ?? 0));
+
+        if (!$postagemAtual)
+        {
+            $this->responderAcao(false, "Postagem não encontrada.", 404);
+        }
+
+        if (!$this->ehAdmin() && (int)$postagemAtual->getUsuario()->getId() !== (int)$_SESSION["usuario_logado"]->getId())
+        {
+            $this->responderAcao(false, "Você não tem permissão para editar esta postagem.", 403);
+        }
+
         $this->validar(true);
 
         if ($this->validador->temErros())
@@ -150,7 +163,7 @@ class ForumController extends Controller
         {
             $posts["equipe_id"] = (int)$visibilidadePost;
 
-            $atual = $this->service->buscarPostagem((int)$posts["id"]);
+            $atual = $postagemAtual;
             $erroEquipe = $this->service->validarEquipe((int)$posts["equipe_id"], $atual?->getEquipe()?->getId() ? (int)$atual->getEquipe()->getId() : null);
 
             if ($erroEquipe)
@@ -180,16 +193,25 @@ class ForumController extends Controller
     public function editar()
     {
         $this->loginRequired();
+        $this->validarId();
+
+        if ($this->validador->temErros())
+        {
+            $this->redirect(URL_BASE . '/forum/listar');
+            return;
+        }
+
         $forum = new Forum();
-        $forum->setId($_POST["id"]);
+        $forum->setId((int)$_POST["id"]);
         $data["forum"] = $this->repositorySql->buscarId($forum);
-        if($data["forum"]->getConteudo() != null)
+
+        if($data["forum"] && $data["forum"]->getConteudo() != null && ($this->ehAdmin() || (int)$data["forum"]->getUsuario()->getId() === (int)$_SESSION["usuario_logado"]->getId()))
         {
             $this->view("forum/edit",$data);
         }
         else
         {
-            $this->view("forum/list");    
+            $this->view("forum/list");
         }
     }
     

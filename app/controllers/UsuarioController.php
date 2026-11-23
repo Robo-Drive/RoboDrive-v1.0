@@ -74,6 +74,11 @@ class UsuarioController extends Controller
         $this->validador->obrigatorio("nome", $nome);
         $this->validador->obrigatorio("email", $email);
 
+        if (isset($_POST["regra"]))
+        {
+            $this->validador->opcao("regra", $_POST["regra"], ["admin", "usuario"], "Perfil de acesso inválido.");
+        }
+
         $biografia = trim($_POST["biografia"] ?? "");
 
         if ($biografia !== "")
@@ -210,12 +215,19 @@ class UsuarioController extends Controller
         if ($this->validador->temErros())
         {
             $this->redirect(URL_BASE . "/usuario/perfil");
+            return;
+        }
+        if (!$this->ehAdmin() && (int)$_POST["id"] !== (int)$_SESSION["usuario_logado"]->getId())
+        {
+            $this->redirect(URL_BASE . "/usuario/perfil");
+            return;
         }
 
         $usuario = new Usuario();
         $usuario->setId((int)$_POST["id"]);
         $data["usuario"] = $this->repositorySql->buscarId($usuario);
-        if ($data["usuario"]->getNome() != null)
+
+        if ($data["usuario"] && $data["usuario"]->getNome() != null)
         {
             $this->view("usuario/edit", $data);
         }
@@ -227,6 +239,11 @@ class UsuarioController extends Controller
     public function atualizar()
     {
         $this->loginRequired();
+        if (!$this->ehAdmin() && (int)($_POST["id"] ?? 0) !== (int)$_SESSION["usuario_logado"]->getId())
+        {
+            $this->responderAcao(false, "Acesso negado.", 403);
+        }
+
         $this->validar(true);
 
         if ($this->validador->temErros())
@@ -244,7 +261,8 @@ class UsuarioController extends Controller
         $posts["email"] = filter_input(INPUT_POST, "email", FILTER_SANITIZE_EMAIL);
         $posts["biografia"] = filter_input(INPUT_POST, "biografia", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
-        if (isset($_POST["regra"]))
+        // Só o admin altera o perfil de acesso
+        if ($this->ehAdmin() && isset($_POST["regra"]))
         {
             $posts["regra"] = filter_input(INPUT_POST, "regra", FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         }

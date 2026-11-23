@@ -57,19 +57,27 @@ class ComponenteController extends Controller
     public function editar()
     {
         $this->loginRequired();
+        $this->validador->idPositivo("id", $_POST["id"] ?? "");
+
+        if ($this->validador->temErros())
+        {
+            $this->redirect(URL_BASE . "/componente/listar");
+            return;
+        }
+
         $componente = new Componente();
-        $componente->setId($_POST["id"]);
+        $componente->setId((int)$_POST["id"]);
         $data["componente"] = $this->repositorySql->buscarId($componente);
-        if($data["componente"]->getNome() != null)
+
+        if($data["componente"] && $data["componente"]->getNome() != null && ($this->ehAdmin() || (int)$data["componente"]->getUsuario()?->getId() === (int)$_SESSION["usuario_logado"]->getId()))
         {
             $this->view("componente/edit",$data);
         }
         else
         {
-            $this->view("componente/list");    
+            $this->view("componente/list");
         }
     }
-
     public function validar(bool $editar=true)
     {
         $this->validador->obrigatorio("nome", trim($_POST["nome"] ?? ""), "O nome do componente é obrigatório.");
@@ -138,6 +146,21 @@ class ComponenteController extends Controller
     public function atualizar()
     {
         $this->loginRequired();
+        $busca = new Componente();
+        $busca->setId((int)($_POST["id"] ?? 0));
+        $componenteAtual = $this->repositorySql->buscarId($busca);
+
+        if (!$componenteAtual || $componenteAtual->getNome() === null)
+        {
+            $this->responderAcao(false, "Componente não encontrado.", 404);
+        }
+
+        $donoId = (int)($componenteAtual->getUsuario()?->getId() ?? 0);
+
+        if (!$this->ehAdmin() && $donoId !== (int)$_SESSION["usuario_logado"]->getId())
+        {
+            $this->responderAcao(false, "Você não tem permissão para editar este componente.", 403);
+        }
 
         $this->validar(false);
 
