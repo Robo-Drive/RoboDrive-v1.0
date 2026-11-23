@@ -547,14 +547,6 @@ class ProjetoController extends Controller
 
             $this->service->editarProjeto($projetoObj);
 
-            if ($this->validador->possuiArquivos($_FILES["imagens"] ?? []))
-            {
-                $this->imagemService->salvarImagem(
-                    $_FILES["imagens"],
-                    $projetoObj
-                );
-            }
-
             $imagensManter = array_values(array_unique(
                 array_map("intval", $_POST["imagens_manter"] ?? [])
             ));
@@ -563,6 +555,14 @@ class ProjetoController extends Controller
                 $projetoId,
                 $imagensManter
             );
+
+            if ($this->validador->possuiArquivos($_FILES["imagens"] ?? []))
+            {
+                $this->imagemService->salvarImagem(
+                    $_FILES["imagens"],
+                    $projetoObj
+                );
+            }
 
             $this->responderJson([ 
                 "sucesso" => true,
