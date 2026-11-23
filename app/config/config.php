@@ -1,5 +1,4 @@
 <?php
-
 //Configuração do ambiente
 define('DEV_ENVIRONMENT', true);
 if(session_status() == PHP_SESSION_NONE)
@@ -48,6 +47,21 @@ define('CSS_URL_BASE', 'http://localhost:8080/assets/css');
 define('JS_URL_BASE', 'http://localhost:8080/assets/scripts');
 define('IMG_URL_BASE', 'http://localhost:8080/assets/images');
 define('STORE_PATH', __DIR__.'/../../store');
+
+function texto(mixed $valor): string
+{
+    return htmlspecialchars(html_entity_decode((string)($valor ?? ''), ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES, 'UTF-8');
+}
+
+function js_url(string $arquivo): string
+{
+    return JS_URL_BASE . '/' . $arquivo . '?v=' . (int)@filemtime(__DIR__ . '/../../public/assets/scripts/' . $arquivo);
+}
+
+function css_url(string $arquivo): string
+{
+    return CSS_URL_BASE . '/' . $arquivo . '?v=' . (int)@filemtime(__DIR__ . '/../../public/assets/css/' . $arquivo);
+}
 
 //Configurações do Banco de dados
 define('DB_HOST', 'localhost');

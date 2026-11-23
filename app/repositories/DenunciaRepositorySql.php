@@ -46,7 +46,6 @@ class DenunciaRepositorySql implements DenunciaRepositoryInterface
             $tipo = $g['tipo'];
             $alvoId = (int)$g['alvo_id'];
 
-            // Busca os motivos agrupados
             $sqlMotivos = "SELECT motivo, COUNT(*) as qtd FROM denuncia WHERE tipo = :tipo AND alvo_id = :alvo_id AND status = true GROUP BY motivo";
             $stmtMotivos = $this->connection->prepare($sqlMotivos);
             $stmtMotivos->bindValue(':tipo', $tipo);
@@ -58,16 +57,36 @@ class DenunciaRepositorySql implements DenunciaRepositoryInterface
                 $motivos[$m['motivo']] = (int)$m['qtd'];
             }
 
-            // Identifica o alvo e seu responsável de acordo com o tipo
+            $stmtDesc = $this->connection->prepare("SELECT d.motivo, d.descricao, d.criado_em, u.nome_usuario FROM denuncia d JOIN usuario u ON u.id = d.usuario_id WHERE d.tipo = :tipo AND d.alvo_id = :alvo_id AND d.status = true AND d.descricao IS NOT NULL AND d.descricao <> '' ORDER BY d.criado_em ASC");
+            $stmtDesc->bindValue(':tipo', $tipo);
+            $stmtDesc->bindValue(':alvo_id', $alvoId, PDO::PARAM_INT);
+            $stmtDesc->execute();
+            $descricoes = $stmtDesc->fetchAll(PDO::FETCH_ASSOC);
+
             $alvoNome = "Item #{$alvoId}";
             $respId = 1;
             $respNome = "Usuário";
             $respUser = "usuario";
             $respEmail = "";
+            $link = null;
 
             if ($tipo === 'projeto')
             {
                 $stmtItem = $this->connection->prepare("SELECT p.nome, u.id as u_id, u.nome as u_nome, u.nome_usuario, u.email FROM projeto p JOIN usuario u ON u.id = p.usuario_id WHERE p.id = :id");
+                $stmtItem->bindValue(':id', $alvoId, PDO::PARAM_INT);
+                $stmtItem->execute();
+                if ($item = $stmtItem->fetch(PDO::FETCH_ASSOC))
+                {
+                    $alvoNome = $item['nome'];
+                    $respId = $item['u_id'];
+                    $respNome = $item['u_nome'];
+                    $respUser = $item['nome_usuario'];
+                    $respEmail = $item['email'];
+                }
+            }
+            elseif ($tipo === 'componente')
+            {
+                $stmtItem = $this->connection->prepare("SELECT c.nome, u.id as u_id, u.nome as u_nome, u.nome_usuario, u.email FROM componente c JOIN usuario u ON u.id = c.usuario_id WHERE c.id = :id");
                 $stmtItem->bindValue(':id', $alvoId, PDO::PARAM_INT);
                 $stmtItem->execute();
                 if ($item = $stmtItem->fetch(PDO::FETCH_ASSOC))
@@ -112,7 +131,7 @@ class DenunciaRepositorySql implements DenunciaRepositoryInterface
                 $stmtItem = $this->connection->prepare("
                     SELECT e.nome, u.id as u_id, u.nome as u_nome, u.nome_usuario, u.email 
                     FROM equipe e 
-                    LEFT JOIN equipe_usuario eu ON eu.equipe_id = e.id AND eu.papel = 'coordenador' AND eu.status = true
+                    LEFT JOIN equipe_usuario eu ON eu.equipe_id = e.id AND eu.papel = 'coordenador' AND eu.status = 'ativo'
                     LEFT JOIN usuario u ON u.id = eu.usuario_id 
                     WHERE e.id = :id 
                     LIMIT 1
@@ -134,7 +153,7 @@ class DenunciaRepositorySql implements DenunciaRepositoryInterface
             elseif ($tipo === 'comentario')
             {
                 $stmtItem = $this->connection->prepare("
-                    SELECT c.conteudo, u.id as u_id, u.nome as u_nome, u.nome_usuario, u.email 
+                    SELECT c.conteudo, c.postagem_forum_id as origem_id, u.id as u_id, u.nome as u_nome, u.nome_usuario, u.email 
                     FROM comentario_postagem_forum c 
                     JOIN usuario u ON u.id = c.usuario_id 
                     WHERE c.id = :id
@@ -143,10 +162,15 @@ class DenunciaRepositorySql implements DenunciaRepositoryInterface
                 $stmtItem->execute();
                 $item = $stmtItem->fetch(PDO::FETCH_ASSOC);
 
+                if ($item)
+                {
+                    $link = "/forum/perfil?id=" . (int)$item['origem_id'];
+                }
+
                 if (!$item)
                 {
                     $stmtItem = $this->connection->prepare("
-                        SELECT c.conteudo, u.id as u_id, u.nome as u_nome, u.nome_usuario, u.email 
+                        SELECT c.conteudo, c.projeto_id as origem_id, u.id as u_id, u.nome as u_nome, u.nome_usuario, u.email 
                         FROM comentario_projeto c 
                         JOIN usuario u ON u.id = c.usuario_id 
                         WHERE c.id = :id
@@ -154,6 +178,11 @@ class DenunciaRepositorySql implements DenunciaRepositoryInterface
                     $stmtItem->bindValue(':id', $alvoId, PDO::PARAM_INT);
                     $stmtItem->execute();
                     $item = $stmtItem->fetch(PDO::FETCH_ASSOC);
+
+                    if ($item)
+                    {
+                        $link = "/projeto/perfil?id=" . (int)$item['origem_id'];
+                    }
                 }
 
                 if ($item)
@@ -173,6 +202,8 @@ class DenunciaRepositorySql implements DenunciaRepositoryInterface
                 "quantidade"          => (int)$g['quantidade'],
                 "primeira_denuncia"   => $g['primeira_denuncia'],
                 "motivos"             => $motivos,
+                "descricoes"          => $descricoes,
+                "link"                => $link,
                 "responsavel_id"      => (int)$respId,
                 "responsavel_nome"    => $respNome,
                 "responsavel_usuario" => $respUser,

@@ -22,9 +22,10 @@ include_once(__DIR__ . "/header.php");
                 <button 
                     type="button" 
                     onclick="window.history.length > 1 ? window.history.back() : window.location.href='<?= URL_BASE ?>'" 
-                    class="rd-btn rd-btn-secondary w-full sm:w-auto"
+                    class="rd-btn rd-btn-ghost w-full sm:w-auto"
                 >
-                    ‹ Voltar
+                    <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><polyline points="15 5 8 12 15 19"/></svg>
+                    Voltar
                 </button>
                 <a href="<?= URL_BASE ?>" class="rd-btn rd-btn-primary w-full sm:w-auto">
                     Página Inicial

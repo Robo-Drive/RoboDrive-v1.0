@@ -17,7 +17,6 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         $this->connection = ConnectionFactory::getConnection();
     }
 
-    // Cadastrar equipe
     public function cadastrar(Equipe $equipe): ?Equipe
     {
         if (!isset($_SESSION["usuario_logado"]) || !$_SESSION["usuario_logado"] instanceof Usuario)
@@ -79,7 +78,6 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         }
     }
 
-    // Buscar equipe pelo hash de acesso
     public function buscarPorHash(string $hash): ?Equipe
     {
         $sql = "SELECT *
@@ -105,7 +103,6 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return $res[0] ?? null;
     }
 
-    // Solicitar entrada em uma equipe
     public function solicitarEntrada(int $equipeId, int $usuarioId): bool
     {
         $sqlChecar = "SELECT id, status
@@ -154,7 +151,6 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return $stmtIns->execute();
     }
 
-    // Listar solicitações pendentes
     public function listarSolicitacoesPendentes(int $equipeId): array
     {
         $sql = "SELECT
@@ -177,7 +173,6 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Aprovar solicitação
     public function aprovarSolicitacao(int $equipeId, int $usuarioId): bool
     {
         $sql = "UPDATE equipe_usuario
@@ -194,7 +189,6 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return $stmt->execute() && $stmt->rowCount() > 0;
     }
 
-    // Rejeitar solicitação
     public function rejeitarSolicitacao(int $equipeId, int $usuarioId): bool
     {
         $sql = "DELETE FROM equipe_usuario
@@ -210,7 +204,6 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return $stmt->execute() && $stmt->rowCount() > 0;
     }
 
-    // Buscar papel do usuário na equipe
     public function buscarPapelUsuario(int $equipeId, int $usuarioId): ?string
     {
         $sql = "SELECT papel
@@ -232,7 +225,6 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return $res !== false ? $res : null;
     }
 
-    // Adicionar membro
     public function adicionarMembro(int $equipeId, int $usuarioId, string $papel = 'participante'): bool
     {
         if (!in_array($papel, ["coordenador", "participante"], true))
@@ -284,13 +276,11 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return $stmt->execute();
     }
 
-    // Compatibilidade com o nome utilizado anteriormente no controller
     public function adicionarMembroDireto(int $equipeId, int $usuarioId, string $papel = 'participante'): bool
     {
         return $this->adicionarMembro($equipeId, $usuarioId, $papel);
     }
 
-    // Remover membro
     public function removerMembro(int $equipeId, int $usuarioId): bool
     {
         $sql = "DELETE FROM equipe_usuario
@@ -306,7 +296,6 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return $stmt->execute() && $stmt->rowCount() > 0;
     }
 
-    // Buscar usuários de uma equipe
     public function buscarUsuariosEquipe(int $equipeId): array
     {
         $sql = "SELECT
@@ -326,7 +315,6 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return Usuario::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    // Verificar se usuário é coordenador
     public function usuarioECoordenador(int $equipeId, int $usuarioId): bool
     {
         $sql = "SELECT papel
@@ -362,7 +350,6 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return (int) $stmt->fetchColumn() > 0;
     }
 
-    // Listar membros de uma equipe
     public function listarMembros(int $equipeId): array
     {
         $sql = "SELECT
@@ -384,7 +371,6 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Editar equipe
     public function editar(Equipe $equipe): ?Equipe
     {
         $senha = $equipe->getSenha();
@@ -425,13 +411,12 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return $equipe;
     }
 
-    // Buscar equipe por ID
-    public function buscarId(Equipe $equipe): ?Equipe
+    public function buscarId(Equipe $equipe, bool $incluirDesativados = false): ?Equipe
     {
         $sql = "SELECT *
                 FROM equipe
-                WHERE id = :id
-                AND status = 1
+                WHERE id = :id"
+                . ($incluirDesativados ? "" : " AND status = 1") . "
                 LIMIT 1";
 
         $stmt = $this->connection->prepare($sql);
@@ -450,7 +435,6 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return $res[0] ?? null;
     }
 
-    // Buscar equipes do usuário
     public function buscarSeguindo(Usuario $usuario): ?array
     {
         $sql = "SELECT e.*
@@ -468,7 +452,6 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return Equipe::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    // Atualizar papel do membro
     public function atualizarPapelMembro(int $equipeId, int $usuarioId, string $papel): bool
     {
         if (!in_array($papel, ["coordenador", "participante"], true))
@@ -491,13 +474,11 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return $stmt->execute() && $stmt->rowCount() > 0;
     }
 
-    // Compatibilidade com o nome utilizado anteriormente no controller
     public function alterarPapelMembro(int $equipeId, int $usuarioId, string $papel): bool
     {
         return $this->atualizarPapelMembro($equipeId, $usuarioId, $papel);
     }
 
-    // Buscar equipes de um usuário
     public function buscarUsuario(Usuario $usuario): ?array
     {
         $sql = "SELECT e.*
@@ -515,7 +496,25 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return Equipe::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    // Buscar equipe pelo nome
+    public function buscarUsuarioFiltrado(Usuario $usuario, string $busca): ?array
+    {
+        $sql = "SELECT e.*
+                FROM equipe e
+                INNER JOIN equipe_usuario eu
+                    ON eu.equipe_id = e.id
+                WHERE eu.usuario_id = :id
+                AND eu.status = 'ativo'
+                AND e.status = 1
+                AND e.nome LIKE :busca";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':id', $usuario->getId(), PDO::PARAM_INT);
+        $stmt->bindValue(':busca', '%' . $busca . '%');
+        $stmt->execute();
+
+        return Equipe::map($stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+
     public function buscarNome(Equipe $equipe): ?array
     {
         $sql = "SELECT *
@@ -530,7 +529,6 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return Equipe::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    // Listar equipes ativas
     public function listarTodos(): array
     {
         $sql = "SELECT *
@@ -543,35 +541,38 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return Equipe::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    // Listar todas as equipes para administração
-    public function listarAdminTodos(): array
+    public function listarAdminTodos(?string $busca = null): array
     {
         $sql = "SELECT *
                 FROM equipe
+                WHERE (:busca IS NULL OR nome LIKE :busca_like)
                 ORDER BY id DESC";
 
         $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':busca', $busca ?: null);
+        $stmt->bindValue(':busca_like', '%' . $busca . '%');
         $stmt->execute();
 
         return Equipe::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    // Listar equipes por status
-    public function listarPorStatus(bool $status): array
+    public function listarPorStatus(bool $status, ?string $busca = null): array
     {
         $sql = "SELECT *
                 FROM equipe
                 WHERE status = :status
+                  AND (:busca IS NULL OR nome LIKE :busca_like)
                 ORDER BY id DESC";
 
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':status', $status ? 1 : 0, PDO::PARAM_INT);
+        $stmt->bindValue(':busca', $busca ?: null);
+        $stmt->bindValue(':busca_like', '%' . $busca . '%');
         $stmt->execute();
 
         return Equipe::map($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    // Desativar equipe
     public function deletar(Equipe $equipe): bool
     {
         $sql = "UPDATE equipe
@@ -585,12 +586,30 @@ class EquipeRepositorySql implements EquipeRepositoryInterface
         return $stmt->execute() && $stmt->rowCount() > 0;
     }
 
-    // Compatibilidade com o nome utilizado anteriormente no controller
+    public function ativar(int $equipeId): bool
+    {
+        $sql = "UPDATE equipe
+                SET status = 1
+                WHERE id = :id";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(':id', $equipeId, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
     public function desativar(int $equipeId): bool
     {
         $equipe = new Equipe();
         $equipe->setId($equipeId);
 
         return $this->deletar($equipe);
+    }
+
+    public function contarAtivos(): int
+    {
+        $stmt = $this->connection->query("SELECT COUNT(*) FROM equipe WHERE status = 1");
+
+        return (int) $stmt->fetchColumn();
     }
 }

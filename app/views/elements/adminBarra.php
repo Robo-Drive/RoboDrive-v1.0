@@ -28,7 +28,7 @@ $barraCompacta = $adminAlvo["compacto"] ?? false;
         data-desativar
         data-tipo="<?= $adminAlvo["tipo"] ?>"
         data-id="<?= $adminAlvo["id"] ?>"
-        data-nome="<?= $adminAlvo["nome"] ?>"
+        data-nome="<?= texto($adminAlvo["nome"]) ?>"
         data-responsavel="<?= $adminAlvo["responsavel"] ?? "" ?>"
     >Desativar</button>
 </div>

@@ -23,7 +23,7 @@
 
         const fechar = document.createElement("button");
         fechar.type = "button";
-        fechar.className = "rd-aviso-fechar";
+        fechar.className = "rd-btn-icon rd-aviso-fechar";
         fechar.setAttribute("aria-label", "Fechar aviso");
         fechar.textContent = "\u00D7";
         fechar.addEventListener("click", () => aviso.remove());
@@ -69,7 +69,7 @@
 
             const cancelar = document.createElement("button");
             cancelar.type = "button";
-            cancelar.className = "rd-btn rd-btn-secondary";
+            cancelar.className = "rd-btn rd-btn-ghost";
             cancelar.textContent = "Cancelar";
 
             const confirmar = document.createElement("button");

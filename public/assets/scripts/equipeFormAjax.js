@@ -121,8 +121,8 @@ document.addEventListener("DOMContentLoaded", function() {
             el.remove();
         });
 
-        form.querySelectorAll(".border-red-500, [class~='!border-rose-500']").forEach(function(el) {
-            el.classList.remove("border-red-500", "!border-rose-500");
+        form.querySelectorAll("[class~='!border-[#F2A058]']").forEach(function(el) {
+            el.classList.remove("!border-[#F2A058]");
         });
 
         const alertGeral = form.querySelector(".alerta-geral-ajax");
@@ -164,11 +164,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
             const errorElement = document.createElement("p");
             errorElement.className =
-                "rd-ajax-error rd-error text-xs text-rose-500 font-bold mt-1.5";
+                "rd-ajax-error rd-error text-xs text-[#F2A058] font-bold mt-1.5";
             errorElement.textContent = mensagem;
 
             if (inputElement) {
-                inputElement.classList.add("border-red-500");
+                inputElement.classList.add("!border-[#F2A058]");
 
                 const container =
                     inputElement.closest(".rd-field") ||
@@ -189,7 +189,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Rola a página até o primeiro campo com erro
     function rolarParaPrimeiroErro(form) {
         const primeiroErro = form.querySelector(
-            ".rd-ajax-error, .rd-error-ajax, .border-red-500"
+            ".rd-ajax-error, .rd-error-ajax, [class~='!border-[#F2A058]']"
         );
 
         if (primeiroErro) {
@@ -207,7 +207,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (!alertDiv) {
             alertDiv = document.createElement("div");
             alertDiv.className =
-                "alerta-geral-ajax mb-5 p-3.5 border-2 border-rose-500 bg-rose-950/40 text-rose-200 text-xs font-bold font-['Orbitron'] tracking-wider";
+                "alerta-geral-ajax mb-5 p-3.5 border-2 border-[#F2A058] bg-[#06141C] text-[#F2A058] text-xs font-bold font-['Orbitron'] tracking-wider";
             form.insertAdjacentElement("afterbegin", alertDiv);
         }
 

@@ -2,7 +2,14 @@
 
 namespace app\services;
 
+use app\helpers\ValidadorHelper;
+use app\models\Componente;
 use app\models\Projeto;
+use app\repositories\CategoriaRepositorySql;
+use app\repositories\CodigoRepositorySql;
+use app\repositories\ComponenteRepositorySql;
+use app\repositories\EquipeRepositorySql;
+use app\repositories\ExtraRepositorySql;
 use app\repositories\ProjetoRepositorySql;
 use Exception;
 
@@ -17,12 +24,13 @@ class ProjetoService
 
     public function salvarProjeto(array $posts): array
     {
-        if ($this->repositorySql->existeNome(trim($posts["nome"] ?? ""))) 
+        $usuarioId = (int)$_SESSION["usuario_logado"]->getId();
+
+        if ($this->repositorySql->existeNomeDoUsuario(trim($posts["nome"] ?? ""), $usuarioId))
         {
-            throw new Exception("Já existe um projeto cadastrado com esse nome.");
+            throw new Exception("Você já possui um projeto com esse nome.");
         }
 
-        // RN13: Visibilidade de equipe requer equipe vinculada
         if (($posts["visibilidade"] ?? "") === "equipe" && empty($posts["equipe_id"])) 
         {
             throw new Exception("A visibilidade para equipe requer vínculo com uma equipe.");
@@ -34,13 +42,167 @@ class ProjetoService
 
     public function editarProjeto(Projeto $projeto): bool
     {
-        if ($this->repositorySql->existeNome($projeto->getNome(), $projeto->getId())) 
+        // O dono do projeto é o usuário atual do projeto (a edição não troca o dono)
+        $projetoAtual = $this->repositorySql->buscarId((new Projeto())->setId($projeto->getId()), true);
+        $donoId = (int)($projetoAtual?->getUsuario()?->getId() ?? 0);
+
+        if ($donoId > 0 && $this->repositorySql->existeNomeDoUsuario($projeto->getNome(), $donoId, $projeto->getId()))
         {
-            throw new Exception("Já existe um projeto cadastrado com esse nome.");
+            throw new Exception("Você já possui um projeto com esse nome.");
         }
 
         $this->repositorySql->editar($projeto);
         return true;
+    }
+    public function validarVinculos(?int $equipeId, ?int $categoriaId, int $proprietarioId, string $visibilidade, ?int $equipeAtualId = null): ?string
+    {
+        if ($categoriaId !== null && !(new CategoriaRepositorySql())->pertenceAoUsuario($categoriaId, $proprietarioId))
+        {
+            return "A categoria selecionada não pertence ao proprietário do projeto.";
+        }
+
+        if ($visibilidade === "equipe" && !$equipeId)
+        {
+            return "A visibilidade para equipe requer vínculo com uma equipe.";
+        }
+
+        if ($equipeId && $equipeId !== $equipeAtualId && !$this->usuarioParticipaDaEquipe($equipeId))
+        {
+            return "Você não participa da equipe selecionada.";
+        }
+
+        return null;
+    }
+
+    private function usuarioParticipaDaEquipe(int $equipeId): bool
+    {
+        $logado = $_SESSION["usuario_logado"] ?? null;
+
+        if (!$logado)
+        {
+            return false;
+        }
+
+        return $logado->getRegra() === "admin"
+            || (new EquipeRepositorySql())->usuarioPertenceAEquipe($equipeId, (int)$logado->getId());
+    }
+
+    public function podeVisualizar(Projeto $projeto): bool
+    {
+        $visibilidade = $projeto->getVisibilidade();
+
+        if ($visibilidade === "publico")
+        {
+            return true;
+        }
+
+        if (!isset($_SESSION["usuario_logado"]))
+        {
+            return false;
+        }
+
+        if ($this->usuarioTemPermissao((int)$projeto->getId()))
+        {
+            return true;
+        }
+
+        $equipeId = (int)($projeto->getEquipe()?->getId() ?? 0);
+
+        if ($this->coordenaEquipeDoProjeto($projeto))
+        {
+            return true;
+        }
+
+        return $visibilidade === "equipe" && $equipeId > 0 && $this->usuarioParticipaDaEquipe($equipeId);
+    }
+
+    public function coordenaEquipeDoProjeto(Projeto $projeto): bool
+    {
+        $logado = $_SESSION["usuario_logado"] ?? null;
+        $equipeId = (int)($projeto->getEquipe()?->getId() ?? 0);
+
+        return $logado && $equipeId > 0
+            && (new EquipeRepositorySql())->usuarioECoordenador($equipeId, (int)$logado->getId());
+    }
+
+    public function podeDesativar(Projeto $projeto): bool
+    {
+        return $this->usuarioECoordenador((int)$projeto->getId()) || $this->coordenaEquipeDoProjeto($projeto);
+    }
+
+    public function podeGerenciarMembros(Projeto $projeto): bool
+    {
+        return $this->podeDesativar($projeto);
+    }
+
+    public function ativarProjeto(int $projetoId): void
+    {
+        $projetoBusca = new Projeto();
+        $projetoBusca->setId($projetoId);
+        $projeto = $this->repositorySql->buscarId($projetoBusca, true);
+        $donoId = (int)($projeto?->getUsuario()?->getId() ?? 0);
+
+        if ($projeto && $donoId > 0 && $this->repositorySql->existeNomeDoUsuario($projeto->getNome(), $donoId, $projetoId))
+        {
+            $base = $projeto->getNome() . " (Antigo)";
+            $novoNome = $base;
+            $contador = 2;
+
+            while ($this->repositorySql->existeNomeDoUsuario($novoNome, $donoId, $projetoId))
+            {
+                $novoNome = $projeto->getNome() . " (Antigo " . $contador++ . ")";
+            }
+
+            $this->repositorySql->atualizarNome($projetoId, $novoNome);
+        }
+
+        $this->repositorySql->ativar($projetoId);
+    }
+
+    public function transferirPropriedade(Projeto $projeto, int $novoDonoId): void
+    {
+        $nomeCategoria = $projeto->getCategoria()?->getNome();
+
+        if ($nomeCategoria !== null && $nomeCategoria !== "")
+        {
+            $categoriaId = (new CategoriaRepositorySql())->obterOuCriarParaUsuario($nomeCategoria, $novoDonoId);
+            $this->repositorySql->atualizarCategoria((int)$projeto->getId(), $categoriaId);
+        }
+
+        $this->repositorySql->transferirProprietario((int)$projeto->getId(), $novoDonoId);
+    }
+
+    public function usuarioECoordenador(int $projetoId): bool
+    {
+        $usuarioLogado = $_SESSION["usuario_logado"] ?? null;
+
+        if (!$usuarioLogado || $projetoId <= 0)
+        {
+            return false;
+        }
+
+        if ($usuarioLogado->getRegra() === "admin")
+        {
+            return true;
+        }
+
+        return $this->repositorySql->usuarioECoordenador($projetoId, (int)$usuarioLogado->getId());
+    }
+    public function usuarioTemPermissao(int $projetoId): bool
+    {
+        $usuarioLogado = $_SESSION["usuario_logado"] ?? null;
+
+        if (!$usuarioLogado || $projetoId <= 0)
+        {
+            return false;
+        }
+
+        if ($usuarioLogado->getRegra() === "admin")
+        {
+            return true;
+        }
+
+        return $this->repositorySql->usuarioPertenceAoProjeto($projetoId, (int)$usuarioLogado->getId());
     }
 
     public function validarSaidaCoordenador($projetoId, $usuarioId): bool
@@ -52,9 +214,182 @@ class ProjetoService
         {
             if ($m["id"] == $usuarioId && $m["papel"] === "coordenador" && count($coordenadores) <= 1) 
             {
-                // RN25: Não pode sair se for o último coordenador
                 return false;
             }
+        }
+
+        return true;
+    }
+
+    public function alterarPapel(int $projetoId, int $usuarioId, string $papel): array
+    {
+        $usuarioLogado = $_SESSION["usuario_logado"] ?? null;
+
+        if ($usuarioLogado && (int)$usuarioLogado->getId() === $usuarioId && $usuarioLogado->getRegra() !== "admin")
+        {
+            return ["resposta" => false, "erro" => "Você não pode alterar o seu próprio papel.", "status" => 422];
+        }
+
+        $this->repositorySql->atualizarPapelMembro($projetoId, $usuarioId, $papel);
+
+        return ["resposta" => true];
+    }
+
+    public function removerMembro(int $projetoId, int $usuarioId, ?int $novoCoordenadorId): array
+    {
+        $membros = $this->repositorySql->listarMembros($projetoId);
+
+        if (count($membros) <= 1)
+        {
+            return ["resposta" => false, "erro" => "O projeto deve ter pelo menos um integrante.", "status" => 422];
+        }
+
+        $coordenadores = array_filter($membros, fn($m) => $m["papel"] === "coordenador");
+        $membroAlvo = null;
+
+        foreach ($membros as $m)
+        {
+            if ((int)$m["id"] === $usuarioId)
+            {
+                $membroAlvo = $m;
+                break;
+            }
+        }
+
+        if (!$membroAlvo)
+        {
+            return ["resposta" => false, "erro" => "Integrante não encontrado no projeto.", "status" => 404];
+        }
+
+        $projetoBusca = new Projeto();
+        $projetoBusca->setId($projetoId);
+        $projeto = $this->repositorySql->buscarId($projetoBusca);
+
+        $ehDonoDoProjeto = ($projeto && (int)$projeto->getUsuario()?->getId() === $usuarioId);
+        $ehUnicoCoordenador = ($membroAlvo["papel"] === "coordenador" && count($coordenadores) <= 1);
+
+        if ($ehUnicoCoordenador || $ehDonoDoProjeto)
+        {
+            if (!$novoCoordenadorId || $novoCoordenadorId === $usuarioId)
+            {
+                return ["resposta" => false, "erro" => "Selecione outro membro para assumir a coordenação antes de sair.", "status" => 422];
+            }
+
+            if ($ehUnicoCoordenador)
+            {
+                $this->repositorySql->atualizarPapelMembro($projetoId, $novoCoordenadorId, "coordenador");
+            }
+
+            if ($ehDonoDoProjeto)
+            {
+                $novoDonoEhIntegrante = count(array_filter($membros, fn($m) => (int)$m["id"] === $novoCoordenadorId)) > 0;
+
+                if (!$novoDonoEhIntegrante)
+                {
+                    return ["resposta" => false, "erro" => "O novo proprietário precisa ser integrante do projeto.", "status" => 422];
+                }
+
+                $this->transferirPropriedade($projeto, $novoCoordenadorId);
+            }
+        }
+
+        $this->repositorySql->removerMembro($projetoId, $usuarioId);
+
+        return ["resposta" => true];
+    }
+
+    public function atualizarVersao(int $projetoId, int $usuarioId, array $componentes, array $codigosManter, array $extrasManter, array $novosCodigos, array $novosCodigosDesc, array $novosExtras, array $novosExtrasDesc, string $nota): bool
+    {
+        $codigoRepositorio = new CodigoRepositorySql();
+        $extraRepositorio = new ExtraRepositorySql();
+        $componenteRepositorio = new ComponenteRepositorySql();
+        $validador = new ValidadorHelper();
+
+        $versaoAtual = $this->repositorySql->buscarUltimaVersao($projetoId);
+        $versaoAtualId = (int)($versaoAtual["id"] ?? 0);
+
+        $idsCodigosBanco = $versaoAtualId > 0
+            ? array_values(array_unique(array_map(fn($c) => (int)$c->getId(), $codigoRepositorio->buscarPorVersao($versaoAtualId))))
+            : [];
+        $idsExtrasBanco = $versaoAtualId > 0
+            ? array_values(array_unique(array_map(fn($e) => (int)$e->getId(), $extraRepositorio->buscarPorVersao($versaoAtualId))))
+            : [];
+
+        $codigosManter = array_values(array_unique(array_map("intval", $codigosManter)));
+        $extrasManter = array_values(array_unique(array_map("intval", $extrasManter)));
+
+        sort($idsCodigosBanco, SORT_NUMERIC);
+        sort($codigosManter, SORT_NUMERIC);
+        sort($idsExtrasBanco, SORT_NUMERIC);
+        sort($extrasManter, SORT_NUMERIC);
+
+        $temNovosCodigos = $validador->possuiArquivos($novosCodigos);
+        $temNovosExtras = $validador->possuiArquivos($novosExtras);
+
+        $mapBanco = [];
+
+        if ($versaoAtualId > 0)
+        {
+            foreach ($componenteRepositorio->buscarPorVersao($versaoAtualId) as $comp)
+            {
+                $mapBanco[(int)$comp->getId()] = (int)$comp->getQuantidade();
+            }
+        }
+
+        ksort($mapBanco, SORT_NUMERIC);
+        ksort($componentes, SORT_NUMERIC);
+
+        $mudou = $temNovosCodigos || $idsCodigosBanco !== $codigosManter
+            || $temNovosExtras || $idsExtrasBanco !== $extrasManter
+            || $mapBanco !== $componentes;
+
+        if (!$mudou)
+        {
+            return false;
+        }
+
+        $novaVersaoNum = (int)($versaoAtual["versao"] ?? 0) + 1;
+        $nota = $nota !== "" ? $nota : "Atualização para versão v{$novaVersaoNum}";
+
+        $novaVersaoId = (int)$this->repositorySql->criarVersao($projetoId, $usuarioId, $novaVersaoNum, $nota);
+
+        $versaoObj = new Projeto();
+        $versaoObj->setId($novaVersaoId);
+
+        foreach ($codigosManter as $codigoId)
+        {
+            $codigoRepositorio->associarVersao($codigoId, $novaVersaoId);
+        }
+
+        if ($temNovosCodigos)
+        {
+            (new CodigoService())->salvarCodigo($novosCodigos, $novosCodigosDesc, $versaoObj);
+        }
+
+        foreach ($extrasManter as $extraId)
+        {
+            $extraRepositorio->associarVersao($extraId, $novaVersaoId);
+        }
+
+        if ($temNovosExtras)
+        {
+            (new ExtraService())->salvarExtras($novosExtras, $novosExtrasDesc, $versaoObj);
+        }
+
+        $componentesObj = [];
+
+        foreach ($componentes as $componenteId => $quantidade)
+        {
+            $comp = new Componente();
+            $comp->setId($componenteId);
+            $comp->setQuantidade($quantidade);
+
+            $componentesObj[] = $comp;
+        }
+
+        if (!empty($componentesObj))
+        {
+            (new ComponenteService())->associar(["componentes" => $componentesObj, "projeto" => $versaoObj]);
         }
 
         return true;

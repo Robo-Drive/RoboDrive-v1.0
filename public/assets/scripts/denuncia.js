@@ -2,7 +2,6 @@ const listaDenuncias = document.getElementById("listaDenuncias");
 const semResultado = document.getElementById("denunciasSemResultado");
 const filtrosDenuncia = document.querySelectorAll("[data-filtro]");
 
-// Mais denúncias primeiro; em caso de empate, a denúncia mais antiga vem antes
 function ordenarDenuncias()
 {
     const itens = [...listaDenuncias.querySelectorAll(".denuncia-item")];

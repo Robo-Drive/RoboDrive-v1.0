@@ -41,7 +41,7 @@ function atualizarLista() {
 
         const botao = document.createElement("button");
         botao.type = "button";
-        botao.className = "cursor-pointer";
+        botao.className = "rd-btn-icon";
 
         const img = document.createElement("img");
         img.src = `${IMG_URL_BASE}/close-icon.png`;

@@ -44,7 +44,8 @@ if (!empty($usuarios)) {
 }
 
 $ehUnicoCoordenador = ($papelUsuarioLogado === 'coordenador' && $totalCoordenadores <= 1);
-$podeSairEquipe = ($eIntegrante && $totalMembros > 1);
+$equipeAtiva = ($equipe->isStatus() !== false);
+$podeSairEquipe = ($eIntegrante && $totalMembros > 1 && $equipeAtiva);
 
 $urlImagemEquipe = static function ($imagem, $fallback = null) {
     $imagem = is_string($imagem) ? trim($imagem) : '';
@@ -77,9 +78,9 @@ $obterImagem = static function ($item) {
     <!-- 1. CABEÇALHO DA EQUIPE -->
     <div class="border-b-2 border-[#07556A] pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
                 <h1 class="font-['Orbitron'] text-2xl sm:text-4xl font-black text-[#F2FEFE]">
-                    <?= htmlspecialchars(html_entity_decode($equipe->getNome())) ?>
+                    <?= texto($equipe->getNome()) ?>
                 </h1>
                 <span class="text-[.65rem] font-bold uppercase tracking-[.2em] px-2.5 py-1 border border-[#0795A5] text-[#13F3F7] bg-[#07556A]/20">
                     <?= $eCoordenador ? 'Coordenador' : ($eIntegrante ? 'Membro' : 'Visitante') ?>
@@ -87,37 +88,62 @@ $obterImagem = static function ($item) {
             </div>
             <?php if (method_exists($equipe, 'getDescricao') && $equipe->getDescricao()): ?>
                 <p class="text-[#91B5BD] text-xs sm:text-sm mt-2 max-w-3xl leading-relaxed whitespace-pre-line">
-                    <?= htmlspecialchars(html_entity_decode($equipe->getDescricao())) ?>
+                    <?= texto($equipe->getDescricao()) ?>
                 </p>
             <?php endif; ?>
         </div>
 
-        <div class="flex items-center gap-3">
-            <?php if ($eCoordenador): ?>
+        <div class="flex flex-wrap items-center gap-3">
+            <?php if ($eCoordenador && $equipeAtiva): ?>
                 <form action="<?= URL_BASE ?>/equipe/editar" method="post">
                     <input type="hidden" name="id" value="<?= (int) $equipe->getId() ?>">
-                    <button type="submit" class="rd-btn rd-btn-primary !py-2 !px-4 text-xs">Editar Equipe</button>
+                    <button type="submit" class="rd-btn rd-btn-primary rd-btn-sm">Editar Equipe</button>
                 </form>
-                <form action="<?= URL_BASE ?>/equipe/desativar" method="post" data-confirmar="Deseja realmente desativar esta equipe?">
-                    <input type="hidden" name="id" value="<?= (int) $equipe->getId() ?>">
-                    <button type="submit" class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition">Desativar</button>
-                </form>
+                <?php if ($eAdmin && $papelUsuarioLogado !== 'coordenador'): ?>
+                    <button
+                        type="button"
+                        class="rd-btn rd-btn-danger rd-btn-sm"
+                        data-desativar
+                        data-tipo="equipe"
+                        data-id="<?= (int) $equipe->getId() ?>"
+                        data-nome="<?= texto($equipe->getNome()) ?>"
+                    >Desativar</button>
+                <?php else: ?>
+                    <form action="<?= URL_BASE ?>/equipe/desativar" method="post" data-confirmar="Deseja realmente desativar esta equipe?" >
+                        <input type="hidden" name="id" value="<?= (int) $equipe->getId() ?>">
+                        <button type="submit" class="rd-btn rd-btn-danger rd-btn-sm">Desativar</button>
+                    </form>
+                <?php endif; ?>
             <?php endif; ?>
             <?php if ($podeSairEquipe): ?>
                 <?php if ($ehUnicoCoordenador): ?>
-                    <button type="button" onclick="document.getElementById('modalSairEquipe').showModal()" class="border-2 border-red-500/80 text-red-400 hover:bg-red-500/10 px-4 py-2 text-xs font-bold transition">
+                    <button type="button" onclick="document.getElementById('modalSairEquipe').showModal()" class="rd-btn rd-btn-danger rd-btn-sm">
                         Sair da Equipe
                     </button>
                 <?php else: ?>
-                    <form action="<?= URL_BASE ?>/equipe/remover-membro" method="post" data-confirmar="Deseja realmente sair desta equipe?">
+                    <form action="<?= URL_BASE ?>/equipe/remover-membro" method="post" data-confirmar="Deseja realmente sair desta equipe?" >
                         <input type="hidden" name="equipe_id" value="<?= (int) $equipe->getId() ?>">
                         <input type="hidden" name="usuario_id" value="<?= (int) $usuarioLogadoId ?>">
-                        <button type="submit" class="border-2 border-red-500/80 text-red-400 hover:bg-red-500/10 px-4 py-2 text-xs font-bold transition">
+                        <button type="submit" class="rd-btn rd-btn-danger rd-btn-sm">
                             Sair da Equipe
                         </button>
                     </form>
                 <?php endif; ?>
             <?php endif; ?>
+
+            <!-- Equipe desativada: o admin pode reativar -->
+            <?php if (!$equipeAtiva): ?>
+                <span class="rd-badge rd-badge-private">Desativada</span>
+                <?php
+                $ativarAlvo = ["tipo" => "equipe", "id" => (int) $equipe->getId(), "ativo" => false];
+                include(__DIR__ . "/../../elements/ativarBotao.php");
+                ?>
+            <?php endif; ?>
+
+            <a href="<?= URL_BASE ?>/usuario/perfil" class="rd-btn rd-btn-ghost">
+                <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><polyline points="15 5 8 12 15 19"/></svg>
+                Voltar
+            </a>
 
             <?php
             $idsMembros = !empty($usuarios) ? array_map(function($u) {
@@ -131,13 +157,15 @@ $obterImagem = static function ($item) {
                 "autores" => $idsMembros,
                 "classe"  => "shrink-0"
             ];
-            include(__DIR__ . "/../../elements/denunciaBotao.php");
+            if ($equipeAtiva) {
+                include(__DIR__ . "/../../elements/denunciaBotao.php");
+            }
             ?>
         </div>
     </div>
 
     <!-- 2. BARRA SUPERIOR COM O SELECT DE VISUALIZAÇÃO -->
-    <div class="border-2 border-[#07556A] bg-[#000505] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div class="border-2 border-[#07556A] bg-[#06141C] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="flex items-center gap-2">
             <span class="text-xs uppercase text-[#91B5BD] tracking-wider font-['Orbitron']">Visualização:</span>
             <img id="iconeSecaoAtual" src="<?= IMG_URL_BASE ?>/projeto-icon.png" alt="" class="w-5 h-5 object-contain">
@@ -160,10 +188,16 @@ $obterImagem = static function ($item) {
         <div class="flex items-center justify-between border-b border-[#07556A] pb-2">
             <h2 class="text-xs font-black uppercase tracking-[.15em] text-[#13F3F7] font-['Orbitron']">PROJETOS DA EQUIPE</h2>
             <?php if ($eIntegrante): ?>
-                <a href="<?= URL_BASE ?>/projeto/cadastro?equipe_id=<?= (int) $equipe->getId() ?>" class="rd-btn rd-btn-primary !py-1 !px-3 text-xs">+ Novo Projeto</a>
+                <a href="<?= URL_BASE ?>/projeto/cadastro?equipe_id=<?= (int) $equipe->getId() ?>" class="rd-btn rd-btn-primary rd-btn-sm">+ Novo Projeto</a>
             <?php endif; ?>
         </div>
 
+        <form data-busca data-alvo="#listaProjetosEquipe" method="get" action="<?= URL_BASE ?>/equipe/perfil?id=<?= (int) $equipe->getId() ?>" class="flex gap-3">
+            <input type="hidden" name="secao" value="projetos">
+            <input type="text" name="busca" value="<?= htmlspecialchars($buscaProjetos ?? '') ?>" placeholder="Pesquisar projetos da equipe pelo nome ou descrição..." class="rd-input w-full flex-1" autocomplete="off">
+            <button type="submit" class="rd-btn rd-btn-secondary rd-btn-sm">Buscar</button>
+        </form>
+        <div id="listaProjetosEquipe" data-atualizar data-resultados class="space-y-4">
         <?php if (!empty($projetos)): ?>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 <?php foreach ($projetos as $projeto): ?>
@@ -177,19 +211,19 @@ $obterImagem = static function ($item) {
                         <div>
                             <div class="flex items-center justify-between gap-2 mb-2">
                                 <span class="text-[.6rem] font-bold uppercase tracking-wider px-2 py-0.5 border border-[#0795A5] text-[#13F3F7] bg-[#07556A]/20 font-mono">
-                                    <?= htmlspecialchars((string)($pCat ?? 'Geral')) ?>
+                                    <?= texto($pCat ?? 'Geral') ?>
                                 </span>
                                 <span class="text-[.65rem] text-[#91B5BD] uppercase font-mono">Projeto</span>
                             </div>
 
                             <a href="<?= URL_BASE ?>/projeto/perfil?id=<?= (int)$pId ?>" class="block mt-1">
                                 <h3 class="font-['Orbitron'] text-sm font-bold text-[#F2FEFE] group-hover:text-[#13F3F7] transition truncate">
-                                    <?= htmlspecialchars(html_entity_decode((string)$projetoNome)) ?>
+                                    <?= texto((string)$projetoNome) ?>
                                 </h3>
                             </a>
 
                             <p class="text-xs text-[#91B5BD] line-clamp-3 mt-2 leading-relaxed">
-                                <?= htmlspecialchars(html_entity_decode((string)$projetoDescricao)) ?>
+                                <?= texto((string)$projetoDescricao) ?>
                             </p>
                         </div>
 
@@ -204,6 +238,7 @@ $obterImagem = static function ($item) {
         <?php else: ?>
             <div class="border-2 border-dashed border-[#07556A] bg-[#000505] p-8 text-center text-[#91B5BD] text-xs">Nenhum projeto registrado para esta equipe ainda.</div>
         <?php endif; ?>
+        </div>
     </div>
 
     <!-- 4. SEÇÃO: FÓRUM DA EQUIPE -->
@@ -211,30 +246,36 @@ $obterImagem = static function ($item) {
         <div class="flex items-center justify-between border-b border-[#07556A] pb-2">
             <h2 class="text-xs font-black uppercase tracking-[.15em] text-[#13F3F7] font-['Orbitron']">02. FÓRUM DE DISCUSSÃO</h2>
             <?php if ($eIntegrante): ?>
-                <a href="<?= URL_BASE ?>/forum/cadastro?equipe_id=<?= (int) $equipe->getId() ?>" class="rd-btn rd-btn-primary !py-1 !px-3 text-xs">+ Nova Mensagem</a>
+                <a href="<?= URL_BASE ?>/forum/cadastro?equipe_id=<?= (int) $equipe->getId() ?>" class="rd-btn rd-btn-primary rd-btn-sm">+ Nova Mensagem</a>
             <?php endif; ?>
         </div>
 
-        <?php if (!empty($postsForum)): ?>
+        <form data-busca data-alvo="#listaForumEquipe" method="get" action="<?= URL_BASE ?>/equipe/perfil?id=<?= (int) $equipe->getId() ?>" class="flex gap-3">
+            <input type="hidden" name="secao" value="forum">
+            <input type="text" name="busca" value="<?= htmlspecialchars($buscaForum ?? '') ?>" placeholder="Pesquisar postagens da equipe pelo conteúdo..." class="rd-input w-full flex-1" autocomplete="off">
+            <button type="submit" class="rd-btn rd-btn-secondary rd-btn-sm">Buscar</button>
+        </form>
+        <div id="listaForumEquipe" data-atualizar data-resultados class="space-y-4">
+        <?php if (!empty($foruns)): ?>
             <div class="space-y-3">
-                 <?php foreach ($postsForum as $forum): ?>
+                 <?php foreach ($foruns as $forum): ?>
                     <?php
                     $autorForum = method_exists($forum, 'getUsuario') ? $forum->getUsuario() : null;
                     $imagemAutor = $autorForum ? $obterImagem($autorForum) : null;
                     $imagemAutorUrl = $urlImagemEquipe($imagemAutor, IMG_URL_BASE . '/perfil.png');
                     $nomeUsuarioForum = $autorForum && method_exists($autorForum, 'getNomeUsuario') ? $autorForum->getNomeUsuario() : 'usuario';
-                    $conteudoForum = method_exists($forum, 'getConteudo') ? htmlspecialchars(html_entity_decode($forum->getConteudo())) : '';
+                    $conteudoForum = method_exists($forum, 'getConteudo') ? texto($forum->getConteudo()) : '';
                     $fId = method_exists($forum, 'getId') ? $forum->getId() : ($forum['id'] ?? null);
                     ?>
                     <div class="border-2 border-[#07556A] bg-[#06141C] p-4 hover:border-[#13F3F7] transition flex flex-col justify-between group">
                         <div>
                             <div class="flex items-center gap-3 mb-3">
                                 <img src="<?= htmlspecialchars($imagemAutorUrl) ?>"
-                                     alt="Foto de <?= htmlspecialchars($nomeUsuarioForum) ?>"
-                                     class="w-10 h-10 rounded-full object-cover border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)] shrink-0"
+                                     alt="Foto de <?= texto($nomeUsuarioForum) ?>"
+                                     class="w-10 h-10 object-cover border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)] shrink-0"
                                      loading="lazy"
                                      onerror="this.onerror=null;this.src='<?= htmlspecialchars(IMG_URL_BASE . '/perfil.png') ?>';">
-                                <p class="text-xs text-[#13F3F7] font-bold">@<?= htmlspecialchars(html_entity_decode($nomeUsuarioForum)) ?></p>
+                                <p class="text-xs text-[#13F3F7] font-bold">@<?= texto($nomeUsuarioForum) ?></p>
                             </div>
                             
                             <!-- Link no texto do fórum -->
@@ -246,9 +287,9 @@ $obterImagem = static function ($item) {
                         </div>
 
                         <!-- Botão de ir para a postagem e responder -->
-                        <div class="mt-4 pt-3 border-t border-[#07556A]/50 flex justify-end">
+                        <div class="mt-4 pt-3 border-t border-[#07556A]/60 flex justify-end">
                             <a href="<?= URL_BASE ?>/forum/perfil?id=<?= (int)$fId ?>" class="text-xs font-bold text-[#13F3F7] hover:underline flex items-center gap-1">
-                                💬 Ver discussão e comentários →
+                                Ver discussão e comentários →
                             </a>
                         </div>
                     </div>
@@ -257,12 +298,13 @@ $obterImagem = static function ($item) {
         <?php else: ?>
             <div class="border-2 border-dashed border-[#07556A] bg-[#000505] p-8 text-center text-[#91B5BD] text-xs">Nenhuma publicação no fórum desta equipe no momento.</div>
         <?php endif; ?>
+        </div>
     </div>
 
     <!-- 5. SEÇÃO: USUÁRIOS DA EQUIPE (EXCLUSIVO PARA COORDENADOR) -->
-    <div id="aba-usuarios" class="space-y-6 hidden">
+    <div id="aba-usuarios" class="space-y-6 hidden" data-atualizar>
         <!-- BOX DO HASH -->
-        <div class="border-2 border-[#13F3F7] bg-[#00171F] p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div class="border-2 border-[#13F3F7] bg-[#082B3A] p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
                 <p class="text-[.65rem] font-bold uppercase tracking-widest text-[#13F3F7]">Código Hash de Entrada da Equipe:</p>
                 <p class="text-xs text-[#91B5BD] mt-0.5">Envie este código e a senha para novos membros solicitarem entrada.</p>
@@ -274,35 +316,11 @@ $obterImagem = static function ($item) {
             </div>
         </div>
 
-        <!-- SOLICITAÇÕES PENDENTES DE ENTRADA -->
-        <?php if (!empty($solicitacoesPendentes)): ?>
-            <div class="border-2 border-yellow-500/80 bg-[#06141C] p-4 space-y-3">
-                <h3 class="text-xs font-black uppercase text-yellow-400 font-['Orbitron']">
-                    ⏳ Solicitações de Entrada Pendentes (<?= count($solicitacoesPendentes) ?>)
-                </h3>
-                <div class="divide-y divide-[#07556A]">
-                    <?php foreach ($solicitacoesPendentes as $pendente): ?>
-                        <div class="py-2.5 flex items-center justify-between gap-3">
-                            <div>
-                                <p class="text-xs font-bold text-[#F2FEFE]"><?= htmlspecialchars($pendente['nome']) ?></p>
-                                <p class="text-[.65rem] text-[#91B5BD]">@<?= htmlspecialchars($pendente['nome_usuario']) ?></p>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <form action="<?= URL_BASE ?>/equipe/aprovar-solicitacao" method="post">
-                                    <input type="hidden" name="equipe_id" value="<?= $equipe->getId() ?>">
-                                    <input type="hidden" name="usuario_id" value="<?= $pendente['id'] ?>">
-                                    <button type="submit" class="rd-btn rd-btn-primary !py-1 !px-3 text-xs !bg-emerald-600 hover:!bg-emerald-500 !text-black font-bold">Aceitar</button>
-                                </form>
-                                <form action="<?= URL_BASE ?>/equipe/rejeitar-solicitacao" method="post">
-                                    <input type="hidden" name="equipe_id" value="<?= $equipe->getId() ?>">
-                                    <input type="hidden" name="usuario_id" value="<?= $pendente['id'] ?>">
-                                    <button type="submit" class="border border-red-500 text-red-400 hover:bg-red-500/20 px-3 py-1 text-xs font-bold transition">Recusar</button>
-                                </form>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
+        <!-- SOLICITAÇÕES PENDENTES DE ENTRADA (atualizadas automaticamente) -->
+        <?php if ($eCoordenador): ?>
+        <div id="solicitacoesEquipe" data-atualizar>
+            <?php include __DIR__ . "/solicitacoes.php"; ?>
+        </div>
         <?php endif; ?>
 
         <!-- LISTA DOS INTEGRANTES -->
@@ -351,8 +369,8 @@ $obterImagem = static function ($item) {
 
                             <img
                                 src="<?= htmlspecialchars($uImagemUrl, ENT_QUOTES, 'UTF-8') ?>"
-                                alt="Foto de <?= htmlspecialchars($uNome, ENT_QUOTES, 'UTF-8') ?>"
-                                class="w-12 h-12 rounded-full object-cover
+                                alt="Foto de <?= texto($uNome) ?>"
+                                class="w-12 h-12 object-cover
                                     border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)] shrink-0"
                                 loading="lazy"
                                 onerror="this.onerror=null;this.src='<?= htmlspecialchars(IMG_URL_BASE . '/perfil.png', ENT_QUOTES, 'UTF-8') ?>';"
@@ -361,17 +379,13 @@ $obterImagem = static function ($item) {
                             <div class="min-w-0">
                                 <p class="text-xs font-bold text-[#F2FEFE]
                                         truncate group-hover:text-[#13F3F7] transition">
-                                    <?= htmlspecialchars(
-                                        html_entity_decode((string)$uNome),
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?>
+                                    <?= texto((string)$uNome) ?>
                                 </p>
 
                                 <span class="inline-block text-[.6rem] font-bold
                                             uppercase tracking-wider px-1.5 py-0.5
                                             border border-[#0795A5] text-[#13F3F7]
-                                            bg-[#07556A]/30 mt-1">
+                                            bg-[#07556A]/20 mt-1">
                                     <?= htmlspecialchars(ucfirst((string)$uPapel)) ?>
                                 </span>
                             </div>
@@ -382,8 +396,7 @@ $obterImagem = static function ($item) {
                             <form
                                 action="<?= URL_BASE ?>/equipe/remover-membro"
                                 method="POST"
-                                data-confirmar="Deseja realmente remover este participante da equipe?"
-                                class="shrink-0"
+                                data-confirmar="Deseja realmente remover este participante da equipe?" class="shrink-0"
                             >
                                 <input
                                     type="hidden"
@@ -400,12 +413,9 @@ $obterImagem = static function ($item) {
                                 <button
                                     type="submit"
                                     title="Remover participante"
-                                    class="text-red-400 hover:text-red-300
-                                        border border-transparent
-                                        hover:border-red-500/40
-                                        p-1.5 text-base transition"
+                                    class="rd-btn-icon" aria-label="Remover participante"
                                 >
-                                    ✕
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
                                 </button>
                             </form>
                         <?php endif; ?>
@@ -417,8 +427,9 @@ $obterImagem = static function ($item) {
                         <form
                             action="<?= URL_BASE ?>/equipe/alterar-papel"
                             method="POST"
+                            data-erro-notificacao
                             class="flex items-center justify-between gap-2
-                                pt-3 border-t border-[#07556A]/50"
+                                pt-3 border-t border-[#07556A]/60"
                         >
                             <input
                                 type="hidden"
@@ -438,7 +449,7 @@ $obterImagem = static function ($item) {
 
                             <select
                                 name="papel"
-                                onchange="this.form.submit()"
+                                onchange="this.form.requestSubmit()"
                                 class="bg-[#000505] text-[#13F3F7]
                                     border border-[#07556A]
                                     text-[.7rem] px-2 py-1
@@ -471,33 +482,33 @@ $obterImagem = static function ($item) {
 
 <?php if ($podeSairEquipe && $ehUnicoCoordenador): ?>
 <dialog id="modalSairEquipe" aria-labelledby="modalSairEquipeTitulo" class="rd-scroll-hidden m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto border-[3px] border-[#07556A] bg-[#06141C] p-0 text-[#F2FEFE] shadow-[8px_8px_0_#07556A] backdrop:bg-[#000505]/85">
-    <div class="h-[3px] w-full bg-red-500"></div>
+    <div class="h-[3px] w-full bg-[#F2A058]"></div>
     <form action="<?= URL_BASE ?>/equipe/remover-membro" method="post" class="flex flex-col">
         <input type="hidden" name="equipe_id" value="<?= (int) $equipe->getId() ?>">
         <input type="hidden" name="usuario_id" value="<?= (int) $usuarioLogadoId ?>">
 
         <div class="flex items-start justify-between gap-4 border-b-[3px] border-[#07556A] p-5 sm:p-6">
             <div>
-                <p class="rd-eyebrow !text-red-400">Passar Coordenação</p>
+                <p class="rd-eyebrow !text-[#F2A058]">Passar Coordenação</p>
                 <h2 id="modalSairEquipeTitulo" class="rd-heading text-xl uppercase sm:text-2xl">SAIR DA <span>EQUIPE</span></h2>
             </div>
-            <button type="button" onclick="document.getElementById('modalSairEquipe').close()" aria-label="Fechar" class="flex h-10 w-10 shrink-0 items-center justify-center border-[3px] border-[#07556A] transition-colors duration-200 hover:border-[#13F3F7]">
+            <button type="button" onclick="document.getElementById('modalSairEquipe').close()" aria-label="Fechar" class="rd-btn-icon">
                 <img src="<?= IMG_URL_BASE ?>/close-icon.png" alt="" class="h-4 w-4">
             </button>
         </div>
 
         <div class="flex flex-col gap-6 p-5 sm:p-6">
-            <p class="border-l-4 border-red-500 pl-4 text-sm leading-relaxed text-[#91B5BD]">
+            <p class="border-l-4 border-[#F2A058] pl-4 text-sm leading-relaxed text-[#91B5BD]">
                 Você é o <strong>único coordenador</strong> desta equipe. Para sair, é obrigatório selecionar outro integrante para assumir o cargo de coordenador.
             </p>
 
             <div class="rd-field">
                 <label for="novoCoordenadorEquipe" class="rd-label">Novo Coordenador da Equipe</label>
-                <select id="novoCoordenadorEquipe" name="novo_coordenador_id" required class="rd-select">
+                <select id="novoCoordenadorEquipe" name="novo_coordenador_id" class="rd-select">
                     <option value="">Selecione um integrante</option>
                     <?php foreach ($outrosMembros as $outro): ?>
                         <option value="<?= (int) $outro['id'] ?>">
-                            <?= htmlspecialchars($outro['nome']) ?> (<?= htmlspecialchars(ucfirst($outro['papel'])) ?>)
+                            <?= texto($outro['nome']) ?> (<?= htmlspecialchars(ucfirst($outro['papel'])) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -506,7 +517,7 @@ $obterImagem = static function ($item) {
 
         <div class="flex flex-col-reverse gap-3 border-t-[3px] border-[#07556A] p-5 sm:flex-row sm:justify-end sm:p-6">
             <button type="button" onclick="document.getElementById('modalSairEquipe').close()" class="rd-btn rd-btn-ghost">Cancelar</button>
-            <button type="submit" class="rd-btn border-red-500 bg-red-600 text-white hover:bg-red-500">Transferir e Sair</button>
+            <button type="submit" class="rd-btn rd-btn-danger-solid">Transferir e Sair</button>
         </div>
     </form>
 </dialog>

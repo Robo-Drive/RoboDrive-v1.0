@@ -16,13 +16,13 @@ include_once(__DIR__ . "/../elements/header.php");
         </div>
 
         <?php if (!empty($sucesso)): ?>
-            <div class="p-3 mb-4 bg-emerald-950/60 border border-emerald-500 text-emerald-300 text-xs">
+            <div class="p-3 mb-4 bg-[#06141C] border border-[#00D6B5] text-[#00D6B5] text-xs">
                 <?= htmlspecialchars($sucesso) ?>
             </div>
         <?php endif; ?>
 
         <?php if (!empty($erro_geral)): ?>
-            <div class="p-3 mb-4 bg-red-950/60 border border-red-500 text-red-300 text-xs">
+            <div class="p-3 mb-4 bg-[#06141C] border border-[#F2A058] text-[#F2A058] text-xs">
                 <?= htmlspecialchars($erro_geral) ?>
             </div>
         <?php endif; ?>
@@ -30,13 +30,10 @@ include_once(__DIR__ . "/../elements/header.php");
         <form action="<?= URL_BASE ?>/recuperar-senha" autocomplete="off" method="post" class="space-y-5">
             <div class="relative">
                 <label for="email" class="rd-label">E-mail cadastrado</label>
-                <input type="email" name="email" id="email" class="rd-input" value="<?= htmlspecialchars($email ?? '') ?>" automcomplete="off" placeholder="seuemail@exemplo.com">
-                <?php if (isset($erros['email'])): ?>
-                    <p class="rd-error"><?= $erros['email'] ?></p>
-                <?php endif; ?>
+                <input type="text" inputmode="email" name="email" id="email" class="rd-input" value="<?= htmlspecialchars($email ?? '') ?>" automcomplete="off" placeholder="seuemail@exemplo.com">
             </div>
 
-            <button type="submit" class="rd-btn rd-btn-primary w-full !py-3">
+            <button type="submit" class="rd-btn rd-btn-primary w-full">
                 Enviar Link
             </button>
         </form>
@@ -47,6 +44,6 @@ include_once(__DIR__ . "/../elements/header.php");
         </p>
     </section>
 </main>
-<script src="<?= JS_URL_BASE."/password.js" ?>"></script>
+<script src="<?= js_url("password.js") ?>"></script>
 
 <?php include_once(__DIR__ . "/../elements/footer.php"); ?>

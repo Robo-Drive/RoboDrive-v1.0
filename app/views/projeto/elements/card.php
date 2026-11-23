@@ -2,22 +2,14 @@
 <?php
 if (isset($projeto, $versaoExibida) && $projeto !== null):
 
-    // Função para exibir textos com segurança.
-    // Decodifica entidades armazenadas anteriormente e depois escapa o HTML.
     $escapar = static function ($valor): string {
-        return htmlspecialchars(
-            html_entity_decode(
-                (string)($valor ?? '')
-               
-            )
-        );
+        return texto((string)($valor ?? ''));
     };
 
     $usuarioLogado = $_SESSION['usuario_logado'] ?? null;
     $usuarioLogadoId = $usuarioLogado?->getId();
     $eAdmin = $usuarioLogado?->getRegra() === 'admin';
 
-    // Verificação dos integrantes e seus cargos.
     $eIntegrante = false;
     $eCoordenador = $eAdmin;
     $papelUsuarioLogado = null;
@@ -53,10 +45,13 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
     $ehDonoDoProjeto = ($projeto->getUsuario() && (int)$projeto->getUsuario()->getId() === (int)$usuarioLogadoId);
     $ehUnicoCoordenador = ($papelUsuarioLogado === 'coordenador' && $totalCoordenadores <= 1);
     $precisaTransferir = ($ehDonoDoProjeto || $ehUnicoCoordenador);
-    $podeSairProjeto = ($eIntegrante && $totalMembros > 1);
+    $podeSairProjeto = ($eIntegrante && $totalMembros > 1 && ($projeto->isStatus() !== false));
 
     // Somente coordenadores e administradores gerenciam o projeto.
-    $podeGerenciar = $eCoordenador;
+    $projetoAtivo = ($projeto->isStatus() !== false);
+    $podeGerenciar = ($eCoordenador || !empty($coordenaEquipe)) && $projetoAtivo;
+    // Qualquer integrante (e o admin) edita; o participante só altera descrição, componentes e arquivos.
+    $podeEditar = ($eIntegrante || $eAdmin) && $projetoAtivo;
 
     // Dados auxiliares.
     $idsAutores = !empty($usuarios)
@@ -95,7 +90,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
         <div class="flex items-center gap-3 flex-wrap">
 
-            <?php if ($podeGerenciar): ?>
+            <?php if ($podeEditar): ?>
 
                 <!-- Editar projeto -->
                 <form action="<?= URL_BASE ?>/projeto/editar" method="post">
@@ -108,43 +103,88 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
                     <button
                         type="submit"
-                        class="rd-btn rd-btn-primary !py-2 !px-4 text-xs"
+                        class="rd-btn rd-btn-primary rd-btn-sm"
                     >
                         Editar Projeto
                     </button>
 
                 </form>
 
-                <!-- Desativar projeto -->
-                <button
-                    type="button"
-                    data-desativar
-                    data-tipo="projeto"
-                    data-id="<?= (int)$projeto->getId() ?>"
-                    data-nome="<?= $escapar($projeto->getNome()) ?>"
-                    class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition"
-                >
-                    Desativar
-                </button>
+            <?php endif; ?>
+
+            <?php if ($podeGerenciar): ?>
+
+                <!-- Desativar projeto (admin em projeto de outro usuário: abre o modal com justificativa) -->
+                <?php if (($eAdmin || !empty($coordenaEquipe)) && !$ehDonoDoProjeto): ?>
+                    <button
+                        type="button"
+                        class="rd-btn rd-btn-danger rd-btn-sm"
+                        data-desativar
+                        data-tipo="projeto"
+                        data-id="<?= (int)$projeto->getId() ?>"
+                        data-nome="<?= $escapar($projeto->getNome()) ?>"
+                        data-responsavel="<?= $escapar($projeto->getUsuario()?->getNome() ?? '') ?>"
+                    >
+                        Desativar
+                    </button>
+                <?php else: ?>
+                <form
+                    action="<?= URL_BASE ?>/projeto/desativar"
+                    method="post"
+                    data-confirmar="Deseja realmente desativar este projeto?" >
+
+                    <input
+                        type="hidden"
+                        name="id"
+                        value="<?= (int)$projeto->getId() ?>"
+                    >
+
+                    <button
+                        type="submit"
+                        class="rd-btn rd-btn-danger rd-btn-sm"
+                    >
+                        Desativar
+                    </button>
+
+                </form>
+                <?php endif; ?>
 
             <?php endif; ?>
 
             <!-- Sair do Projeto -->
             <?php if ($podeSairProjeto): ?>
                 <?php if ($precisaTransferir): ?>
-                    <button type="button" onclick="document.getElementById('modalSairProjeto').showModal()" class="border-2 border-red-500/80 text-red-400 hover:bg-red-500/10 px-4 py-2 text-xs font-bold transition">
+                    <button type="button" onclick="document.getElementById('modalSairProjeto').showModal()" class="rd-btn rd-btn-danger rd-btn-sm">
                         Sair do Projeto
                     </button>
                 <?php else: ?>
-                    <form action="<?= URL_BASE ?>/projeto/remover-membro" method="post" data-confirmar="Deseja realmente sair deste projeto?">
+                    <form action="<?= URL_BASE ?>/projeto/remover-membro" method="post" data-confirmar="Deseja realmente sair deste projeto?" >
                         <input type="hidden" name="projeto_id" value="<?= (int)$projeto->getId() ?>">
                         <input type="hidden" name="usuario_id" value="<?= (int)$usuarioLogadoId ?>">
-                        <button type="submit" class="border-2 border-red-500/80 text-red-400 hover:bg-red-500/10 px-4 py-2 text-xs font-bold transition">
+                        <button type="submit" class="rd-btn rd-btn-danger rd-btn-sm">
                             Sair do Projeto
                         </button>
                     </form>
                 <?php endif; ?>
             <?php endif; ?>
+
+            <!-- Projeto desativado: o admin pode reativar -->
+            <?php if (!$projetoAtivo): ?>
+                <span class="rd-badge rd-badge-private">Desativado</span>
+                <?php
+                $ativarAlvo = ["tipo" => "projeto", "id" => (int)$projeto->getId(), "ativo" => false];
+                include(__DIR__ . '/../../elements/ativarBotao.php');
+                ?>
+            <?php endif; ?>
+
+            <!-- Voltar -->
+            <a
+                href="<?= URL_BASE ?>/projeto/listar"
+                class="rd-btn rd-btn-ghost"
+            >
+                <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><polyline points="15 5 8 12 15 19"/></svg>
+                Voltar
+            </a>
 
             <!-- Denunciar projeto -->
             <?php
@@ -156,7 +196,9 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                 'classe' => 'shrink-0'
             ];
 
-            include(__DIR__ . '/../../elements/denunciaBotao.php');
+            if ($projetoAtivo) {
+                include(__DIR__ . '/../../elements/denunciaBotao.php');
+            }
             ?>
 
         </div>
@@ -164,7 +206,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
 
     <!-- 2. DESCRIÇÃO -->
-    <div class="border-2 border-[#07556A] bg-[#000505] p-5">
+    <div class="border-2 border-[#07556A] bg-[#06141C] p-5">
 
         <h2 class="text-xs font-black uppercase tracking-[.15em] text-[#13F3F7] mb-2 font-['Orbitron']">
             SOBRE O PROJETO
@@ -180,7 +222,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
     <!-- 3. GALERIA DE IMAGENS -->
     <?php if (!empty($imagens)): ?>
 
-        <div class="border-2 border-[#07556A] bg-[#000505] p-5">
+        <div class="border-2 border-[#07556A] bg-[#06141C] p-5">
 
             <h2 class="text-xs font-black uppercase tracking-[.15em] text-[#13F3F7] mb-4 font-['Orbitron']">
                 02. FOTOS DO PROJETO
@@ -190,7 +232,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
                 <?php foreach ($imagens as $img): ?>
 
-                    <div class="group relative aspect-video border-2 border-[#07556A] overflow-hidden bg-[#06141C] hover:border-[#13F3F7] transition">
+                    <div class="group relative aspect-video border-2 border-[#07556A] overflow-hidden bg-[#000505] hover:border-[#13F3F7] transition">
 
                         <img
                             src="<?= URL_BASE ?>/arquivo?arquivo=<?= urlencode($img->getCaminho()) ?>"
@@ -212,7 +254,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
     <!-- 4. HISTÓRICO DE VERSÕES -->
     <?php if (!empty($todasVersoes)): ?>
 
-        <div class="border-2 border-[#07556A] bg-[#000505] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="border-2 border-[#07556A] bg-[#06141C] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 
             <div>
 
@@ -330,7 +372,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
 
     <!-- 5. ARQUIVOS DE CÓDIGO -->
-    <div class="border-2 border-[#07556A] bg-[#000505] p-5">
+    <div id="codigosProjeto" data-atualizar class="border-2 border-[#07556A] bg-[#06141C] p-5">
 
         <h2 class="text-xs font-black uppercase tracking-[.15em] text-[#13F3F7] mb-4 font-['Orbitron']">
             03. ARQUIVOS DE CÓDIGO
@@ -367,10 +409,10 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                     $codigoId = 'code-' . (int)$idx;
                     ?>
 
-                    <div class="border-2 border-[#07556A] bg-[#06141C] overflow-hidden">
+                    <div class="border-2 border-[#07556A] bg-[#000505] overflow-hidden">
 
                         <!-- Cabeçalho do arquivo -->
-                        <div class="bg-[#000505] border-b-2 border-[#07556A] px-4 py-2.5 flex items-center justify-between gap-3">
+                        <div class="bg-[#082B3A] border-b-2 border-[#07556A] px-4 py-2.5 flex items-center justify-between gap-3">
 
                             <div class="flex items-center gap-3 min-w-0">
 
@@ -398,7 +440,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                             <button
                                 type="button"
                                 onclick="copiarCodigo('<?= $codigoId ?>', this)"
-                                class="text-xs border border-[#07556A] hover:border-[#13F3F7] text-[#91B5BD] hover:text-[#13F3F7] px-2.5 py-1 transition flex items-center gap-1.5 shrink-0"
+                                class="rd-btn rd-btn-ghost rd-btn-sm shrink-0"
                             >
 
                                 <svg
@@ -421,10 +463,10 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                         </div>
 
                         <!-- Conteúdo do código -->
-                        <div class="overflow-x-auto p-4 text-xs font-mono flex gap-4 bg-[#030B10]">
+                        <div class="overflow-x-auto p-4 text-xs font-mono flex gap-4 bg-[#000505]">
 
                             <!-- Numeração das linhas -->
-                            <div class="select-none text-[#4E6B72] text-right font-mono pr-2 border-r leading-[1.625] border-[#07556A]/60">
+                            <div class="select-none text-[#91B5BD] text-right font-mono pr-2 border-r leading-[1.625] border-[#07556A]/60">
 
                                 <?php for ($i = 1; $i <= $totalLinhas; $i++): ?>
 
@@ -459,7 +501,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
 
     <!-- 6. COMPONENTES UTILIZADOS -->
-    <div class="border-2 border-[#07556A] bg-[#000505] p-5">
+    <div id="componentesProjeto" data-atualizar class="border-2 border-[#07556A] bg-[#06141C] p-5">
 
         <h2 class="text-xs font-black uppercase tracking-[.15em] text-[#13F3F7] mb-4 font-['Orbitron']">
             04. COMPONENTES DO PROJETO
@@ -473,7 +515,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
                     <a
                         href="<?= URL_BASE ?>/componente/perfil?id=<?= (int)$comp->getId() ?>"
-                        class="border-2 border-[#07556A] bg-[#06141C] p-4 flex gap-4 hover:border-[#13F3F7] transition group"
+                        class="border-2 border-[#07556A] bg-[#000505] p-4 flex gap-4 hover:border-[#13F3F7] transition group"
                     >
 
                         <img
@@ -517,7 +559,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
     </div>
         <!-- 7. ARQUIVOS EXTRAS E DOCUMENTAÇÕES PARA DOWNLOAD -->
-    <div class="border-2 border-[#07556A] bg-[#000505] p-5">
+    <div id="extrasProjeto" data-atualizar class="border-2 border-[#07556A] bg-[#06141C] p-5">
         <div class="flex items-center justify-between border-b border-[#07556A] pb-3 mb-4">
             <h2 class="text-xs font-black uppercase tracking-[.15em] text-[#13F3F7] font-['Orbitron']">
                 05. ARQUIVOS EXTRAS E DOCUMENTAÇÕES
@@ -533,7 +575,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                         $nomeArquivoExtra = basename((string)$caminhoExtra);
                         $extensaoExtra = strtoupper(pathinfo($nomeArquivoExtra, PATHINFO_EXTENSION));
                     ?>
-                    <div class="border-2 border-[#07556A] bg-[#06141C] p-4 flex flex-col justify-between gap-3 hover:border-[#13F3F7] transition group">
+                    <div class="border-2 border-[#07556A] bg-[#000505] p-4 flex flex-col justify-between gap-3 hover:border-[#13F3F7] transition group">
                         <div>
                             <div class="flex items-center justify-between gap-2 mb-2">
                                 <span class="px-2 py-0.5 text-[.65rem] font-black border border-[#07556A] text-[#13F3F7] bg-[#000505]">
@@ -542,14 +584,14 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                             </div>
 
                             <p class="text-xs font-bold text-[#F2FEFE] line-clamp-2">
-                                <?= htmlspecialchars(html_entity_decode($ext->getDescricao() ?? $nomeArquivoExtra)) ?>
+                                <?= texto($ext->getDescricao() ?? $nomeArquivoExtra) ?>
                             </p>
                         </div>
 
                         <a 
                             href="<?= URL_BASE ?>/arquivo?arquivo=<?= urlencode((string)$caminhoExtra) ?>" 
                             download="<?= htmlspecialchars($nomeArquivoExtra) ?>"
-                            class="rd-btn rd-btn-secondary !py-1.5 !px-3 text-xs flex items-center justify-center gap-2 w-full text-center"
+                            class="rd-btn rd-btn-secondary rd-btn-sm flex items-center justify-center gap-2 w-full text-center"
                         >
                             <span>Baixar Arquivo</span>
                         </a>
@@ -563,7 +605,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
 
     <!-- 7. EQUIPE DO PROJETO -->
-    <div class="border-2 border-[#07556A] bg-[#000505] p-5">
+    <div class="border-2 border-[#07556A] bg-[#06141C] p-5">
 
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
 
@@ -585,7 +627,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
         <!-- HASH DE ENTRADA -->
         <?php if ($eCoordenador): ?>
 
-            <div class="mb-4 border-2 border-[#13F3F7] bg-[#00171F] p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div class="mb-4 border-2 border-[#13F3F7] bg-[#082B3A] p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
 
                 <div>
 
@@ -609,7 +651,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
 
         <!-- INTEGRANTES -->
-        <div class="border-2 border-[#07556A] bg-[#000505] p-5 space-y-6">
+        <div class="border-2 border-[#07556A] bg-[#06141C] p-5 space-y-6">
 
             <div class="flex items-center justify-between border-b border-[#07556A] pb-3">
 
@@ -624,12 +666,13 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
             </div>
 
 
+            <div id="solicitacoesProjeto" data-atualizar>
             <!-- SOLICITAÇÕES PENDENTES -->
             <?php if ($eCoordenador && !empty($solicitacoesPendentes)): ?>
 
-                <div class="border-2 border-yellow-500/80 bg-[#06141C] p-4 space-y-3">
+                <div class="border-2 border-[#F0ED06] bg-[#06141C] p-4 space-y-3">
 
-                    <h3 class="text-xs font-black uppercase text-yellow-400 font-['Orbitron']">
+                    <h3 class="text-xs font-black uppercase text-[#F0ED06] font-['Orbitron']">
                         Solicitações de Entrada Pendentes (<?= count($solicitacoesPendentes) ?>)
                     </h3>
 
@@ -673,7 +716,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
                                         <button
                                             type="submit"
-                                            class="rd-btn rd-btn-primary !py-1 !px-3 text-xs !bg-emerald-600 hover:!bg-emerald-500 !text-black font-bold"
+                                            class="rd-btn rd-btn-primary rd-btn-sm"
                                         >
                                             Aceitar
                                         </button>
@@ -701,7 +744,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
                                         <button
                                             type="submit"
-                                            class="border border-red-500 text-red-400 hover:bg-red-500/20 px-3 py-1 text-xs font-bold transition"
+                                            class="rd-btn rd-btn-danger rd-btn-sm"
                                         >
                                             Recusar
                                         </button>
@@ -719,12 +762,13 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                 </div>
 
             <?php endif; ?>
+            </div>
 
 
             <!-- LISTA DOS INTEGRANTES -->
             <?php if (!empty($usuarios)): ?>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div id="integrantesProjeto" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" data-atualizar>
 
                     <?php foreach ($usuarios as $usr): ?>
 
@@ -736,7 +780,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                         $ehParticipante = $usrPapel === 'participante';
                         ?>
 
-                        <div class="border-2 border-[#07556A] bg-[#06141C] p-3 flex flex-col justify-between gap-3 group hover:border-[#13F3F7] transition">
+                        <div class="border-2 border-[#07556A] bg-[#000505] p-3 flex flex-col justify-between gap-3 group hover:border-[#13F3F7] transition">
 
                             <div class="flex items-center justify-between gap-3">
 
@@ -752,7 +796,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                                             : IMG_URL_BASE . '/perfil.png' ?>"
                                         alt="Foto do usuário"
                                         loading="lazy"
-                                        class="w-10 h-10 rounded-full object-cover border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)] shrink-0"
+                                        class="w-10 h-10 object-cover border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)] shrink-0"
                                     >
 
                                     <div class="min-w-0">
@@ -761,7 +805,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                                             <?= $escapar($usr->getNome()) ?>
                                         </p>
 
-                                        <span class="inline-block text-[.6rem] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-[#0795A5] text-[#13F3F7] bg-[#07556A]/30 mt-1">
+                                        <span class="inline-block text-[.6rem] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-[#0795A5] text-[#13F3F7] bg-[#07556A]/20 mt-1">
                                             <?= ucfirst($escapar($usrPapel)) ?>
                                         </span>
 
@@ -771,13 +815,12 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
 
                                 <!-- Remover participante -->
-                                <?php if ($eCoordenador && $ehOutroUsuario && $ehParticipante): ?>
+                                <?php if ($podeGerenciar && $ehOutroUsuario && $usrId !== (int)($projeto->getUsuario()?->getId() ?? 0)): ?>
 
                                     <form
                                         action="<?= URL_BASE ?>/projeto/remover-membro"
                                         method="post"
-                                        data-confirmar="Deseja realmente remover este participante do projeto?"
-                                        class="shrink-0"
+                                        data-confirmar="Deseja realmente remover este participante do projeto?" class="shrink-0"
                                     >
 
                                         <input
@@ -796,9 +839,9 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                                             type="submit"
                                             onclick="console.log('Botão de remoção clicado');"
                                             title="Remover participante"
-                                            class="text-red-400 hover:text-red-300 border border-transparent hover:border-red-500/40 p-1.5 text-base transition"
+                                            class="rd-btn-icon" aria-label="Remover participante"
                                         >
-                                            ✕
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
                                         </button>
 
                                     </form>
@@ -809,12 +852,13 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
 
                             <!-- ALTERAR CARGO -->
-                            <?php if ($eCoordenador && $ehOutroUsuario): ?>
+                            <?php if ($eCoordenador && $ehOutroUsuario && $usrId !== (int)($projeto->getUsuario()?->getId() ?? 0)): ?>
 
                                 <form
                                     action="<?= URL_BASE ?>/projeto/alterar-papel"
                                     method="post"
-                                    class="flex items-center gap-2 pt-2 border-t border-[#07556A]/50"
+                                    data-erro-notificacao
+                                    class="flex items-center gap-2 pt-2 border-t border-[#07556A]/60"
                                 >
 
                                     <input
@@ -835,7 +879,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
                                     <select
                                         name="papel"
-                                        onchange="this.form.submit()"
+                                        onchange="this.form.requestSubmit()"
                                         class="bg-[#000505] text-[#13F3F7] border border-[#07556A] text-[.7rem] px-2 py-0.5 focus:outline-none"
                                     >
 
@@ -877,7 +921,7 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
     </div>
         <!-- 9. COMENTÁRIOS DO PROJETO -->
-    <div class="border-2 border-[#07556A] bg-[#000505] p-5 space-y-6">
+    <div class="border-2 border-[#07556A] bg-[#06141C] p-5 space-y-6">
         <div class="flex items-center justify-between border-b border-[#07556A] pb-3">
             <h2 class="text-xs font-black uppercase tracking-[.15em] text-[#13F3F7] font-['Orbitron']">
                 COMENTÁRIOS DO PROJETO (<?= count($comentarios ?? []) ?>)
@@ -895,7 +939,6 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
                     id="comentarioProjetoConteudo" 
                     name="conteudo" 
                     rows="3" 
-                    required 
                     maxlength="2000" 
                     placeholder="Deixe um comentário sobre este projeto..." 
                     class="rd-textarea !bg-[#06141C]"
@@ -903,67 +946,15 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
             </div>
 
             <div class="flex justify-end">
-                <button type="submit" class="rd-btn rd-btn-primary !py-2 !px-4 text-xs">
+                <button type="submit" class="rd-btn rd-btn-primary rd-btn-sm">
                     Publicar Comentário
                 </button>
             </div>
         </form>
 
-        <!-- LISTAGEM DE COMENTÁRIOS DO PROJETO -->
-        <div class="space-y-4 pt-4 border-t border-[#07556A]/60">
-            <?php if (!empty($comentarios)): ?>
-                <?php foreach ($comentarios as $coment): ?>
-                    <div class="border border-[#07556A] bg-[#06141C] p-4 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <img 
-                                    src="<?= $coment->getUsuario()->getImagem() ? URL_BASE . '/arquivo?arquivo=' . urlencode($coment->getUsuario()->getImagem()) : IMG_URL_BASE . '/perfil.png' ?>" 
-                                    alt="Foto" 
-                                    class="w-8 h-8 rounded-full object-cover border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)]"
-                                >
-                                <div>
-                                    <p class="text-xs font-bold text-[#F2FEFE]">
-                                        @<?= htmlspecialchars($coment->getUsuario()->getNomeUsuario()) ?>
-                                    </p>
-                                    <span class="text-[.6rem] text-[#91B5BD] font-mono">
-                                        <?= $coment->getCriadoEm() ? $coment->getCriadoEm()->format('d/m/Y H:i') : '' ?>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-2">
-                                <?php if ($coment->getUsuario()->getId() === $usuarioLogadoId || $eAdmin): ?>
-                                    <form action="<?= URL_BASE ?>/comentario/desativar" method="post" data-confirmar="Deseja desativar este comentário?">
-                                        <input type="hidden" name="id" value="<?= $coment->getId() ?>">
-                                        <input type="hidden" name="tipo" value="projeto">
-                                        <button type="submit" title="desativar" class="text-red-400 hover:text-red-300 text-xs px-2 py-1">
-                                            desativar
-                                        </button>
-                                    </form>
-                                <?php endif; ?>
-
-                                <?php
-                                // Botão de denúncia do comentário
-                                $denunciaAlvo = [
-                                    "tipo"    => "comentario",
-                                    "id"      => $coment->getId(),
-                                    "nome"    => mb_strimwidth($coment->getConteudo(), 0, 50, '...'),
-                                    "autores" => [$coment->getUsuario()->getId()],
-                                    "classe"  => "shrink-0"
-                                ];
-                                include(__DIR__ . "/../../elements/denunciaBotao.php");
-                                ?>
-                            </div>
-                        </div>
-
-                        <p class="text-sm text-[#F2FEFE] leading-relaxed whitespace-pre-line pl-11">
-                            <?= htmlspecialchars(html_entity_decode($coment->getConteudo())) ?>
-                        </p>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p class="text-xs text-[#91B5BD] text-center py-4">Nenhum comentário neste projeto ainda.</p>
-            <?php endif; ?>
+        <!-- LISTAGEM DE COMENTÁRIOS DO PROJETO (atualizada automaticamente) -->
+        <div id="comentariosProjeto" class="space-y-4 pt-4 border-t border-[#07556A]/60" data-atualizar>
+            <?php include __DIR__ . "/comentarios.php"; ?>
         </div>
     </div>   
 </div>
@@ -971,23 +962,23 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 <!-- SCRIPT: COPIAR CÓDIGO -->
 <?php if ($podeSairProjeto && $precisaTransferir): ?>
 <dialog id="modalSairProjeto" aria-labelledby="modalSairProjetoTitulo" class="rd-scroll-hidden m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto border-[3px] border-[#07556A] bg-[#06141C] p-0 text-[#F2FEFE] shadow-[8px_8px_0_#07556A] backdrop:bg-[#000505]/85">
-    <div class="h-[3px] w-full bg-red-500"></div>
+    <div class="h-[3px] w-full bg-[#F2A058]"></div>
     <form action="<?= URL_BASE ?>/projeto/remover-membro" method="post" class="flex flex-col">
         <input type="hidden" name="projeto_id" value="<?= (int)$projeto->getId() ?>">
         <input type="hidden" name="usuario_id" value="<?= (int)$usuarioLogadoId ?>">
 
         <div class="flex items-start justify-between gap-4 border-b-[3px] border-[#07556A] p-5 sm:p-6">
             <div>
-                <p class="rd-eyebrow !text-red-400">Transferência de Responsabilidade</p>
+                <p class="rd-eyebrow !text-[#F2A058]">Transferência de Responsabilidade</p>
                 <h2 id="modalSairProjetoTitulo" class="rd-heading text-xl uppercase sm:text-2xl">SAIR DO <span>PROJETO</span></h2>
             </div>
-            <button type="button" onclick="document.getElementById('modalSairProjeto').close()" aria-label="Fechar" class="flex h-10 w-10 shrink-0 items-center justify-center border-[3px] border-[#07556A] transition-colors duration-200 hover:border-[#13F3F7]">
+            <button type="button" onclick="document.getElementById('modalSairProjeto').close()" aria-label="Fechar" class="rd-btn-icon">
                 <img src="<?= IMG_URL_BASE ?>/close-icon.png" alt="" class="h-4 w-4">
             </button>
         </div>
 
         <div class="flex flex-col gap-6 p-5 sm:p-6">
-            <p class="border-l-4 border-red-500 pl-4 text-sm leading-relaxed text-[#91B5BD]">
+            <p class="border-l-4 border-[#F2A058] pl-4 text-sm leading-relaxed text-[#91B5BD]">
                 <?php if ($ehDonoDoProjeto && $ehUnicoCoordenador): ?>
                     Você é o <strong>proprietário e único coordenador</strong> deste projeto. Para sair, é obrigatório selecionar outro integrante para assumir a titularidade e a coordenação do projeto.
                 <?php elseif ($ehDonoDoProjeto): ?>
@@ -999,11 +990,11 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
             <div class="rd-field">
                 <label for="novoCoordenadorProjeto" class="rd-label">Novo Responsável / Coordenador</label>
-                <select id="novoCoordenadorProjeto" name="novo_coordenador_id" required class="rd-select">
+                <select id="novoCoordenadorProjeto" name="novo_coordenador_id" class="rd-select">
                     <option value="">Selecione um integrante</option>
                     <?php foreach ($outrosMembros as $outro): ?>
                         <option value="<?= (int)$outro['id'] ?>">
-                            <?= htmlspecialchars($outro['nome']) ?> (<?= htmlspecialchars(ucfirst($outro['papel'])) ?>)
+                            <?= texto($outro['nome']) ?> (<?= htmlspecialchars(ucfirst($outro['papel'])) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -1012,13 +1003,14 @@ if (isset($projeto, $versaoExibida) && $projeto !== null):
 
         <div class="flex flex-col-reverse gap-3 border-t-[3px] border-[#07556A] p-5 sm:flex-row sm:justify-end sm:p-6">
             <button type="button" onclick="document.getElementById('modalSairProjeto').close()" class="rd-btn rd-btn-ghost">Cancelar</button>
-            <button type="submit" class="rd-btn border-red-500 bg-red-600 text-white hover:bg-red-500">Transferir e Sair</button>
+            <button type="submit" class="rd-btn rd-btn-danger-solid">Transferir e Sair</button>
         </div>
     </form>
 </dialog>
 <?php endif; ?>
 
-<script>
+<script> $eIntegrante = false;
+   
 function copiarCodigo(elementId, btn) {
 
     const elemento = document.getElementById(elementId);
@@ -1035,7 +1027,7 @@ function copiarCodigo(elementId, btn) {
         : 'Copiar';
 
     if (!navigator.clipboard || !window.isSecureContext) {
-        rdAviso('Não foi possível copiar automaticamente. Verifique se a página está em uma conexão segura.', 'erro');
+        rdNotificar('Não foi possível copiar automaticamente. Verifique se a página está em uma conexão segura.', 'erro');
         return;
     }
 
@@ -1066,7 +1058,7 @@ function copiarCodigo(elementId, btn) {
 
         })
         .catch(() => {
-            rdAviso('Erro ao copiar o código.', 'erro');
+            rdNotificar('Erro ao copiar o código.', 'erro');
         });
 
 }

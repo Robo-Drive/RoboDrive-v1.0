@@ -99,12 +99,11 @@ class UploadService
 
         $destinoFisico = $this->uploadPath . "/" . $novaImagem;
         $destinoRelativo = $this->relativePath . "/" . $novaImagem;
-
         if (move_uploaded_file($file["tmp_name"], $destinoFisico))
         {
             return [
                 "status" => true,
-                "mensagem" => $destinoRelativo // <-- Agora retorna "store/users/user-X/img/..." para salvar no banco!
+                "mensagem" => $destinoRelativo 
             ];
         }
 

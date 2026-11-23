@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Orbitron:wght@700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
-    <link href="<?= CSS_URL_BASE ?>/style.css" rel="stylesheet">
-    <link rel="stylesheet" href="<?= CSS_URL_BASE ?>/output.css">
-    <link rel="stylesheet" href="<?= CSS_URL_BASE ?>/cropper.min.css">
+    <link href="<?= css_url("style.css") ?>" rel="stylesheet">
+    <link rel="stylesheet" href="<?= css_url("output.css") ?>">
+    <link rel="stylesheet" href="<?= css_url("cropper.min.css") ?>">
     <link rel="icon" type="image/png" href="<?= IMG_URL_BASE ?>/robodrive-logo.png">
     <title><?= $titulo ?></title>
-    <script src="<?= JS_URL_BASE ?>/tailwind.js"></script>
+    <script src="<?= js_url("tailwind.js") ?>"></script>
 </head>
 <body class="h-screen w-screen bg-[#000505] font-['Space_Grotesk']">
 <header class="relative flex h-[10dvh] w-full items-center justify-between border-b-[3px] border-[#07556A] bg-[#000505] px-4 sm:px-8">
@@ -20,25 +20,21 @@
         aria-label="Abrir menu"
         aria-expanded="false"
         aria-controls="sidebar"
-        class="peer group relative hidden h-11 w-11 shrink-0 items-center justify-center border-[3px] border-[#07556A] transition-colors duration-200 hover:border-[#13F3F7] aria-expanded:border-[#13F3F7] lg:!hidden"
+        class="rd-btn-icon rd-burger peer relative hidden shrink-0 items-center justify-center lg:!hidden"
     >
-        <span class="absolute h-[3px] w-5 -translate-y-[7px] bg-[#F2FEFE] transition-transform duration-200 ease-out group-hover:bg-[#13F3F7] group-aria-expanded:translate-y-0 group-aria-expanded:rotate-45 group-aria-expanded:bg-[#13F3F7]"></span>
-        <span class="absolute h-[3px] w-5 bg-[#F2FEFE] transition-opacity duration-150 group-hover:bg-[#13F3F7] group-aria-expanded:opacity-0"></span>
-        <span class="absolute h-[3px] w-5 translate-y-[7px] bg-[#F2FEFE] transition-transform duration-200 ease-out group-hover:bg-[#13F3F7] group-aria-expanded:translate-y-0 group-aria-expanded:-rotate-45 group-aria-expanded:bg-[#13F3F7]"></span>
+        <span class="rd-burger-bar rd-burger-bar-top"></span>
+        <span class="rd-burger-bar rd-burger-bar-mid"></span>
+        <span class="rd-burger-bar rd-burger-bar-bottom"></span>
     </button>
         <?php
-        // Identifica a rota atual sem os parâmetros de query string (?id=...)
         $uriAtual = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
 
-        // Rotas onde o botão NUNCA deve aparecer
         $rotasBloqueadas = [
             '/usuario/perfil',
             '/'
         ];
 
-        // Palavras-chave permitidas (perfis e formulários)
         $palavrasPermitidas = [
-            'perfil',
             'cadastro',
             'create',
             'edit',
@@ -50,7 +46,6 @@
 
         $mostrarBotaoVoltar = false;
 
-        // Se NÃO estiver na lista bloqueada, verifica se é perfil ou formulário
         if (!in_array($uriAtual, $rotasBloqueadas, true)) {
             foreach ($palavrasPermitidas as $termo) {
                 if (str_contains($uriAtual, $termo)) {
@@ -61,7 +56,7 @@
         }
     ?>
 
-    <div class="flex items-center gap-3">
+    <div class="flex flex-wrap items-center gap-3">
         <?php if ($mostrarBotaoVoltar): ?>
             <!-- BOTÃO VOLTAR ESTILIZADO ROBODRIVE -->
             <button 
@@ -69,9 +64,9 @@
                 onclick="window.history.length > 1 ? window.history.back() : window.location.href='<?= URL_BASE ?>'" 
                 title="Voltar para a página anterior"
                 aria-label="Voltar"
-                class="group flex h-9 items-center gap-1.5 border-2 border-[#07556A] bg-[#000505] px-3 font-['Orbitron'] text-[.7rem] font-bold uppercase tracking-wider text-[#91B5BD] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#13F3F7] hover:bg-[#07556A]/20 hover:text-[#13F3F7] cursor-pointer"
+                class="rd-btn rd-btn-ghost rd-btn-sm h-11 w-11 !px-0 sm:h-auto sm:w-auto sm:!px-4"
             >
-                <span class="text-sm transition-transform duration-200 group-hover:-translate-x-1">‹</span>
+                <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><polyline points="15 5 8 12 15 19"/></svg>
                 <span class="hidden sm:inline">Voltar</span>
             </button>
         <?php endif; ?>
@@ -86,11 +81,11 @@
             <img
                 src="<?= $_SESSION["usuario_logado"]->getImagem() ? URL_BASE."/arquivo?arquivo=".$_SESSION["usuario_logado"]->getImagem() : IMG_URL_BASE."/perfil.png" ?>"
                 alt="Foto de perfil"
-                class="aspect-square h-7 w-7 rounded-full border-2 border-[#13F3F7] object-cover shadow-[0_0_10px_rgba(19,243,247,.35)]"
+                class="aspect-square h-7 w-7 border-2 border-[#13F3F7] object-cover shadow-[0_0_10px_rgba(19,243,247,.35)]"
             >
-            <span class="hidden text-xs font-bold uppercase tracking-[.08em] text-[#F2FEFE] sm:inline"><?= $_SESSION["usuario_logado"]->getNomeUsuario() ?></span>
+            <span class="hidden text-xs font-bold uppercase tracking-[.08em] text-[#F2FEFE] sm:inline"><?= texto($_SESSION["usuario_logado"]->getNomeUsuario()) ?></span>
         </a>
     <?php endif; ?>
 </header>
     <!--npm init -y
-npm install -D tailwindcss @tailwindcss/clix-->
+npm install -D tailwindcss @tailwindcss/clix-->

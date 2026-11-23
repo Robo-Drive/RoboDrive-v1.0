@@ -18,10 +18,10 @@ include_once(__DIR__."/../elements/header.php");
     </div>
 </div>
 
-<script src="<?= JS_URL_BASE ?>/password.js"></script>
-<script src="<?= JS_URL_BASE ?>/categoria.js"></script>
-<script src="<?= JS_URL_BASE ?>/componente.js"></script>
-<script src="<?= JS_URL_BASE ?>/inputFiles.js"></script>
-<script src="<?= JS_URL_BASE ?>/images.js"></script>
+<script src="<?= js_url("password.js") ?>"></script>
+<script src="<?= js_url("categoria.js") ?>"></script>
+<script src="<?= js_url("componente.js") ?>"></script>
+<script src="<?= js_url("inputFiles.js") ?>"></script>
+<script src="<?= js_url("images.js") ?>"></script>
 <?php
 include_once(__DIR__."/../elements/footer.php");

@@ -16,6 +16,8 @@ class Denuncia implements ArrayAccess
     private ?int $quantidade = null;
     private ?string $primeiraDenuncia = null;
     private array $motivos = [];
+    private array $descricoes = [];
+    private ?string $link = null;
     private ?int $responsavelId = null;
     private ?string $responsavelNome = null;
     private ?string $responsavelUsuario = null;
@@ -123,6 +125,26 @@ class Denuncia implements ArrayAccess
         $this->motivos = $motivos;
     }
 
+    public function getDescricoes(): array
+    {
+        return $this->descricoes;
+    }
+
+    public function setDescricoes(array $descricoes): void
+    {
+        $this->descricoes = $descricoes;
+    }
+
+    public function getLink(): ?string
+    {
+        return $this->link;
+    }
+
+    public function setLink(?string $link): void
+    {
+        $this->link = $link;
+    }
+
     public function getResponsavelId(): ?int
     {
         return $this->responsavelId;
@@ -188,7 +210,7 @@ class Denuncia implements ArrayAccess
         return in_array($offset, [
             "id", "tipo", "alvo_id", "alvo_nome", "usuario_id",
             "motivo", "descricao", "quantidade", "primeira_denuncia",
-            "motivos", "responsavel_id", "responsavel_nome",
+            "motivos", "descricoes", "link", "responsavel_id", "responsavel_nome",
             "responsavel_usuario", "responsavel_email", "criado_em", "status"
         ], true);
     }
@@ -207,6 +229,8 @@ class Denuncia implements ArrayAccess
             "quantidade" => $this->quantidade,
             "primeira_denuncia" => $this->primeiraDenuncia,
             "motivos" => $this->motivos,
+            "descricoes" => $this->descricoes,
+            "link" => $this->link,
             "responsavel_id" => $this->responsavelId,
             "responsavel_nome" => $this->responsavelNome,
             "responsavel_usuario" => $this->responsavelUsuario,
@@ -231,6 +255,8 @@ class Denuncia implements ArrayAccess
             "quantidade" => $this->setQuantidade($value),
             "primeira_denuncia" => $this->setPrimeiraDenuncia($value),
             "motivos" => $this->setMotivos($value),
+            "descricoes" => $this->setDescricoes($value),
+            "link" => $this->setLink($value),
             "responsavel_id" => $this->setResponsavelId($value),
             "responsavel_nome" => $this->setResponsavelNome($value),
             "responsavel_usuario" => $this->setResponsavelUsuario($value),
@@ -262,6 +288,8 @@ class Denuncia implements ArrayAccess
             $denuncia->setQuantidade(isset($item["quantidade"]) ? (int)$item["quantidade"] : null);
             $denuncia->setPrimeiraDenuncia($item["primeira_denuncia"] ?? null);
             $denuncia->setMotivos($item["motivos"] ?? []);
+            $denuncia->setDescricoes($item["descricoes"] ?? []);
+            $denuncia->setLink($item["link"] ?? null);
             $denuncia->setResponsavelId(isset($item["responsavel_id"]) ? (int)$item["responsavel_id"] : null);
             $denuncia->setResponsavelNome($item["responsavel_nome"] ?? null);
             $denuncia->setResponsavelUsuario($item["responsavel_usuario"] ?? null);

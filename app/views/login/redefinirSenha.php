@@ -26,15 +26,10 @@ include_once(__DIR__ . "/../elements/header.php");
                 <div class="password-container flex w-full border-2 border-[#07556A] transition-colors duration-200 focus-within:border-[#13F3F7]">
                     <input type="password" name="senha" id="senha" class="password h-11 sm:h-12 min-w-0 flex-1 bg-[#000505] px-3.5 sm:px-4 text-sm sm:text-base text-[#F2FEFE] outline-none">
 
-                    <button type="button" onclick="passowrdChange()" class="password-divider flex h-11 sm:h-12 items-center justify-center border-l-2 border-[#07556A] bg-[#000505] px-3 sm:px-4 text-[#F2FEFE] transition-colors duration-200 focus:outline-none" aria-label="Alternar visibilidade da senha">
+                    <button type="button" onclick="passowrdChange()" class="rd-btn-icon password-divider sm:h-12" aria-label="Alternar visibilidade da senha">
                         <img class="passwordButton h-4 w-4 sm:h-5 sm:w-5 transition-all duration-200" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
                     </button>
                 </div>
-                <?php if(isset($erros)): ?>
-                    <?php if(isset($erros["senha"])): ?>
-                        <p class="mt-1.5 sm:mt-2 text-xs sm:text-sm font-medium text-[#13F3F7]"><?= $erros["senha"] ?></p>
-                    <?php endif;?>
-                <?php endif;?>
             </div>
             <div class="relative">
                 <label for="confirmar_senha" class="absolute -top-3 left-3 z-10 bg-[#06141C] px-2 text-[.65rem] sm:text-[.7rem] font-bold uppercase tracking-[.14em] text-[#F2FEFE]">
@@ -44,26 +39,21 @@ include_once(__DIR__ . "/../elements/header.php");
                 <div class="password-container flex w-full border-2 border-[#07556A] transition-colors duration-200 focus-within:border-[#13F3F7]">
                     <input type="password" name="confirmar_senha" id="confirmar_senha" class="confirmarPassword h-11 sm:h-12 min-w-0 flex-1 bg-[#000505] px-3.5 sm:px-4 text-sm sm:text-base text-[#F2FEFE] outline-none">
 
-                    <button type="button" onclick="confirmarPassowrdChange()" class="password-divider flex h-11 sm:h-12 items-center justify-center border-l-2 border-[#07556A] bg-[#000505] px-3 sm:px-4 text-[#F2FEFE] transition-colors duration-200 focus:outline-none" aria-label="Alternar visibilidade da confirmação de senha">
+                    <button type="button" onclick="confirmarPassowrdChange()" class="rd-btn-icon password-divider sm:h-12" aria-label="Alternar visibilidade da confirmação de senha">
                         <img class="confirmarPasswordButton h-4 w-4 sm:h-5 sm:w-5 transition-all duration-200" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
                     </button>
                 </div>
                 <p class="confirmarErro mt-1.5 sm:mt-2 text-xs sm:text-sm font-medium text-[#13F3F7]">
-                    <?php if(isset($erros)): ?>
-                        <?php if(isset($erros["confirmar_senha"])): ?>
-                            <?= $erros["confirmar_senha"] ?>
-                        <?php endif;?>
-                    <?php endif;?>
                 </p>
                 
             </div>
 
-            <button type="submit" class="rd-btn rd-btn-primary w-full !py-3">
+            <button type="submit" class="rd-btn rd-btn-primary w-full">
                 Salvar Nova Senha
             </button>
         </form>
     </section>
 </main>
-<script src="<?= JS_URL_BASE ?>/password.js"></script> 
+<script src="<?= js_url("password.js") ?>"></script> 
 
 <?php include_once(__DIR__ . "/../elements/footer.php"); ?>

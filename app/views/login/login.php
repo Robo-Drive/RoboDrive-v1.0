@@ -27,12 +27,12 @@ include_once(__DIR__ . "/../elements/header.php");
 
             <p class="mt-6 sm:mt-7 border-t border-[#07556A] pt-4 sm:pt-5 text-center text-xs sm:text-sm text-[#91B5BD]">
                 Ainda não possui conta?
-                <a href="<?= URL_BASE . "/cadastro" ?>" class="ml-1 font-bold uppercase tracking-[.08em] text-[#F2FEFE] underline decoration-[#13F3F7] decoration-2 underline-offset-4 transition-colors duration-200 hover:text-[#54FBFE]">Cadastre-se</a>
+                <a href="<?= URL_BASE . "/cadastro" ?>" class="ml-1 font-bold uppercase tracking-[.08em] text-[#F2FEFE] underline decoration-[#13F3F7] decoration-2 underline-offset-4 transition-colors duration-200 hover:text-[#13F3F7]">Cadastre-se</a>
             </p>
         </div>
     </section>
 </main>
-<script src="<?= JS_URL_BASE ?>/password.js"></script> 
-<script src="<?= JS_URL_BASE ?>/script.js"></script>
-<script src="<?= JS_URL_BASE ?>/metaballs-wallpaper.js"></script><?php
+<script src="<?= js_url("password.js") ?>"></script> 
+<script src="<?= js_url("script.js") ?>"></script>
+<script src="<?= js_url("metaballs-wallpaper.js") ?>"></script><?php
                                                                     include_once(__DIR__ . "/../elements/footer.php");

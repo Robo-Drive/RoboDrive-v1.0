@@ -101,9 +101,9 @@ document.addEventListener('DOMContentLoaded', () =>
     {
         document.querySelectorAll('.rd-error-ajax').forEach(el => el.remove());
 
-        document.querySelectorAll('.border-red-500').forEach(el =>
+        document.querySelectorAll("[class~='!border-[#F2A058]']").forEach(el =>
         {
-            el.classList.remove('border-red-500');
+            el.classList.remove('!border-[#F2A058]');
         });
 
         const alertGeral = document.getElementById('alertaGeralAjax');
@@ -173,11 +173,11 @@ document.addEventListener('DOMContentLoaded', () =>
             }
 
             // Destaca o elemento com borda vermelha
-            inputElement.classList.add('border-red-500');
+            inputElement.classList.add('!border-[#F2A058]');
 
             // Cria e insere o texto do erro
             const errorElement = document.createElement('p');
-            errorElement.className = 'rd-error rd-error-ajax mt-1 text-xs text-red-400 font-bold';
+            errorElement.className = 'rd-error rd-error-ajax mt-1 text-xs text-[#F2A058] font-bold';
             errorElement.textContent = mensagem;
 
             // Se for a descrição do código ou extra, insere logo abaixo do input
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () =>
         alertDiv.id = 'alertaGeralAjax';
 
         alertDiv.className =
-            'mb-6 p-4 border-2 border-red-500 bg-red-950/40 text-red-200 text-xs font-bold font-["Orbitron"] tracking-wider';
+            'mb-6 p-4 border-2 border-[#F2A058] bg-[#06141C] text-[#F2A058] text-xs font-bold font-["Orbitron"] tracking-wider';
 
         alertDiv.textContent = `AVISO: ${mensagem}`;
 

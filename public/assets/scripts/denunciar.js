@@ -41,11 +41,11 @@ document.addEventListener("click", evento => {
     const gatilho = evento.target.closest("[data-denunciar]");
     if (gatilho)
     {
+        evento.preventDefault();
         abrirDenuncia(gatilho.dataset);
     }
 });
 
-// Fecha pelo botão de fechar/cancelar ou ao clicar fora da caixa (no backdrop)
 modalDenunciar.addEventListener("click", evento => {
     if (evento.target === modalDenunciar || evento.target.closest("[data-fechar-modal]"))
     {

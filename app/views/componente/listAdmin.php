@@ -1,0 +1,53 @@
+<?php
+$titulo = "Componentes - Administração";
+include_once(__DIR__."/../elements/header.php");
+?>
+<div class="rd-shell">
+    <?php include_once(__DIR__."/../elements/sidebar.php") ?>
+    <div class="rd-content rd-scroll-hidden">
+
+        <section class="rd-section flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <p class="rd-eyebrow">ADMINISTRAÇÃO</p>
+                <h1 class="rd-heading text-[clamp(1.8rem,4vw,2.8rem)]">TODOS OS COMPONENTES</h1>
+            </div>
+            <a href="<?= URL_BASE ?>/componente/cadastro" class="rd-btn rd-btn-primary w-fit">Adicionar componente</a>
+        </section>
+
+        <!-- FILTRO DE STATUS E BUSCA POR NOME -->
+        <form data-busca method="get" action="<?= URL_BASE ?>/admin/componente/listar" class="flex flex-col gap-3 px-5 pb-3 sm:flex-row sm:items-center">
+            <label for="status" class="text-xs text-[#91B5BD] uppercase font-bold">Status:</label>
+            <select name="status" id="status" onchange="this.form.submit()" class="rd-select !h-9 text-xs sm:!w-44 sm:shrink-0">
+                <option value="1" <?= ($statusFiltro ?? '1') === '1' ? 'selected' : '' ?>>Ativos</option>
+                <option value="0" <?= ($statusFiltro ?? '1') === '0' ? 'selected' : '' ?>>Desativados</option>
+                <option value="todos" <?= ($statusFiltro ?? '1') === 'todos' ? 'selected' : '' ?>>Todos</option>
+            </select>
+            <input
+                type="text"
+                name="busca"
+                value="<?= htmlspecialchars($busca_atual ?? '') ?>"
+                placeholder="Pesquisar componentes pelo nome..."
+                class="rd-input w-full flex-1"
+                autocomplete="off"
+            >
+            <button type="submit" class="rd-btn rd-btn-secondary rd-btn-sm">Buscar</button>
+        </form>
+
+        <section data-resultados class="grid grid-cols-1 gap-5 p-5 md:grid-cols-2 lg:grid-cols-4">
+            <?php if(isset($componentes) && count($componentes) > 0):?>
+                <?php foreach($componentes as $componente):?>
+                    <?php include(__DIR__."/elements/card.php")?>
+                <?php endforeach;?>
+            <?php else: ?>
+                <p class="rd-empty w-full">Nenhum componente encontrado.</p>
+            <?php endif; ?>
+        </section>
+
+    </div>
+</div>
+<?php
+include_once(__DIR__."/../elements/denunciaModal.php");
+?>
+<script src="<?= js_url("busca.js") ?>"></script>
+<?php
+include_once(__DIR__."/../elements/footer.php");

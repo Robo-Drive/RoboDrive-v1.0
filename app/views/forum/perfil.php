@@ -7,6 +7,8 @@ include_once(__DIR__ . "/../elements/header.php");
 $usuarioLogado = $_SESSION["usuario_logado"];
 $eAdmin = ($usuarioLogado->getRegra() === "admin");
 $eAutor = ($forum->getUsuario()->getId() === $usuarioLogado->getId());
+$forumAtivo = ($forum->isStatus() !== false);
+$eCoordenadorEquipe = !empty($coordenaEquipe);
 
 $fotoAutor = $forum->getUsuario()->getImagem()
     ? URL_BASE . '/arquivo?arquivo=' . urlencode($forum->getUsuario()->getImagem())
@@ -27,25 +29,50 @@ $fotoAutor = $forum->getUsuario()->getImagem()
                 </h1>
             </div>
 
-            <div class="flex items-center gap-3">
-                <?php if ($eAdmin || $eAutor): ?>
+            <div class="flex flex-wrap items-center gap-3">
+                <?php if (!$forumAtivo): ?>
+                    <span class="rd-badge rd-badge-private">Desativada</span>
+                    <?php
+                    $ativarAlvo = ["tipo" => "forum", "id" => (int) $forum->getId(), "ativo" => false];
+                    include(__DIR__ . "/../elements/ativarBotao.php");
+                    ?>
+                <?php endif; ?>
+
+                <?php if (($eAdmin || $eAutor || $eCoordenadorEquipe) && $forumAtivo): ?>
+                    <?php if ($eAdmin || $eAutor): ?>
                     <form action="<?= URL_BASE ?>/forum/editar" method="post">
                         <input type="hidden" name="id" value="<?= $forum->getId() ?>">
-                        <button type="submit" class="rd-btn rd-btn-secondary !py-2 !px-4 text-xs">
+                        <button type="submit" class="rd-btn rd-btn-secondary rd-btn-sm">
                             Editar
                         </button>
                     </form>
+                    <?php endif; ?>
 
-                    <form action="<?= URL_BASE ?>/forum/desativar" method="post" data-confirmar="Deseja realmente desativar esta postagem?">
-                        <input type="hidden" name="id" value="<?= $forum->getId() ?>">
-                        <button type="submit" class="border-2 border-[#F2A058] text-[#F2A058] hover:bg-[#F2A058]/10 px-4 py-2 text-xs font-bold transition">
+                    <?php if (($eAdmin || $eCoordenadorEquipe) && !$eAutor): ?>
+                        <button
+                            type="button"
+                            class="rd-btn rd-btn-danger rd-btn-sm"
+                            data-desativar
+                            data-tipo="forum"
+                            data-id="<?= $forum->getId() ?>"
+                            data-nome="<?= texto(mb_strimwidth(html_entity_decode($forum->getConteudo()), 0, 50, '...')) ?>"
+                            data-responsavel="@<?= texto($forum->getUsuario()->getNomeUsuario() ?? '') ?>"
+                        >
                             Desativar
                         </button>
-                    </form>
+                    <?php else: ?>
+                        <form action="<?= URL_BASE ?>/forum/desativar" method="post" data-confirmar="Deseja realmente desativar esta postagem?" >
+                            <input type="hidden" name="id" value="<?= $forum->getId() ?>">
+                            <button type="submit" class="rd-btn rd-btn-danger rd-btn-sm">
+                                Desativar
+                            </button>
+                        </form>
+                    <?php endif; ?>
                 <?php endif; ?>
 
-                <a href="<?= URL_BASE ?>/forum" class="border-2 border-[#07556A] px-4 py-2 text-xs font-bold text-[#F2FEFE] hover:border-[#13F3F7] transition">
-                    Voltar
+                <a href="<?= URL_BASE ?>/forum/listar" class="rd-btn rd-btn-ghost">
+                    <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><polyline points="15 5 8 12 15 19"/></svg>
+                Voltar
                 </a>
             </div>
         </div>
@@ -59,13 +86,13 @@ $fotoAutor = $forum->getUsuario()->getImagem()
                     <img 
                         src="<?= htmlspecialchars($fotoAutor) ?>" 
                         alt="Foto do autor" 
-                        class="w-12 h-12 rounded-full object-cover border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)] shrink-0"
+                        class="w-12 h-12 object-cover border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)] shrink-0"
                         loading="lazy"
                         onerror="this.onerror=null;this.src='<?= IMG_URL_BASE ?>/perfil.png';"
                     >
                     <div class="min-w-0">
                         <p class="text-sm font-bold text-[#F2FEFE] truncate">
-                            @<?= htmlspecialchars(html_entity_decode($forum->getUsuario()->getNomeUsuario() ?? 'Usuário')) ?>
+                            @<?= texto($forum->getUsuario()->getNomeUsuario() ?? 'Usuário') ?>
                         </p>
                         <span class="text-xs text-[#91B5BD] font-mono">
                             Publicado em <?= $forum->getCriadoEm() ? $forum->getCriadoEm()->format('d/m/Y H:i') : 'Data não informada' ?>
@@ -87,14 +114,16 @@ $fotoAutor = $forum->getUsuario()->getImagem()
                         "autores" => [$forum->getUsuario()->getId()],
                         "classe"  => "shrink-0"
                     ];
-                    include(__DIR__ . "/../elements/denunciaBotao.php");
+                    if ($forumAtivo) {
+                        include(__DIR__ . "/../elements/denunciaBotao.php");
+                    }
                     ?>
                 </div>
             </div>
 
             <!-- CONTEÚDO DA POSTAGEM -->
             <div class="text-[#F2FEFE] text-base leading-relaxed whitespace-pre-line bg-[#000505] p-5 border border-[#07556A]/60 w-full">
-                <?= nl2br(htmlspecialchars(html_entity_decode($forum->getConteudo(), ENT_QUOTES, 'UTF-8'))) ?>
+                <?= nl2br(texto($forum->getConteudo())) ?>
             </div>
 
         </article>
@@ -118,7 +147,6 @@ $fotoAutor = $forum->getUsuario()->getImagem()
                         id="comentarioConteudo" 
                         name="conteudo" 
                         rows="3" 
-                        required 
                         maxlength="2000" 
                         placeholder="Escreva sua resposta para esta postagem..." 
                         class="rd-textarea !bg-[#000505] w-full"
@@ -126,14 +154,14 @@ $fotoAutor = $forum->getUsuario()->getImagem()
                 </div>
 
                 <div class="flex justify-end">
-                    <button type="submit" class="rd-btn rd-btn-primary !py-2 !px-4 text-xs">
+                    <button type="submit" class="rd-btn rd-btn-primary rd-btn-sm">
                         Publicar Comentário
                     </button>
                 </div>
             </form>
 
             <!-- LISTAGEM DE COMENTÁRIOS -->
-            <div class="space-y-4 pt-4 border-t border-[#07556A]/60 w-full">
+            <div id="comentariosForum" data-atualizar class="space-y-4 pt-4 border-t border-[#07556A]/60 w-full">
                 <?php if (!empty($comentarios)): ?>
                     <?php foreach ($comentarios as $coment): ?>
                         <?php
@@ -147,13 +175,13 @@ $fotoAutor = $forum->getUsuario()->getImagem()
                                     <img 
                                         src="<?= htmlspecialchars($fotoComent) ?>" 
                                         alt="Foto" 
-                                        class="w-9 h-9 rounded-full object-cover border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)] shrink-0"
+                                        class="w-9 h-9 object-cover border-2 border-[#13F3F7] shadow-[0_0_10px_rgba(19,243,247,.35)] shrink-0"
                                         loading="lazy"
                                         onerror="this.onerror=null;this.src='<?= IMG_URL_BASE ?>/perfil.png';"
                                     >
                                     <div class="min-w-0">
                                         <p class="text-xs font-bold text-[#F2FEFE] truncate">
-                                            @<?= htmlspecialchars(html_entity_decode($coment->getUsuario()->getNomeUsuario())) ?>
+                                            @<?= texto($coment->getUsuario()->getNomeUsuario()) ?>
                                         </p>
                                         <span class="text-[.65rem] text-[#91B5BD] font-mono">
                                             <?= $coment->getCriadoEm() ? $coment->getCriadoEm()->format('d/m/Y H:i') : '' ?>
@@ -163,13 +191,29 @@ $fotoAutor = $forum->getUsuario()->getImagem()
 
                                 <div class="flex items-center gap-2 shrink-0">
                                     <?php if ($coment->getUsuario()->getId() === $usuarioLogado->getId() || $eAdmin): ?>
-                                        <form action="<?= URL_BASE ?>/comentario/desativar" method="post" data-confirmar="Deseja desativar este comentário?">
-                                            <input type="hidden" name="id" value="<?= $coment->getId() ?>">
-                                            <input type="hidden" name="tipo" value="forum">
-                                            <button type="submit" title="Desativar comentário" class="text-red-400 hover:text-red-300 text-xs px-2 py-1 font-bold">
+                                        <?php if ($eAdmin && $coment->getUsuario()->getId() !== $usuarioLogado->getId()): ?>
+                                            <button
+                                                type="button"
+                                                title="Desativar comentário"
+                                                class="rd-btn rd-btn-danger rd-btn-sm"
+                                                data-desativar
+                                                data-tipo="comentario"
+                                                data-origem="forum"
+                                                data-id="<?= $coment->getId() ?>"
+                                                data-nome="<?= texto(mb_strimwidth(html_entity_decode($coment->getConteudo()), 0, 50, '...')) ?>"
+                                                data-responsavel="@<?= texto($coment->getUsuario()->getNomeUsuario()) ?>"
+                                            >
                                                 Desativar
                                             </button>
-                                        </form>
+                                        <?php else: ?>
+                                            <form action="<?= URL_BASE ?>/comentario/desativar" method="post" data-confirmar="Deseja desativar este comentário?" >
+                                                <input type="hidden" name="id" value="<?= $coment->getId() ?>">
+                                                <input type="hidden" name="tipo" value="forum">
+                                                <button type="submit" title="Desativar comentário" class="rd-btn rd-btn-danger rd-btn-sm">
+                                                    Desativar
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
                                     <?php endif; ?>
 
                                     <?php
@@ -186,7 +230,7 @@ $fotoAutor = $forum->getUsuario()->getImagem()
                             </div>
 
                             <p class="text-sm text-[#F2FEFE] leading-relaxed whitespace-pre-line pl-12">
-                                <?= nl2br(htmlspecialchars(html_entity_decode($coment->getConteudo(), ENT_QUOTES, 'UTF-8'))) ?>
+                                <?= nl2br(texto($coment->getConteudo())) ?>
                             </p>
                         </div>
                     <?php endforeach; ?>

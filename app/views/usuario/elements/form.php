@@ -1,20 +1,14 @@
 <?php
-$erros = $erros ?? [];
 $fotoAtual = null;
 if (isset($usuario)) {
     $fotoAtual = is_object($usuario) ? $usuario->getImagem() : ($usuario['imagem'] ?? null);
 }
-// Atributos de acessibilidade para campo com erro vindo do servidor
-$ariaErro = function ($campo, $extra = '') use ($erros) {
-    $ids = trim($extra . (isset($erros[$campo]) ? " erro-$campo" : ''));
-    return ($ids !== '' ? 'aria-describedby="' . $ids . '"' : '') . (isset($erros[$campo]) ? ' aria-invalid="true"' : '');
-};
-$estrela = '<span aria-hidden="true" class="text-red-400">*</span>';
+$estrela = '<span aria-hidden="true" class="text-[#F2A058]">*</span>';
 $marcado = 'group-has-[input[name=remover_imagem]:checked]';
 ?>
 <div class="space-y-9">
 
-    <p class="text-xs text-[#91B5BD]"><span aria-hidden="true" class="text-red-400">*</span> Campos obrigatórios</p>
+    <p class="text-xs text-[#91B5BD]"><span aria-hidden="true" class="text-[#F2A058]">*</span> Campos obrigatórios</p>
 
     <!-- Foto de perfil -->
     <div class="group flex flex-col items-center gap-4 sm:flex-row">
@@ -22,15 +16,15 @@ $marcado = 'group-has-[input[name=remover_imagem]:checked]';
             id="avatarPerfil"
             src="<?= !empty($fotoAtual) ? URL_BASE . '/arquivo?arquivo=' . urlencode($fotoAtual) : IMG_URL_BASE . '/perfil.png' ?>"
             alt="Foto de perfil"
-            class="aspect-square h-24 w-24 shrink-0 overflow-hidden rounded-full border-2 border-[#13F3F7] object-cover shadow-[0_0_24px_rgba(19,243,247,.35)] transition-opacity motion-reduce:transition-none <?= $marcado ?>:opacity-40"
+            class="aspect-square h-24 w-24 shrink-0 overflow-hidden border-2 border-[#13F3F7] object-cover shadow-[0_0_24px_rgba(19,243,247,.35)] transition-opacity motion-reduce:transition-none <?= $marcado ?>:opacity-40"
         >
 
         <div class="flex w-full flex-col gap-2 sm:w-auto">
             <button type="button" id="btnSelecionarImagem" onclick="adicionarImagens()" class="rd-file-btn sm:w-auto sm:px-6">Selecionar imagem</button>
-            <input type="file" name="imagem" id="imagens" accept="image/*" style="display:none;" <?= $ariaErro('imagem') ?>>
+            <input type="file" name="imagem" id="imagens" accept="image/*" style="display:none;">
 
             <?php if (!empty($fotoAtual)): ?>
-                <label class="flex min-h-11 cursor-pointer items-center gap-3 text-sm font-bold text-red-400">
+                <label class="flex min-h-11 cursor-pointer items-center gap-3 text-sm font-bold text-[#F2A058]">
                     <input type="checkbox" name="remover_imagem" value="1" class="peer sr-only">
                     <span class="flex h-5 w-5 shrink-0 items-center justify-center border-2 border-[#07556A] bg-[#06141C] text-transparent peer-checked:border-[#13F3F7] peer-checked:bg-[#13F3F7] peer-checked:text-[#000505] peer-focus-visible:ring-2 peer-focus-visible:ring-[#54FBFE] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#06141C]">
                         <svg viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>
@@ -42,10 +36,7 @@ $marcado = 'group-has-[input[name=remover_imagem]:checked]';
         </div>
     </div>
 
-    <ul id="listaImagens" class="rd-file-list [&>li]:bg-[#06141C] [&>li]:border-[#07556A] [&>li]:text-[#F2FEFE] [&>li]:p-4 [&>li:hover]:border-[#13F3F7] [&_img]:rounded-full [&_img]:border-[#13F3F7] [&_p:last-child]:text-[#91B5BD] [&>li>button]:flex [&>li>button]:h-11 [&>li>button]:w-11 [&>li>button]:items-center [&>li>button]:justify-center"></ul>
-    <?php if (isset($erros['imagem'])): ?>
-        <p id="erro-imagem" class="rd-error"><?= $erros['imagem'] ?></p>
-    <?php endif; ?>
+    <ul id="listaImagens" class="rd-file-list [&>li]:bg-[#06141C] [&>li]:border-[#07556A] [&>li]:text-[#F2FEFE] [&>li]:p-4 [&>li:hover]:border-[#13F3F7] [&>li>div>img]:rounded-none [&>li>div>img]:border-2 [&>li>div>img]:border-[#13F3F7] [&>li>div>img]:shadow-[0_0_10px_rgba(19,243,247,.35)] [&_p:last-child]:text-[#91B5BD] [&>li>button]:flex [&>li>button]:h-11 [&>li>button]:w-11 [&>li>button]:items-center [&>li>button]:justify-center"></ul>
 
     <fieldset class="min-w-0 space-y-6">
         <legend class="mb-3 w-full">
@@ -64,12 +55,8 @@ $marcado = 'group-has-[input[name=remover_imagem]:checked]';
                 name="nome_usuario"
                 class="rd-input"
                 required
-                <?= $ariaErro('nome_usuario') ?>
                 value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getNomeUsuario() : (isset($usuario['nome_usuario']) ? $usuario['nome_usuario'] : '')) : '' ?>"
             >
-            <?php if (isset($erros['nome_usuario'])): ?>
-                <p id="erro-nome_usuario" class="rd-error"><?= $erros['nome_usuario'] ?></p>
-            <?php endif; ?>
         </div>
 
         <div class="rd-field">
@@ -80,12 +67,8 @@ $marcado = 'group-has-[input[name=remover_imagem]:checked]';
                 name="nome"
                 class="rd-input"
                 required
-                <?= $ariaErro('nome') ?>
                 value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getNome() : (isset($usuario['nome']) ? $usuario['nome'] : '')) : '' ?>"
             >
-            <?php if (isset($erros['nome'])): ?>
-                <p id="erro-nome" class="rd-error"><?= $erros['nome'] ?></p>
-            <?php endif; ?>
         </div>
 
         <div class="rd-field">
@@ -97,16 +80,13 @@ $marcado = 'group-has-[input[name=remover_imagem]:checked]';
                 maxlength="500"
                 placeholder="Conte um pouco sobre você..."
                 class="rd-textarea"
-                <?= $ariaErro('biografia', 'contador-biografia') ?>
+                aria-describedby="contador-biografia"
             ><?= isset($usuario)
                 ? (is_object($usuario)
                     ? $usuario->getBiografia()
                     : (isset($usuario['biografia']) ? $usuario['biografia'] : ''))
                 : '' ?></textarea>
             <p id="contador-biografia" aria-live="polite" class="mt-1 text-right text-xs text-[#91B5BD]">0/500</p>
-            <?php if (isset($erros['biografia'])): ?>
-                <p id="erro-biografia" class="rd-error"><?= $erros['biografia'] ?></p>
-            <?php endif; ?>
         </div>
 
         <div class="rd-field">
@@ -118,25 +98,18 @@ $marcado = 'group-has-[input[name=remover_imagem]:checked]';
                 class="rd-input"
                 autocomplete="email"
                 required
-                <?= $ariaErro('email') ?>
                 value="<?= isset($usuario) ? (is_object($usuario) ? $usuario->getEmail() : (isset($usuario['email']) ? $usuario['email'] : '')) : '' ?>"
             >
-            <?php if (isset($erros['email'])): ?>
-                <p id="erro-email" class="rd-error"><?= $erros['email'] ?></p>
-            <?php endif; ?>
         </div>
 
         <?php if($_SESSION["usuario_logado"]->getRegra() == "admin"): ?>
             <div class="rd-field">
                 <label for="regra" class="rd-label">Regra</label>
-                <select name="regra" id="regra" class="rd-select" <?= $ariaErro('regra') ?>>
+                <select name="regra" id="regra" class="rd-select">
                     <option value="">Selecione</option>
                     <option value="admin" <?= isset($usuario) ? (is_object($usuario) ? ($usuario->getRegra() == "admin" ? "selected" : "") : (isset($usuario["regra"]) ? ($usuario["regra"] == "admin" ? "selected" : "") : "")) : "" ?>>Admin</option>
                     <option value="usuario" <?= isset($usuario) ? (is_object($usuario) ? ($usuario->getRegra() == "usuario" ? "selected" : "") : (isset($usuario["regra"]) ? ($usuario["regra"] == "usuario" ? "selected" : "") : "")) : "" ?>>Usuário</option>
                 </select>
-                <?php if (isset($erros['regra'])): ?>
-                    <p id="erro-regra" class="rd-error"><?= $erros['regra'] ?></p>
-                <?php endif; ?>
             </div>
         <?php endif; ?>
     </fieldset>
@@ -159,32 +132,25 @@ $marcado = 'group-has-[input[name=remover_imagem]:checked]';
                     name="senha"
                     autocomplete="new-password"
                     class="password rd-input flex-1 border-r-0"
-                    <?= $ariaErro('senha', 'dica-senha') ?>
+                    aria-describedby="dica-senha"
                     value="<?= isset($usuario) ? (is_object($usuario) ? '' : (isset($usuario['senha']) ? $usuario['senha'] : '')) : '' ?>"
                 >
-                <button type="button" onclick="passowrdChange()" class="flex h-11 w-11 shrink-0 items-center justify-center border-2 border-[#07556A] bg-[#000505] transition-colors duration-200 hover:border-[#13F3F7] focus-visible:outline-2 focus-visible:outline-[#54FBFE]">
+                <button type="button" onclick="passowrdChange()" class="rd-btn-icon">
                     <img class="passwordButton h-4 w-4" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
                 </button>
             </div>
             <p id="dica-senha" class="mt-2 text-xs text-[#91B5BD]">Deixe em branco para manter a senha atual.</p>
-            <?php if (isset($erros['senha'])): ?>
-                <p id="erro-senha" class="rd-error"><?= $erros['senha'] ?></p>
-            <?php endif; ?>
         </div>
 
         <div class="rd-field">
             <label for="confirmar_senha" class="rd-label">Confirmar nova senha</label>
             <div class="flex w-full">
-                <input type="password" id="confirmar_senha" name="confirmar_senha" autocomplete="new-password" class="confirmarPassword rd-input flex-1 border-r-0" <?= $ariaErro('confirmar_senha') ?>>
-                <button type="button" onclick="confirmarPassowrdChange()" class="flex h-11 w-11 shrink-0 items-center justify-center border-2 border-[#07556A] bg-[#000505] transition-colors duration-200 hover:border-[#13F3F7] focus-visible:outline-2 focus-visible:outline-[#54FBFE]">
+                <input type="password" id="confirmar_senha" name="confirmar_senha" autocomplete="new-password" class="confirmarPassword rd-input flex-1 border-r-0">
+                <button type="button" onclick="confirmarPassowrdChange()" class="rd-btn-icon">
                     <img class="confirmarPasswordButton h-4 w-4" src="<?= IMG_URL_BASE ?>/visibility.png" alt="visualização">
                 </button>
             </div>
-            <p id="erro-confirmar_senha" class="confirmarErro rd-error">
-                <?php if(isset($erros["confirmar_senha"])): ?>
-                    <?= $erros["confirmar_senha"] ?>
-                <?php endif;?>
-            </p>
+            <p class="confirmarErro rd-error"></p>
         </div>
     </fieldset>
 

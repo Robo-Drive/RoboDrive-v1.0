@@ -14,13 +14,26 @@ include_once(__DIR__."/../elements/header.php");
             <a href="<?= URL_BASE ?>/componente/cadastro" class="rd-btn rd-btn-primary w-fit">Adicionar componente</a>
         </section>
 
-        <section class="grid grid-cols-1 gap-5 p-5 md:grid-cols-2 lg:grid-cols-4">
+        <!-- BUSCA POR NOME -->
+        <form data-busca method="get" action="<?= URL_BASE ?>/componente/listar" class="flex gap-3 px-5 pb-3">
+            <input
+                type="text"
+                name="busca"
+                value="<?= htmlspecialchars($busca_atual ?? '') ?>"
+                placeholder="Pesquisar componentes pelo nome..."
+                class="rd-input w-full flex-1"
+                autocomplete="off"
+            >
+            <button type="submit" class="rd-btn rd-btn-secondary rd-btn-sm">Buscar</button>
+        </form>
+
+        <section id="resultadosComponentes" data-atualizar data-resultados class="grid grid-cols-1 gap-5 p-5 md:grid-cols-2 lg:grid-cols-4">
             <?php if(isset($componentes) && count($componentes) > 0):?>
                 <?php foreach($componentes as $componente):?>
                     <?php include(__DIR__."/elements/card.php")?>
                 <?php endforeach;?>
             <?php else: ?>
-                <p class="rd-empty w-full">Nenhum componente cadastrado ainda</p>
+                <p class="rd-empty w-full"><?= !empty($busca_atual) ? "Nenhum componente encontrado." : "Nenhum componente cadastrado ainda" ?></p>
             <?php endif; ?>
         </section>
 
@@ -28,4 +41,7 @@ include_once(__DIR__."/../elements/header.php");
 </div>
 <?php
 include_once(__DIR__."/../elements/denunciaModal.php");
+?>
+<script src="<?= js_url("busca.js") ?>"></script>
+<?php
 include_once(__DIR__."/../elements/footer.php");

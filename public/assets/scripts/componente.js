@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const container =
         document.getElementById('multiSelectComponente');
 
-    // Verifica se os elementos existem
     if (
         !pesquisaComponente ||
         !listaComponentes ||
@@ -24,12 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Abrir lista de componentes
-    |--------------------------------------------------------------------------
-    */
-
+  
     pesquisaComponente.addEventListener('focus', () => {
 
         listaComponentes.classList.remove('hidden');
@@ -42,12 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Pesquisar componentes
-    |--------------------------------------------------------------------------
-    */
-
+  
     pesquisaComponente.addEventListener('input', () => {
 
         const pesquisa =
@@ -77,12 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Selecionar componentes
-    |--------------------------------------------------------------------------
-    */
-
+    
     const checkboxes =
         document.querySelectorAll('.componente-checkbox');
 
@@ -104,15 +88,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Adicionar componente
-    |--------------------------------------------------------------------------
-    */
+    function escaparHtml(texto) {
+        const div = document.createElement('div');
+        div.textContent = texto;
+        return div.innerHTML;
+    }
 
     function adicionarComponente(id, nome) {
 
-        // Evita duplicação
         const existente =
             componentesSelecionados.querySelector(
                 `.componente-selecionado[data-id="${id}"]`
@@ -137,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="flex-1">
 
                 <span class="text-white font-bold">
-                    ${nome}
+                    ${escaparHtml(nome)}
                 </span>
 
             </div>
@@ -176,12 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Remover componente
-    |--------------------------------------------------------------------------
-    */
-
     function removerComponente(id) {
 
         const componente =
@@ -198,12 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Botão de remover
-    |--------------------------------------------------------------------------
-    */
-
     componentesSelecionados.addEventListener('click', event => {
 
         const botao =
@@ -216,7 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = botao.dataset.id;
 
 
-        // Desmarca o checkbox
         const checkbox =
             document.querySelector(
                 `.componente-checkbox[value="${id}"]`
@@ -229,17 +199,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
-        // Remove da lista
         removerComponente(id);
 
     });
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Fechar lista ao clicar fora
-    |--------------------------------------------------------------------------
-    */
 
     document.addEventListener('click', event => {
 

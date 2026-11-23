@@ -1,8 +1,14 @@
-<?php if(isset($_SESSION["usuario_logado"]) && $_SESSION["usuario_logado"]->getRegra() == "admin"): ?>
+<?php
+$modaisAdmin = isset($_SESSION["usuario_logado"]) && $_SESSION["usuario_logado"]->getRegra() == "admin";
+$modaisCoordenacao = isset($_SESSION["usuario_logado"]) && !empty($coordenaEquipe);
+$autoridadeModal = $modaisAdmin ? "Administração" : "Coordenação";
+if($modaisAdmin || $modaisCoordenacao):
+?>
+<?php if($modaisAdmin): ?>
 
 <dialog id="modalComunicado" aria-labelledby="modalComunicadoTitulo" class="rd-scroll-hidden m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto border-[3px] border-[#07556A] bg-[#06141C] p-0 text-[#F2FEFE] shadow-[8px_8px_0_#07556A] backdrop:bg-[#000505]/85">
     <div class="h-[3px] w-full bg-[#13F3F7]"></div>
-    <form action="<?= URL_BASE ?>/usuario/comunicado" autocomplete="off" method="post" data-native="true" class="flex flex-col">
+    <form action="<?= URL_BASE ?>/usuario/comunicado" autocomplete="off" method="post" class="flex flex-col">
         <input type="hidden" name="id" data-campo="id">
 
         <div class="flex items-start justify-between gap-4 border-b-[3px] border-[#07556A] p-5 sm:p-6">
@@ -10,7 +16,7 @@
                 <p class="rd-eyebrow">Administração</p>
                 <h2 id="modalComunicadoTitulo" class="rd-heading text-xl sm:text-2xl">ENVIAR <span>COMUNICADO</span></h2>
             </div>
-            <button type="button" data-fechar-modal aria-label="Fechar" class="flex h-10 w-10 shrink-0 items-center justify-center border-[3px] border-[#07556A] transition-colors duration-200 hover:border-[#13F3F7]">
+            <button type="button" data-fechar-modal aria-label="Fechar" class="rd-btn-icon">
                 <img src="<?= IMG_URL_BASE ?>/close-icon.png" alt="" class="h-4 w-4">
             </button>
         </div>
@@ -49,17 +55,20 @@
     </form>
 </dialog>
 
+<?php endif; ?>
+
 <dialog id="modalDesativar" aria-labelledby="modalDesativarTitulo" class="rd-scroll-hidden m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto border-[3px] border-[#07556A] bg-[#06141C] p-0 text-[#F2FEFE] shadow-[8px_8px_0_#07556A] backdrop:bg-[#000505]/85">
     <div class="h-[3px] w-full bg-[#F2A058]"></div>
-    <form method="post" autocomplete="off" data-native="true" data-rota-base="<?= URL_BASE ?>" class="flex flex-col">
+    <form method="post" autocomplete="off" data-rota-base="<?= URL_BASE ?>" class="flex flex-col">
         <input type="hidden" name="id" data-campo="id">
+        <input type="hidden" name="tipo" data-campo="origem">
 
         <div class="flex items-start justify-between gap-4 border-b-[3px] border-[#07556A] p-5 sm:p-6">
             <div>
-                <p class="rd-eyebrow">Administração</p>
+                <p class="rd-eyebrow"><?= $autoridadeModal ?></p>
                 <h2 id="modalDesativarTitulo" class="rd-heading text-xl uppercase sm:text-2xl">DESATIVAR <span data-campo="rotulo" class="!text-[#F2A058]"></span></h2>
             </div>
-            <button type="button" data-fechar-modal aria-label="Fechar" class="flex h-10 w-10 shrink-0 items-center justify-center border-[3px] border-[#07556A] transition-colors duration-200 hover:border-[#13F3F7]">
+            <button type="button" data-fechar-modal aria-label="Fechar" class="rd-btn-icon">
                 <img src="<?= IMG_URL_BASE ?>/close-icon.png" alt="" class="h-4 w-4">
             </button>
         </div>
@@ -86,11 +95,11 @@
                 <div class="border-2 border-dashed border-[#07556A] bg-[#000505] p-4 text-sm leading-relaxed sm:p-5">
                     <p class="mb-3 text-[.65rem] font-bold uppercase tracking-[.15em] text-[#91B5BD]">Assunto: <span data-campo="assunto" class="normal-case tracking-normal text-[#91B5BD]"></span></p>
                     <p class="text-[#91B5BD]">Olá<span data-campo="saudacao" class="font-bold text-[#F2FEFE]"></span>,</p>
-                    <p class="mt-3 text-[#91B5BD]">Informamos que <span data-campo="descricao"></span> pela administração do RoboDrive pelo seguinte motivo:</p>
+                    <p class="mt-3 text-[#91B5BD]">Informamos que <span data-campo="descricao"></span> pela <?= $modaisAdmin ? "administração do RoboDrive" : "coordenação da equipe" ?> pelo seguinte motivo:</p>
                     <p id="desativarPreview" data-vazio="A justificativa aparecerá aqui." class="my-4 whitespace-pre-line break-words border-l-4 border-[#07556A] pl-3 text-[#F2FEFE]"></p>
                     <p class="text-[#91B5BD]">Caso discorde desta decisão, responda a este e-mail para solicitar a revisão.</p>
                     <div class="mt-4 border-t border-[#07556A] pt-3 text-xs text-[#91B5BD]">
-                        <p>Atenciosamente,<br><strong class="text-[#F2FEFE]">Administração RoboDrive</strong></p>
+                        <p>Atenciosamente,<br><strong class="text-[#F2FEFE]"><?= $modaisAdmin ? "Administração RoboDrive" : "Coordenação da equipe · RoboDrive" ?></strong></p>
                     </div>
                 </div>
             </div>
@@ -98,11 +107,11 @@
 
         <div class="flex flex-col-reverse gap-3 border-t-[3px] border-[#07556A] p-5 sm:flex-row sm:justify-end sm:p-6">
             <button type="button" data-fechar-modal class="rd-btn rd-btn-ghost">Cancelar</button>
-            <button type="submit" class="rd-btn border-[#F2A058] bg-[#F2A058] text-[#000505] hover:border-[#F7BD8A] hover:bg-[#F7BD8A]">Desativar e notificar</button>
+            <button type="submit" class="rd-btn rd-btn-danger-solid">Desativar e notificar</button>
         </div>
     </form>
 </dialog>
 
-<script src="<?= JS_URL_BASE ?>/admin.js"></script>
+<script src="<?= js_url("admin.js") ?>"></script>
 
 <?php endif; ?>

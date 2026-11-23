@@ -20,10 +20,8 @@ button, input, textarea, select {
     --rd-primary-light: #54FBFE;
 
     --rd-aqua: #00D6B5;
-    --rd-aqua-light: #39F5D0;
 
     --rd-yellow: #F0ED06;
-    --rd-yellow-dark: #D8D400;
     --rd-amber: #F2A058;
 
     --rd-text-primary: #F2FEFE;
@@ -131,7 +129,7 @@ html, body {
     cursor: pointer;
     transition: border-color .2s ease, color .2s ease, background-color .2s ease;
 }
-.rd-nav-link:hover { border-color: var(--rd-primary); color: var(--rd-primary); }
+@media (hover: hover) { .rd-nav-link:hover { border-color: var(--rd-primary); color: var(--rd-primary); } }
 .rd-nav-link.is-active {
     border-color: var(--rd-primary);
     background-color: rgba(19, 243, 247, .08);
@@ -144,8 +142,10 @@ html, body {
     opacity: .8;
     transition: opacity .2s ease;
 }
-.rd-nav-link:hover img { opacity: 1; }
-.rd-nav-link.rd-nav-danger:hover { border-color: var(--rd-amber); color: var(--rd-amber); }
+@media (hover: hover) {
+    .rd-nav-link:hover img { opacity: 1; }
+    .rd-nav-link.rd-nav-danger:hover { border-color: var(--rd-amber); color: var(--rd-amber); }
+}
 
 .rd-eyebrow {
     margin-bottom: .5rem;
@@ -189,7 +189,7 @@ html, body {
 }
 
 .rd-card-hover { transition: border-color .2s ease, background-color .2s ease; text-decoration: none; }
-.rd-card-hover:hover { border-color: var(--rd-primary); background-color: rgba(7, 85, 106, .08); }
+.rd-card-hover:hover { border-color: var(--rd-primary); background-color: rgba(7, 85, 106, .2); }
 
 .rd-chip {
     display: inline-flex;
@@ -206,7 +206,7 @@ html, body {
     text-decoration: none;
     transition: border-color .2s ease, color .2s ease;
 }
-.rd-chip:hover { border-color: var(--rd-primary); color: var(--rd-primary); }
+@media (hover: hover) { .rd-chip:hover { border-color: var(--rd-primary); color: var(--rd-primary); } }
 
 .rd-empty {
     width: 100%;
@@ -216,7 +216,7 @@ html, body {
     font-size: .8rem;
     text-transform: uppercase;
     letter-spacing: .1em;
-    color: var(--rd-text-disabled);
+    color: var(--rd-text-secondary);
 }
 
 .rd-form-card {
@@ -255,7 +255,7 @@ html, body {
 
 .rd-input, .rd-textarea, .rd-select {
     width: 100%;
-    border: 2px solid var(--rd-blue);
+    border: 2px solid var(--rd-blue-cyan);
     background-color: var(--rd-bg-black);
     padding: 0 .875rem;
     height: 2.75rem;
@@ -264,7 +264,7 @@ html, body {
     outline: none;
     transition: border-color .2s ease;
 }
-.rd-input::placeholder, .rd-textarea::placeholder { color: var(--rd-text-disabled); }
+.rd-input::placeholder, .rd-textarea::placeholder { color: #91B5BD; }
 .rd-input:focus, .rd-textarea:focus, .rd-select:focus { border-color: var(--rd-primary); }
 .rd-textarea { height: auto; padding: .75rem .875rem; resize: vertical; }
 .rd-select {
@@ -313,37 +313,127 @@ html, body {
 .rd-file-thumb { height: 2.5rem; width: 2.5rem; object-fit: cover; border: 2px solid var(--rd-blue); flex-shrink: 0; }
 
 /* ---------- Buttons ---------- */
+/* Base: sem movimento. So primary, secondary, danger e danger-solid sobem (acao que compromete algo). */
 .rd-btn {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: .5rem;
+    min-height: 2.75rem;
     border: 3px solid transparent;
     background-color: transparent;
-    padding: .75rem 1.5rem;
+    padding: .5rem 1.5rem;
     font-size: .8rem;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: .08em;
     text-decoration: none;
     cursor: pointer;
-    transition: transform .2s ease, background-color .2s ease, color .2s ease, border-color .2s ease;
+    transition: transform .15s ease-out, background-color .2s ease, color .2s ease, border-color .2s ease;
 }
-.rd-btn:hover { transform: translateY(-2px); }
+.rd-btn-sm { min-height: 2.25rem; padding: .375rem 1rem; font-size: .7rem; }
+@media (pointer: coarse) { .rd-btn-sm { min-height: 2.75rem; } }
 
 .rd-btn-primary { border-color: var(--rd-primary); background-color: var(--rd-primary); color: var(--rd-bg-black); }
-.rd-btn-primary:hover { background-color: var(--rd-primary-light); border-color: var(--rd-primary-light); }
-
 .rd-btn-secondary { border-color: var(--rd-primary); background-color: transparent; color: var(--rd-primary); }
-.rd-btn-secondary:hover { background-color: var(--rd-primary); color: var(--rd-bg-black); }
-
 .rd-btn-ghost { border-color: var(--rd-blue); background-color: transparent; color: var(--rd-text-secondary); }
-.rd-btn-ghost:hover { border-color: var(--rd-primary); color: var(--rd-primary); }
+.rd-btn-danger { border-color: var(--rd-amber); background-color: transparent; color: var(--rd-amber); }
+.rd-btn-danger-solid { border-color: var(--rd-amber); background-color: var(--rd-amber); color: var(--rd-bg-black); }
 
-.rd-btn-danger { border-color: var(--rd-blue); background-color: transparent; color: var(--rd-text-secondary); }
-.rd-btn-danger:hover { border-color: var(--rd-amber); color: var(--rd-amber); }
+/* Area de acerto extra de 3 px abaixo, para o ponteiro nao piscar no limite inferior quando o botao sobe */
+.rd-btn-primary::after, .rd-btn-secondary::after, .rd-btn-danger::after, .rd-btn-danger-solid::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 -6px 0;
+    height: 3px;
+}
 
-.rd-btn-sm { padding: .5rem 1rem; font-size: .7rem; }
+/* Hover so em dispositivo com hover; nao "gruda" no toque */
+@media (hover: hover) {
+    .rd-btn-primary:where(:not(:disabled, [aria-disabled="true"])):hover { background-color: var(--rd-primary-light); border-color: var(--rd-primary-light); transform: translateY(-2px); }
+    .rd-btn-secondary:where(:not(:disabled, [aria-disabled="true"])):hover { background-color: var(--rd-primary); color: var(--rd-bg-black); transform: translateY(-2px); }
+    .rd-btn-ghost:where(:not(:disabled, [aria-disabled="true"])):hover { border-color: var(--rd-primary); color: var(--rd-primary); }
+    .rd-btn-danger:where(:not(:disabled, [aria-disabled="true"])):hover { background-color: var(--rd-amber); color: var(--rd-bg-black); transform: translateY(-2px); }
+    .rd-btn-danger-solid:where(:not(:disabled, [aria-disabled="true"])):hover { background-color: var(--rd-text-primary); border-color: var(--rd-text-primary); transform: translateY(-2px); }
+}
+
+/* Pressionado */
+.rd-btn-primary:where(:not(:disabled, [aria-disabled="true"])):active,
+.rd-btn-secondary:where(:not(:disabled, [aria-disabled="true"])):active,
+.rd-btn-danger:where(:not(:disabled, [aria-disabled="true"])):active,
+.rd-btn-danger-solid:where(:not(:disabled, [aria-disabled="true"])):active { transform: translateY(0); }
+.rd-btn-ghost:where(:not(:disabled, [aria-disabled="true"])):active,
+.rd-btn-icon:where(:not(:disabled, [aria-disabled="true"])):active,
+.rd-btn-link:where(:not(:disabled, [aria-disabled="true"])):active,
+.rd-nav-link:active,
+.rd-chip:active { background-color: rgba(19, 243, 247, .10); }
+
+/* Desabilitado */
+.rd-btn:disabled, .rd-btn[aria-disabled="true"],
+.rd-btn-icon:disabled, .rd-btn-icon[aria-disabled="true"] {
+    border-color: var(--rd-blue);
+    background-color: transparent;
+    color: var(--rd-text-disabled);
+    cursor: not-allowed;
+    transform: none;
+}
+.rd-btn-primary:disabled, .rd-btn-primary[aria-disabled="true"] { border-color: var(--rd-bg-elevated); background-color: var(--rd-bg-elevated); }
+.rd-btn-link:disabled, .rd-btn-link[aria-disabled="true"] { color: var(--rd-text-disabled); cursor: not-allowed; }
+
+/* Foco por teclado */
+.rd-btn:focus-visible, .rd-btn-icon:focus-visible, .rd-btn-link:focus-visible,
+.rd-nav-link:focus-visible, .rd-chip:focus-visible, .rd-file-btn:focus-visible {
+    outline: 2px solid var(--rd-primary-light);
+    outline-offset: 2px;
+}
+
+/* Icone: so icone (menu, fechar, mostrar senha). display com especificidade 0 para nao vencer utilitarios (hidden) */
+:where(.rd-btn-icon) { display: inline-flex; align-items: center; justify-content: center; }
+.rd-btn-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex-shrink: 0;
+    border: 3px solid var(--rd-blue);
+    background-color: transparent;
+    color: var(--rd-text-primary);
+    cursor: pointer;
+    transition: border-color .2s ease, color .2s ease, background-color .2s ease;
+}
+.rd-btn-icon svg { width: 1.25rem; height: 1.25rem; }
+@media (hover: hover) { .rd-btn-icon:where(:not(:disabled, [aria-disabled="true"])):hover { border-color: var(--rd-primary); color: var(--rd-primary); } }
+
+/* Link-botao: aparencia de link, inline */
+.rd-btn-link {
+    background: none;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+    text-decoration: underline dashed var(--rd-blue);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    transition: color .2s ease, text-decoration-color .2s ease, background-color .2s ease;
+}
+@media (hover: hover) { .rd-btn-link:where(:not(:disabled, [aria-disabled="true"])):hover { color: var(--rd-primary); text-decoration-color: var(--rd-primary); } }
+
+@media (prefers-reduced-motion: reduce) {
+    .rd-btn { transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
+    .rd-btn, .rd-btn:hover, .rd-btn:active { transform: none !important; }
+}
+
+/* Menu hamburguer: CSS puro (output.css v4 e tailwind.js v3 somavam as rotacoes) */
+.rd-burger { --rd-burger-gap: 14px; }
+.rd-burger-bar { position: absolute; width: 1.25rem; height: 3px; background-color: var(--rd-text-primary); transition: transform .2s ease-out, background-color .2s ease; }
+.rd-burger-bar-top { transform: translateY(calc(var(--rd-burger-gap) * -1)); }
+.rd-burger-bar-bottom { transform: translateY(var(--rd-burger-gap)); }
+.rd-burger-bar-mid { transition: opacity .15s ease, background-color .2s ease; }
+.rd-burger[aria-expanded="true"] { border-color: var(--rd-primary); }
+.rd-burger[aria-expanded="true"] .rd-burger-bar { background-color: var(--rd-primary); }
+.rd-burger[aria-expanded="true"] .rd-burger-bar-top { transform: rotate(45deg); }
+.rd-burger[aria-expanded="true"] .rd-burger-bar-bottom { transform: rotate(-45deg); }
+.rd-burger[aria-expanded="true"] .rd-burger-bar-mid { opacity: 0; }
+@media (hover: hover) { .rd-burger:hover .rd-burger-bar { background-color: var(--rd-primary); } }
+@media (prefers-reduced-motion: reduce) { .rd-burger-bar { transition: none; } }
 
 .rd-table-wrap { width: 100%; overflow-x: auto; border: 3px solid var(--rd-blue); }
 .rd-table { width: 100%; border-collapse: collapse; min-width: 720px; }
@@ -369,7 +459,7 @@ html, body {
 .rd-table tbody tr:nth-child(even) { background-color: rgba(7, 85, 106, .12); }
 .rd-table tbody tr:hover { background-color: rgba(19, 243, 247, .06); }
 .rd-table tbody tr:last-child td { border-bottom: none; }
-.rd-table-thumb { height: 2.5rem; width: 2.5rem; border-radius: 9999px; object-fit: cover; border: 2px solid var(--rd-primary); box-shadow: 0 0 10px rgba(19,243,247,.35); }
+.rd-table-thumb { height: 2.5rem; width: 2.5rem; object-fit: cover; border: 2px solid var(--rd-primary); box-shadow: 0 0 10px rgba(19,243,247,.35); }
 
 .rd-badge {
     display: inline-flex;
@@ -384,22 +474,4 @@ html, body {
 }
 .rd-badge-public { border-color: var(--rd-primary); background-color: rgba(19,243,247,.12); color: var(--rd-primary); }
 .rd-badge-team { border-color: var(--rd-aqua); background-color: rgba(0,214,181,.12); color: var(--rd-aqua); }
-.rd-badge-private { border-color: var(--rd-blue); background-color: var(--rd-bg-elevated); color: var(--rd-text-disabled); }
-
-/* Aviso padrão (aviso.js) */
-.rd-avisos { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; gap: .5rem; width: calc(100% - 2rem); max-width: 32rem; pointer-events: none; }
-.rd-aviso { pointer-events: auto; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; border: 2px solid var(--rd-blue); border-left-width: 6px; background-color: var(--rd-bg-primary); padding: .875rem 1rem; box-shadow: 6px 6px 0 var(--rd-blue); }
-.rd-aviso-sucesso { border-color: var(--rd-aqua); box-shadow: 6px 6px 0 var(--rd-blue); }
-.rd-aviso-erro { border-color: var(--rd-amber); }
-.rd-aviso-info { border-color: var(--rd-primary); }
-.rd-aviso-texto { margin: 0; font-size: .8rem; font-weight: 700; letter-spacing: .05em; line-height: 1.4; color: #F2FEFE; }
-.rd-aviso-fechar { flex-shrink: 0; min-width: 1.75rem; min-height: 1.75rem; border: 2px solid var(--rd-blue); background: transparent; color: #F2FEFE; font-size: 1rem; line-height: 1; cursor: pointer; transition: border-color .2s; }
-.rd-aviso-fechar:hover, .rd-aviso-fechar:focus-visible { border-color: var(--rd-primary); outline: none; }
-
-/* Confirmação padrão (aviso.js) */
-.rd-confirmar { margin: auto; width: calc(100% - 2rem); max-width: 28rem; border: 3px solid var(--rd-blue); background-color: var(--rd-bg-primary); padding: 0; color: #F2FEFE; box-shadow: 8px 8px 0 var(--rd-blue); }
-.rd-confirmar::backdrop { background-color: rgba(0,5,5,.85); }
-.rd-confirmar-topo { height: 3px; width: 100%; background-color: var(--rd-amber); }
-.rd-confirmar-titulo { margin: 0; padding: 1.25rem 1.5rem 0; font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 900; letter-spacing: .05em; color: #F2FEFE; }
-.rd-confirmar-texto { margin: 0; padding: 1rem 1.5rem 0; border-left: 4px solid var(--rd-amber); margin-left: 1.5rem; padding-left: 1rem; padding-right: 1.5rem; font-size: .875rem; line-height: 1.6; color: #91B5BD; }
-.rd-confirmar-acoes { display: flex; justify-content: flex-end; gap: .75rem; padding: 1.5rem; }
+.rd-badge-private { border-color: var(--rd-blue); background-color: var(--rd-bg-elevated); color: var(--rd-text-secondary); }

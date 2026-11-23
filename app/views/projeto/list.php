@@ -11,9 +11,9 @@ include_once(__DIR__."/../elements/header.php");
                 <p class="rd-eyebrow">BIBLIOTECA</p>
                 <h1 class="rd-heading text-[clamp(1.8rem,4vw,2.8rem)]"><?= (isset($_SERVER['REQUEST_URI']) && str_contains($_SERVER['REQUEST_URI'], '/admin')) ? 'TODOS OS PROJETOS' : 'PROJETOS PÚBLICOS' ?></h1>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
                 <?php if (isset($_SERVER['REQUEST_URI']) && str_contains($_SERVER['REQUEST_URI'], '/admin')): ?>
-                    <form method="get" action="<?= URL_BASE ?>/projeto/listar/admin" class="flex items-center gap-2">
+                    <form method="get" action="<?= URL_BASE ?>/admin/projeto/listar" class="flex items-center gap-2">
                         <label for="status" class="text-xs text-[#91B5BD] uppercase font-bold">Status:</label>
                         <select name="status" id="status" onchange="this.form.submit()" class="rd-select !h-9 text-xs">
                             <option value="1" <?= ($statusFiltro ?? '1') === '1' ? 'selected' : '' ?>>Ativos</option>
@@ -44,14 +44,14 @@ include_once(__DIR__."/../elements/header.php");
                         autocomplete="off"
                     >
                 </div>
-                <button type="submit" class="rd-btn rd-btn-secondary !py-2 !px-4 text-xs">
+                <button type="submit" class="rd-btn rd-btn-secondary rd-btn-sm">
                     Buscar
                 </button>
             </form>
         </section>
 
         <!-- CONTAINER DOS CARDS -->
-        <section id="gridProjetos" class="grid grid-cols-1 gap-5 p-5 md:grid-cols-2 lg:grid-cols-4">
+        <section id="gridProjetos" data-atualizar class="grid grid-cols-1 gap-5 p-5 md:grid-cols-2 lg:grid-cols-4">
             <?php if(isset($projetos) && count($projetos) > 0):?>
                 <?php foreach($projetos as $projeto):?>
                     <?php include(__DIR__."/elements/cardLista.php")?>
@@ -75,7 +75,10 @@ document.addEventListener("DOMContentLoaded", function() {
         if (busca) params.append("busca", busca);
         params.append("ajax", "1");
 
-        fetch("<?= URL_BASE ?>/projeto/listar?" + params.toString(), {
+        const url = "<?= URL_BASE ?>/projeto/listar?" + params.toString();
+        gridProjetos.dataset.fonte = url;
+
+        fetch(url, {
             headers: { "X-Requested-With": "XMLHttpRequest" }
         })
         .then(response => response.text())

@@ -15,13 +15,13 @@ include_once(__DIR__ . "/../elements/header.php");
         </div>
 
         <?php if (!empty($sucesso)): ?>
-            <div class="p-4 bg-emerald-950/60 border border-emerald-500 text-emerald-300 text-xs rounded">
+            <div class="p-4 bg-[#06141C] border border-[#00D6B5] text-[#00D6B5] text-xs rounded">
                 <?= htmlspecialchars($sucesso) ?>
             </div>
         <?php endif; ?>
 
         <?php if (!empty($erros['geral'])): ?>
-            <div class="p-4 bg-red-950/60 border border-red-500 text-red-300 text-xs rounded">
+            <div class="p-4 bg-[#06141C] border border-[#F2A058] text-[#F2A058] text-xs rounded">
                 <?= htmlspecialchars($erros['geral']) ?>
             </div>
         <?php endif; ?>
@@ -37,9 +37,6 @@ include_once(__DIR__ . "/../elements/header.php");
                     placeholder="Ex: 4A8E20B9C1" 
                     class="rd-input uppercase font-mono tracking-widest"
                 >
-                <?php if (isset($erros['hash'])): ?>
-                    <p class="rd-error"><?= $erros['hash'] ?></p>
-                <?php endif; ?>
             </div>
 
             <div class="rd-field">
@@ -51,12 +48,9 @@ include_once(__DIR__ . "/../elements/header.php");
                     placeholder="Digite a senha..." 
                     class="rd-input"
                 >
-                <?php if (isset($erros['senha'])): ?>
-                    <p class="rd-error"><?= $erros['senha'] ?></p>
-                <?php endif; ?>
             </div>
 
-            <button type="submit" class="rd-btn rd-btn-primary w-full !py-3">
+            <button type="submit" class="rd-btn rd-btn-primary w-full">
                 Solicitar Associação
             </button>
         </form>

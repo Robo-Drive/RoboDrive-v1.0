@@ -11,7 +11,7 @@
                 <p class="rd-eyebrow">Denúncia</p>
                 <h2 id="modalDenunciarTitulo" class="rd-heading text-xl uppercase sm:text-2xl">DENUNCIAR <span data-campo="rotulo"></span></h2>
             </div>
-            <button type="button" data-fechar-modal aria-label="Fechar" class="flex h-10 w-10 shrink-0 items-center justify-center border-[3px] border-[#07556A] transition-colors duration-200 hover:border-[#13F3F7]">
+            <button type="button" data-fechar-modal aria-label="Fechar" class="rd-btn-icon">
                 <img src="<?= IMG_URL_BASE ?>/close-icon.png" alt="" class="h-4 w-4">
             </button>
         </div>
@@ -53,6 +53,6 @@
     </form>
 </dialog>
 
-<script src="<?= JS_URL_BASE ?>/denunciar.js"></script>
+<script src="<?= js_url("denunciar.js") ?>"></script>
 
 <?php endif; ?>

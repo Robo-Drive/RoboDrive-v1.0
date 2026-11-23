@@ -6,7 +6,8 @@
   <title>ROBODRIVE</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Orbitron:wght@700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="<?= css_url("style.css") ?>" rel="stylesheet" />
+  <script src="<?= js_url("tailwind.js") ?>"></script>
 </head>
 
 <body class="relative overflow-x-hidden bg-[#000505] font-['Space_Grotesk'] text-[#F2FEFE] selection:bg-[rgba(19,243,247,.32)] selection:text-[#000505] before:fixed before:inset-0 before:-z-10 before:pointer-events-none before:content-[''] before:bg-[radial-gradient(circle_at_top_right,rgba(240,237,6,.08),transparent_26%)] [&::-webkit-scrollbar]:hidden">
@@ -52,11 +53,11 @@
           Repositório central de projetos de robótica educacional do IFPR. Centralize código, componentes, equipes e conhecimento — tudo em um lugar.
         </p>
         <div class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 w-full lg:w-auto">
-          <a href="<?= URL_BASE ?>/login" class="inline-flex w-full items-center justify-center gap-3 border-[3px] border-[#13F3F7] bg-[#13F3F7] px-6 py-3 text-center text-sm font-black uppercase tracking-[.06em] text-[#000505] no-underline transition-[filter,transform] duration-200 hover:translate-y-[-2px] hover:bg-[#54FBFE] sm:w-auto sm:px-10 sm:py-[1.1rem] sm:text-base">
+          <a href="<?= URL_BASE ?>/login" class="rd-btn rd-btn-primary w-full sm:w-auto">
             COMEÇAR AGORA
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
-          <a href="<?=URL_BASE ?>/projeto/listar" class="inline-flex w-full items-center justify-center gap-3 border-[3px] border-[#13F3F7] bg-transparent px-6 py-3 text-center text-sm font-black uppercase tracking-[.06em] text-[#13F3F7] no-underline transition-[filter,transform] duration-200 hover:translate-y-[-2px] sm:w-auto sm:px-10 sm:py-[1.1rem] sm:text-base">VER PROJETOS PÚBLICOS</a>
+          <a href="<?= URL_BASE."/projeto/listar" ?>" class="rd-btn rd-btn-secondary w-full sm:w-auto">VER PROJETOS PÚBLICOS</a>
         </div>
       </div>
     </div>
@@ -100,24 +101,24 @@
   <section class="border-b-[3px] border-[#07556A]">
     <div class="grid grid-cols-2 lg:grid-cols-4">
 
-      <div class="border-b-[3px] border-r-[3px] border-[#07556A] px-4 py-8 text-center transition-colors duration-200 hover:bg-[rgba(7,85,106,.08)] sm:px-8 sm:py-14 lg:border-b-0">
+      <div class="border-b-[3px] border-r-[3px] border-[#07556A] px-4 py-8 text-center transition-colors duration-200 hover:bg-[#07556A]/20 sm:px-8 sm:py-14 lg:border-b-0">
         <div class="mb-2 text-[.55rem] font-bold uppercase tracking-[.2em] text-[#91B5BD] sm:mb-3 sm:text-[.65rem] sm:tracking-[.25em]">PROJETOS</div>
-        <div class="font-['Barlow_Condensed'] text-[clamp(2.5rem,6vw,7rem)] font-black leading-none text-[#13F3F7]">50+</div>
+        <div class="font-['Barlow_Condensed'] text-[clamp(2.5rem,6vw,7rem)] font-black leading-none text-[#13F3F7]"><?= (int) ($totalProjetos ?? 0) ?></div>
       </div>
 
-      <div class="border-b-[3px] border-[#07556A] px-4 py-8 text-center transition-colors duration-200 hover:bg-[rgba(7,85,106,.08)] sm:px-8 sm:py-14 lg:border-b-0 lg:border-r-[3px]">
+      <div class="border-b-[3px] border-[#07556A] px-4 py-8 text-center transition-colors duration-200 hover:bg-[#07556A]/20 sm:px-8 sm:py-14 lg:border-b-0 lg:border-r-[3px]">
         <div class="mb-2 text-[.55rem] font-bold uppercase tracking-[.2em] text-[#91B5BD] sm:mb-3 sm:text-[.65rem] sm:tracking-[.25em]">EQUIPES</div>
-        <div class="font-['Barlow_Condensed'] text-[clamp(2.5rem,6vw,7rem)] font-black leading-none text-[#F2FEFE]">8</div>
+        <div class="font-['Barlow_Condensed'] text-[clamp(2.5rem,6vw,7rem)] font-black leading-none text-[#F2FEFE]"><?= (int) ($totalEquipes ?? 0) ?></div>
       </div>
 
-      <div class="border-b-[3px] border-r-[3px] border-[#07556A] px-4 py-8 text-center transition-colors duration-200 hover:bg-[rgba(7,85,106,.08)] sm:px-8 sm:py-14 sm:border-b-0">
+      <div class="border-b-[3px] border-r-[3px] border-[#07556A] px-4 py-8 text-center transition-colors duration-200 hover:bg-[#07556A]/20 sm:px-8 sm:py-14 sm:border-b-0">
         <div class="mb-2 text-[.55rem] font-bold uppercase tracking-[.2em] text-[#91B5BD] sm:mb-3 sm:text-[.65rem] sm:tracking-[.25em]">COMPONENTES</div>
-        <div class="font-['Barlow_Condensed'] text-[clamp(2.5rem,6vw,7rem)] font-black leading-none text-[#13F3F7]">156</div>
+        <div class="font-['Barlow_Condensed'] text-[clamp(2.5rem,6vw,7rem)] font-black leading-none text-[#13F3F7]"><?= (int) ($totalComponentes ?? 0) ?></div>
       </div>
 
-      <div class="px-4 sm:px-8 py-8 sm:py-14 text-center transition-colors duration-200 hover:bg-[rgba(7,85,106,.08)]">
+      <div class="px-4 sm:px-8 py-8 sm:py-14 text-center transition-colors duration-200 hover:bg-[#07556A]/20">
         <div class="mb-2 text-[.55rem] font-bold uppercase tracking-[.2em] text-[#91B5BD] sm:mb-3 sm:text-[.65rem] sm:tracking-[.25em]">USUARIOS</div>
-        <div class="font-['Barlow_Condensed'] text-[clamp(2.5rem,6vw,7rem)] font-black leading-none text-[#F2FEFE]">186</div>
+        <div class="font-['Barlow_Condensed'] text-[clamp(2.5rem,6vw,7rem)] font-black leading-none text-[#F2FEFE]"><?= (int) ($totalUsuarios ?? 0) ?></div>
       </div>
 
     </div>
@@ -144,7 +145,7 @@
 
     <div class="grid grid-cols-1 gap-6 border-b-[3px] border-[#07556A] px-4 pb-10 sm:gap-8 sm:px-8 lg:grid-cols-2 lg:px-10">
 
-      <div class="group relative overflow-hidden border-[3px] border-[#07556A] p-6 transition-colors duration-[250ms] hover:bg-[rgba(7,85,106,.06)] sm:p-8 lg:p-12">
+      <div class="group relative overflow-hidden border-[3px] border-[#07556A] p-6 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:p-8 lg:p-12">
         <div class="absolute top-0 left-0 h-1 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
         <div class="mb-6 inline-flex border-[3px] border-[#13F3F7] p-3 text-[#13F3F7] sm:mb-8 sm:p-4">
           <svg width="36" height="36" class="sm:w-[44px] sm:h-[44px]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
@@ -157,7 +158,7 @@
       </div>
 
       <!-- COMPONENTES -->
-      <div class="group relative overflow-hidden border-[3px] border-[#07556A] p-6 transition-colors duration-[250ms] hover:bg-[rgba(7,85,106,.06)] sm:p-8 lg:p-12">
+      <div class="group relative overflow-hidden border-[3px] border-[#07556A] p-6 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:p-8 lg:p-12">
         <div class="absolute top-0 left-0 h-1 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
         <div class="mb-6 inline-flex border-[3px] border-[#13F3F7] p-3 text-[#13F3F7] sm:mb-8 sm:p-4">
           <svg width="36" height="36" class="sm:w-[44px] sm:h-[44px]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
@@ -170,7 +171,7 @@
       </div>
 
       <!-- EQUIPES -->
-      <div class="group relative overflow-hidden border-[3px] border-[#07556A] p-6 transition-colors duration-[250ms] hover:bg-[rgba(7,85,106,.06)] sm:p-8 lg:p-12">
+      <div class="group relative overflow-hidden border-[3px] border-[#07556A] p-6 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:p-8 lg:p-12">
         <div class="absolute top-0 left-0 h-1 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
         <div class="mb-6 inline-flex border-[3px] border-[#13F3F7] p-3 text-[#13F3F7] sm:mb-8 sm:p-4">
           <svg width="36" height="36" class="sm:w-[44px] sm:h-[44px]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -183,7 +184,7 @@
       </div>
 
       <!-- FÓRUM -->
-      <div class="group relative overflow-hidden border-[3px] border-[#07556A] p-6 transition-colors duration-[250ms] hover:bg-[rgba(7,85,106,.06)] sm:p-8 lg:p-12">
+      <div class="group relative overflow-hidden border-[3px] border-[#07556A] p-6 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:p-8 lg:p-12">
         <div class="absolute top-0 left-0 h-1 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
         <div class="mb-6 inline-flex border-[3px] border-[#13F3F7] p-3 text-[#13F3F7] sm:mb-8 sm:p-4">
           <svg width="36" height="36" class="sm:w-[44px] sm:h-[44px]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -211,13 +212,13 @@
           DA<br>COMUNIDADE
         </h2>
       </div>
-      <a href="#" class="border-b-2 border-[#07556A] pb-1 text-xs font-bold uppercase tracking-[.08em] text-[#91B5BD] no-underline transition-colors duration-200 hover:border-[#13F3F7] hover:text-[#54FBFE] sm:text-sm">
+      <a href="#" class="border-b-2 border-[#07556A] pb-1 text-xs font-bold uppercase tracking-[.08em] text-[#91B5BD] no-underline transition-colors duration-200 hover:border-[#13F3F7] hover:text-[#13F3F7] sm:text-sm">
         VER TODOS →
       </a>
     </div>
 
     <div>
-      <div class="group relative grid cursor-pointer grid-cols-1 items-start gap-3 overflow-hidden border-b border-[#07556A] px-4 py-5 transition-colors duration-[250ms] hover:bg-[rgba(7,85,106,.06)] sm:grid-cols-[3rem_1fr_auto] sm:items-center sm:gap-6 sm:px-8 sm:py-7 md:grid-cols-[4rem_1fr_auto] md:gap-8 lg:px-10">
+      <div class="group relative grid cursor-pointer grid-cols-1 items-start gap-3 overflow-hidden border-b border-[#07556A] px-4 py-5 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:grid-cols-[3rem_1fr_auto] sm:items-center sm:gap-6 sm:px-8 sm:py-7 md:grid-cols-[4rem_1fr_auto] md:gap-8 lg:px-10">
         <div class="absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
         <div class="font-['Barlow_Condensed'] text-2xl font-black leading-none text-[#4E6B72] sm:text-[2.5rem]">01</div>
         <div>
@@ -230,7 +231,7 @@
         </div>
       </div>
 
-      <div class="group relative grid cursor-pointer grid-cols-1 items-start gap-3 overflow-hidden border-b border-[#07556A] px-4 py-5 transition-colors duration-[250ms] hover:bg-[rgba(7,85,106,.06)] sm:grid-cols-[3rem_1fr_auto] sm:items-center sm:gap-6 sm:px-8 sm:py-7 md:grid-cols-[4rem_1fr_auto] md:gap-8 lg:px-10">
+      <div class="group relative grid cursor-pointer grid-cols-1 items-start gap-3 overflow-hidden border-b border-[#07556A] px-4 py-5 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:grid-cols-[3rem_1fr_auto] sm:items-center sm:gap-6 sm:px-8 sm:py-7 md:grid-cols-[4rem_1fr_auto] md:gap-8 lg:px-10">
         <div class="absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
         <div class="font-['Barlow_Condensed'] text-2xl font-black leading-none text-[#4E6B72] sm:text-[2.5rem]">02</div>
         <div>
@@ -243,7 +244,7 @@
         </div>
       </div>
 
-      <div class="group relative grid cursor-pointer grid-cols-1 items-start gap-3 overflow-hidden border-b border-[#07556A] px-4 py-5 transition-colors duration-[250ms] hover:bg-[rgba(7,85,106,.06)] sm:grid-cols-[3rem_1fr_auto] sm:items-center sm:gap-6 sm:px-8 sm:py-7 md:grid-cols-[4rem_1fr_auto] md:gap-8 lg:px-10">
+      <div class="group relative grid cursor-pointer grid-cols-1 items-start gap-3 overflow-hidden border-b border-[#07556A] px-4 py-5 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:grid-cols-[3rem_1fr_auto] sm:items-center sm:gap-6 sm:px-8 sm:py-7 md:grid-cols-[4rem_1fr_auto] md:gap-8 lg:px-10">
         <div class="absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
         <div class="font-['Barlow_Condensed'] text-2xl font-black leading-none text-[#4E6B72] sm:text-[2.5rem]">03</div>
         <div>
@@ -256,7 +257,7 @@
         </div>
       </div>
 
-      <div class="group relative grid cursor-pointer grid-cols-1 items-start gap-3 overflow-hidden border-b border-[#07556A] px-4 py-5 transition-colors duration-[250ms] hover:bg-[rgba(7,85,106,.06)] sm:grid-cols-[3rem_1fr_auto] sm:items-center sm:gap-6 sm:px-8 sm:py-7 md:grid-cols-[4rem_1fr_auto] md:gap-8 lg:px-10">
+      <div class="group relative grid cursor-pointer grid-cols-1 items-start gap-3 overflow-hidden border-b border-[#07556A] px-4 py-5 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:grid-cols-[3rem_1fr_auto] sm:items-center sm:gap-6 sm:px-8 sm:py-7 md:grid-cols-[4rem_1fr_auto] md:gap-8 lg:px-10">
         <div class="absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
         <div class="font-['Barlow_Condensed'] text-2xl font-black leading-none text-[#4E6B72] sm:text-[2.5rem]">04</div>
         <div>
@@ -269,7 +270,7 @@
         </div>
       </div>
 
-      <div class="group relative grid cursor-pointer grid-cols-1 items-start gap-3 overflow-hidden px-4 py-5 transition-colors duration-[250ms] hover:bg-[rgba(7,85,106,.06)] sm:grid-cols-[3rem_1fr_auto] sm:items-center sm:gap-6 sm:px-8 sm:py-7 md:grid-cols-[4rem_1fr_auto] md:gap-8 lg:px-10">
+      <div class="group relative grid cursor-pointer grid-cols-1 items-start gap-3 overflow-hidden px-4 py-5 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:grid-cols-[3rem_1fr_auto] sm:items-center sm:gap-6 sm:px-8 sm:py-7 md:grid-cols-[4rem_1fr_auto] md:gap-8 lg:px-10">
         <div class="absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
         <div class="font-['Barlow_Condensed'] text-2xl font-black leading-none text-[#4E6B72] sm:text-[2.5rem]">05</div>
         <div>
@@ -418,8 +419,8 @@
           <li>→ &nbsp;Ver projetos públicos</li>
           <li>→ &nbsp;Explorar componentes públicos</li>
           <li>→ &nbsp;Ler threads do fórum</li>
-          <li class="text-[#91B5BD]">✕ &nbsp;Criar projetos</li>
-          <li class="text-[#91B5BD]">✕ &nbsp;Participar de equipes</li>
+          <li class="text-[#91B5BD]"><svg class="mr-1 inline h-3 w-3 align-baseline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg> &nbsp;Criar projetos</li>
+          <li class="text-[#91B5BD]"><svg class="mr-1 inline h-3 w-3 align-baseline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg> &nbsp;Participar de equipes</li>
         </ul>
       </div>
 
@@ -469,11 +470,11 @@
         Junte-se ao repositório central de robótica e pare de perder conhecimento.
       </p>
       <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-5">
-        <a href="<?= URL_BASE ?>/cadastro" class="inline-flex w-full items-center justify-center gap-3 border-[3px] border-[#13F3F7] bg-[#13F3F7] px-6 py-3 text-center text-sm font-black uppercase tracking-[.06em] text-[#000505] no-underline transition-[filter,transform] duration-200 hover:translate-y-[-2px] hover:bg-[#54FBFE] sm:w-auto sm:px-10 sm:py-[1.1rem] sm:text-base">
+        <a href="<?= URL_BASE ?>/cadastro" class="rd-btn rd-btn-primary w-full sm:w-auto">
           CRIAR CONTA GRÁTIS
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
-        <a href="<?= URL_BASE ?>/login" class="inline-flex w-full items-center justify-center gap-3 border-[3px] border-[#13F3F7] bg-transparent px-6 py-3 text-center text-sm font-black uppercase tracking-[.06em] text-[#13F3F7] no-underline transition-[filter,transform] duration-200 hover:translate-y-[-2px] sm:w-auto sm:px-10 sm:py-[1.1rem] sm:text-base">JÁ TENHO CONTA</a>
+        <a href="<?= URL_BASE ?>/login" class="rd-btn rd-btn-secondary w-full sm:w-auto">JÁ TENHO CONTA</a>
       </div>
     </div>
 
@@ -574,4 +575,4 @@
     requestAnimationFrame(animate);
   });
 </script>
-<script src="<?= JS_URL_BASE ?>/wallpaper.js"></script>
+<script src="<?= js_url("wallpaper.js") ?>"></script>

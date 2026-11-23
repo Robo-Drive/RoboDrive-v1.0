@@ -12,6 +12,19 @@ include_once(__DIR__."/../elements/header.php");
             <h1 class="rd-heading text-[clamp(1.8rem,4vw,2.8rem)]">USUÁRIOS <span>CADASTRADOS</span></h1>
         </section>
 
+        <!-- BUSCA POR NOME OU NOME DE USUÁRIO -->
+        <form data-busca method="get" action="<?= URL_BASE ?>/admin/usuario/listar" class="flex gap-3 px-5 pb-3">
+            <input
+                type="text"
+                name="busca"
+                value="<?= htmlspecialchars($busca_atual ?? '') ?>"
+                placeholder="Pesquisar usuários pelo nome ou nome de usuário..."
+                class="rd-input w-full flex-1"
+                autocomplete="off"
+            >
+            <button type="submit" class="rd-btn rd-btn-secondary rd-btn-sm">Buscar</button>
+        </form>
+
         <section class="rd-section">
             <div class="rd-table-wrap">
                 <table class="rd-table">
@@ -28,20 +41,20 @@ include_once(__DIR__."/../elements/header.php");
                             <th>Ações</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <?php if(isset($usuarios)): ?>
+                    <tbody id="resultadosUsuarios" data-atualizar data-resultados>
+                        <?php if(isset($usuarios) && count($usuarios) > 0): ?>
                         <?php foreach($usuarios as $u):?>
                         <?php $proprioUsuario = $u->getId() == $_SESSION["usuario_logado"]->getId(); ?>
                         <tr>
                             <td>#<?= $u->getId() ?></td>
-                            <td><img src="<?= $u->getImagem() ? URL_BASE."/arquivo?arquivo=".$u->getImagem() : IMG_URL_BASE."/perfil.png" ?>" alt="Foto de <?= $u->getNome() ?>" class="rd-table-thumb"></td>
-                            <td><?= $u->getNome() ?></td>
-                            <td>@<?= $u->getNomeUsuario() ?></td>
+                            <td><img src="<?= $u->getImagem() ? URL_BASE."/arquivo?arquivo=".$u->getImagem() : IMG_URL_BASE."/perfil.png" ?>" alt="Foto de <?= texto($u->getNome()) ?>" class="rd-table-thumb"></td>
+                            <td><?= texto($u->getNome()) ?></td>
+                            <td>@<?= texto($u->getNomeUsuario()) ?></td>
                             <td>
                                 <?php if($adminLogado && !$proprioUsuario): ?>
-                                    <button type="button" title="Enviar comunicado por e-mail" class="text-left underline decoration-[#07556A] decoration-dashed decoration-2 underline-offset-4 transition-colors duration-200 hover:text-[#13F3F7] hover:decoration-[#13F3F7]" data-comunicado data-id="<?= $u->getId() ?>" data-nome="<?= $u->getNome() ?>" data-email="<?= $u->getEmail() ?>"><?= $u->getEmail() ?></button>
+                                    <button type="button" title="Enviar comunicado por e-mail" class="rd-btn-link" data-comunicado data-id="<?= $u->getId() ?>" data-nome="<?= texto($u->getNome()) ?>" data-email="<?= texto($u->getEmail()) ?>"><?= texto($u->getEmail()) ?></button>
                                 <?php else: ?>
-                                    <?= $u->getEmail() ?>
+                                    <?= texto($u->getEmail()) ?>
                                 <?php endif; ?>
                             </td>
                             <td><span class="rd-badge <?= $u->getRegra() == 'admin' ? 'rd-badge-public' : 'rd-badge-team' ?>"><?= ucfirst($u->getRegra()) ?></span></td>
@@ -54,12 +67,12 @@ include_once(__DIR__."/../elements/header.php");
                                         <form action="<?= URL_BASE ?>/usuario/editar" method="post"><input type="hidden" name="id" value="<?= $u->getId() ?>"><button type="submit" class="rd-btn rd-btn-secondary rd-btn-sm">Editar</button></form>
                                                                                 <?php if(!$proprioUsuario): ?>
                                         <?php if($u->isStatus() === false): ?>
-                                            <form action="<?= URL_BASE ?>/usuario/ativar" method="post" data-confirmar="Deseja realmente reativar a conta deste usuário?">
+                                            <form action="<?= URL_BASE ?>/usuario/ativar" method="post" data-confirmar="Deseja realmente reativar a conta deste usuário?" >
                                                 <input type="hidden" name="id" value="<?= $u->getId() ?>">
-                                                <button type="submit" class="rd-btn rd-btn-primary rd-btn-sm !bg-emerald-600 hover:!bg-emerald-500 !text-black font-bold">Ativar</button>
+                                                <button type="submit" class="rd-btn rd-btn-primary rd-btn-sm">Ativar</button>
                                             </form>
                                         <?php else: ?>
-                                            <button type="button" class="rd-btn rd-btn-danger rd-btn-sm" data-desativar data-tipo="usuario" data-id="<?= $u->getId() ?>" data-nome="<?= $u->getNome() ?> (@<?= $u->getNomeUsuario() ?>)" data-responsavel="<?= $u->getNome() ?>">Desativar</button>
+                                            <button type="button" class="rd-btn rd-btn-danger rd-btn-sm" data-desativar data-tipo="usuario" data-id="<?= $u->getId() ?>" data-nome="<?= texto($u->getNome()) ?> (@<?= texto($u->getNomeUsuario()) ?>)" data-responsavel="<?= texto($u->getNome()) ?>">Desativar</button>
                                         <?php endif; ?>
                                     <?php endif; ?>
                                     <?php endif; ?>
@@ -67,6 +80,8 @@ include_once(__DIR__."/../elements/header.php");
                             </td>
                         </tr>
                         <?php endforeach;?>
+                        <?php else: ?>
+                        <tr><td colspan="9" class="text-center">Nenhum usuário encontrado.</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -77,4 +92,7 @@ include_once(__DIR__."/../elements/header.php");
 </div>
 <?php
 include_once(__DIR__."/../elements/adminModais.php");
+?>
+<script src="<?= js_url("busca.js") ?>"></script>
+<?php
 include_once(__DIR__."/../elements/footer.php");
