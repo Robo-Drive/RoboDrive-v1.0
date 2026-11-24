@@ -3,7 +3,7 @@
 if(isset($cardAlvo)):
 $cardAtivo = $cardAlvo["ativo"] !== false;
 ?>
-<article class="relative flex h-full flex-col gap-3 border-[3px] border-[#07556A] bg-[#06141C] p-4 transition-colors duration-200 hover:border-[#13F3F7] <?= $cardAtivo ? "" : "opacity-80" ?>">
+<article class="relative flex h-full flex-col gap-3 rd-glow p-4 <?= $cardAtivo ? "" : "opacity-80" ?>">
     <a href="<?= $cardAlvo["link"] ?>" class="absolute -inset-[3px] z-10" aria-label="Abrir <?= htmlspecialchars(html_entity_decode($cardAlvo["rotulo"] . ": " . $cardAlvo["titulo"])) ?>"></a>
 
     <div class="flex flex-wrap items-center gap-2 pr-11">

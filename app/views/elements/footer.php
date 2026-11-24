@@ -5,5 +5,6 @@
 <script src="<?= js_url("confirmacao.js") ?>"></script>
 <script src="<?= js_url("robodriveAjax.js") ?>"></script>
 <script src="<?= js_url("atualizacaoAutomatica.js") ?>"></script>
+<script src="<?= js_url("brilhoCards.js") ?>"></script>
 </body>
 </html>

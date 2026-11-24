@@ -49,11 +49,11 @@ $tiposDenuncia = [
         <section class="rd-section">
             <?php if(count($denuncias) > 0): ?>
                 <div class="mb-6 flex flex-wrap gap-2" role="group" aria-label="Filtrar denúncias por tipo">
-                    <button type="button" data-filtro="todos" aria-pressed="true" class="rd-chip aria-pressed:border-[#13F3F7] aria-pressed:bg-[#13F3F7]/10 aria-pressed:text-[#13F3F7]">
+                    <button type="button" data-filtro="todos" aria-pressed="true" class="rd-chip">
                         Todos <span class="text-[#91B5BD]"><?= count($denuncias) ?></span>
                     </button>
                     <?php foreach($quantidadePorTipo as $tipo => $quantidade): ?>
-                        <button type="button" data-filtro="<?= $tipo ?>" aria-pressed="false" class="rd-chip aria-pressed:border-[#13F3F7] aria-pressed:bg-[#13F3F7]/10 aria-pressed:text-[#13F3F7]">
+                        <button type="button" data-filtro="<?= $tipo ?>" aria-pressed="false" class="rd-chip">
                             <?= $tiposDenuncia[$tipo]["plural"] ?> <span class="text-[#91B5BD]"><?= $quantidade ?></span>
                         </button>
                     <?php endforeach; ?>

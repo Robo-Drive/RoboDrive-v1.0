@@ -134,6 +134,7 @@ html, body {
     border-color: var(--rd-primary);
     background-color: rgba(19, 243, 247, .08);
     color: var(--rd-primary);
+    box-shadow: 0 0 10px rgba(19, 243, 247, .30);
 }
 .rd-nav-link img {
     height: 1.25rem;
@@ -475,3 +476,87 @@ html, body {
 .rd-badge-public { border-color: var(--rd-primary); background-color: rgba(19,243,247,.12); color: var(--rd-primary); }
 .rd-badge-team { border-color: var(--rd-aqua); background-color: rgba(0,214,181,.12); color: var(--rd-aqua); }
 .rd-badge-private { border-color: var(--rd-blue); background-color: var(--rd-bg-elevated); color: var(--rd-text-secondary); }
+
+/* Glow que acompanha o cursor. --mx e --my vêm de brilhoCards.js */
+.rd-glow {
+    --mx: -999px;
+    --my: -999px;
+    border: 3px solid var(--rd-blue);
+    border-image: radial-gradient(200px circle at var(--mx) var(--my), var(--rd-primary), var(--rd-blue) 70%) 1;
+    background: radial-gradient(260px circle at var(--mx) var(--my), rgba(19, 243, 247, .08), transparent 70%) var(--rd-glow-fill, var(--rd-bg-primary));
+}
+.rd-glow-vazado { --rd-glow-fill: transparent; }
+.rd-glow:has(:focus-visible) {
+    border-image: none;
+    border-color: var(--rd-primary);
+    outline: 2px solid var(--rd-primary-light);
+    outline-offset: 2px;
+}
+
+/* Revelação de imagem (card de componente) */
+@property --rv { syntax: "<percentage>"; inherits: false; initial-value: -12%; }
+
+.rd-reveal { position: relative; overflow: hidden; isolation: isolate; }
+.rd-reveal-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    --rv: -12%;
+    -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, .7) calc(var(--rv) - 12%), rgba(0, 0, 0, .3) var(--rv));
+    mask-image: linear-gradient(to top, rgba(0, 0, 0, .7) calc(var(--rv) - 12%), rgba(0, 0, 0, .3) var(--rv));
+    transition: --rv .45s cubic-bezier(.65, .05, 0, 1), transform .6s cubic-bezier(.65, .05, 0, 1);
+}
+.rd-reveal::before, .rd-reveal::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    transition: opacity .3s ease;
+}
+.rd-reveal::before { background: rgba(0, 5, 5, .5); }
+.rd-reveal::after {
+    opacity: 0;
+    background: linear-gradient(to bottom, rgba(0, 5, 5, .9) 0, rgba(0, 5, 5, .9) 28%, rgba(0, 5, 5, 0) 48%, rgba(0, 5, 5, 0) 62%, rgba(0, 5, 5, .9) 84%);
+}
+.rd-reveal-desc { transition: opacity .25s ease; }
+@media (hover: hover) and (pointer: fine) {
+    .rd-reveal:hover .rd-reveal-img,
+    .rd-reveal:has(:focus-visible) .rd-reveal-img { --rv: 112%; transform: scale(1.04); }
+    .rd-reveal:hover::before, .rd-reveal:has(:focus-visible)::before { opacity: 0; }
+    .rd-reveal:hover::after, .rd-reveal:has(:focus-visible)::after { opacity: 1; }
+    .rd-reveal:hover .rd-reveal-desc, .rd-reveal:has(:focus-visible) .rd-reveal-desc { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .rd-reveal-img, .rd-reveal::before, .rd-reveal::after, .rd-reveal-desc { transition: none; }
+    .rd-reveal:hover .rd-reveal-img { transform: none; }
+}
+
+/* Glow de selecionado (estático) */
+.rd-chip[aria-pressed="true"] {
+    border-color: var(--rd-primary);
+    background-color: rgba(19, 243, 247, .10);
+    color: var(--rd-primary);
+    box-shadow: 0 0 10px rgba(19, 243, 247, .30);
+}
+.componente-option:has(:checked) {
+    box-shadow: inset 3px 0 0 var(--rd-primary), inset 0 0 14px rgba(19, 243, 247, .18);
+}
+
+/* Faixa "do projeto ao código" (home) */
+.rd-trit { --trit-linha: 33.333%; --trit-w: 260px; --trit-h: 150px; --trit-gap: 24px; position: relative; overflow: hidden; padding-block: 1.5rem; }
+@media (max-width: 640px) { .rd-trit { --trit-w: 220px; --trit-h: 130px; --trit-gap: 16px; } }
+.rd-trit-faixa { display: flex; gap: var(--trit-gap); width: max-content; will-change: transform; }
+.rd-trit-card { position: relative; flex: none; width: var(--trit-w); height: var(--trit-h); --corte: 0%; }
+.rd-trit-face, .rd-trit-codigo { position: absolute; inset: 0; margin: 0; padding: 1rem; overflow: hidden; border: 3px solid var(--rd-blue); }
+.rd-trit-face { background: var(--rd-bg-primary); clip-path: inset(0 0 0 var(--corte)); }
+.rd-trit-codigo { background: var(--rd-bg-black); border-color: var(--rd-primary); clip-path: inset(0 calc(100% - var(--corte)) 0 0); font-size: .7rem; line-height: 1.4; white-space: pre; color: var(--rd-text-secondary); }
+.rd-trit-linha { position: absolute; top: 0; bottom: 0; left: calc(var(--trit-linha) - 1.5px); width: 3px; overflow: hidden; background: var(--rd-primary); box-shadow: 0 0 12px rgba(19, 243, 247, .6), 0 0 28px rgba(19, 243, 247, .25); pointer-events: none; animation: rd-trit-pulso 1.4s ease-in-out infinite alternate; }
+.rd-trit-linha::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 40%; background: linear-gradient(to bottom, transparent, var(--rd-text-primary), transparent); animation: rd-trit-varrer 1.8s linear infinite; }
+.rd-trit-linha::after { content: ""; position: absolute; inset: 0 0 auto 0; height: 40%; background: linear-gradient(to bottom, transparent, var(--rd-text-primary), transparent); animation: rd-trit-varrer 1.8s linear infinite -.9s; }
+.rd-trit-halo { position: absolute; top: 0; bottom: 0; left: calc(var(--trit-linha) - 28px); width: 56px; background: linear-gradient(to right, transparent, rgba(19, 243, 247, .14), transparent); pointer-events: none; animation: rd-trit-halo 2.2s ease-in-out infinite alternate; }
+.rd-trit-pausada .rd-trit-linha, .rd-trit-pausada .rd-trit-linha::before, .rd-trit-pausada .rd-trit-linha::after, .rd-trit-pausada .rd-trit-halo { animation-play-state: paused; }
+@keyframes rd-trit-pulso { from { box-shadow: 0 0 6px rgba(19, 243, 247, .4), 0 0 14px rgba(19, 243, 247, .15); } to { box-shadow: 0 0 16px rgba(19, 243, 247, .8), 0 0 36px rgba(19, 243, 247, .35); } }
+@keyframes rd-trit-varrer { from { transform: translateY(-100%); } to { transform: translateY(250%); } }
+@keyframes rd-trit-halo { from { opacity: .4; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .rd-trit-linha, .rd-trit-linha::before, .rd-trit-linha::after, .rd-trit-halo { animation: none; } .rd-trit-linha::before, .rd-trit-linha::after { display: none; } }

@@ -145,7 +145,7 @@
 
     <div class="grid grid-cols-1 gap-6 border-b-[3px] border-[#07556A] px-4 pb-10 sm:gap-8 sm:px-8 lg:grid-cols-2 lg:px-10">
 
-      <div class="group relative overflow-hidden border-[3px] border-[#07556A] p-6 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:p-8 lg:p-12">
+      <div class="rd-glow rd-glow-vazado group relative overflow-hidden p-6 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:p-8 lg:p-12">
         <div class="absolute top-0 left-0 h-1 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
         <div class="mb-6 inline-flex border-[3px] border-[#13F3F7] p-3 text-[#13F3F7] sm:mb-8 sm:p-4">
           <svg width="36" height="36" class="sm:w-[44px] sm:h-[44px]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
@@ -158,7 +158,7 @@
       </div>
 
       <!-- COMPONENTES -->
-      <div class="group relative overflow-hidden border-[3px] border-[#07556A] p-6 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:p-8 lg:p-12">
+      <div class="rd-glow rd-glow-vazado group relative overflow-hidden p-6 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:p-8 lg:p-12">
         <div class="absolute top-0 left-0 h-1 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
         <div class="mb-6 inline-flex border-[3px] border-[#13F3F7] p-3 text-[#13F3F7] sm:mb-8 sm:p-4">
           <svg width="36" height="36" class="sm:w-[44px] sm:h-[44px]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
@@ -171,7 +171,7 @@
       </div>
 
       <!-- EQUIPES -->
-      <div class="group relative overflow-hidden border-[3px] border-[#07556A] p-6 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:p-8 lg:p-12">
+      <div class="rd-glow rd-glow-vazado group relative overflow-hidden p-6 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:p-8 lg:p-12">
         <div class="absolute top-0 left-0 h-1 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
         <div class="mb-6 inline-flex border-[3px] border-[#13F3F7] p-3 text-[#13F3F7] sm:mb-8 sm:p-4">
           <svg width="36" height="36" class="sm:w-[44px] sm:h-[44px]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -184,7 +184,7 @@
       </div>
 
       <!-- FÓRUM -->
-      <div class="group relative overflow-hidden border-[3px] border-[#07556A] p-6 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:p-8 lg:p-12">
+      <div class="rd-glow rd-glow-vazado group relative overflow-hidden p-6 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:p-8 lg:p-12">
         <div class="absolute top-0 left-0 h-1 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
         <div class="mb-6 inline-flex border-[3px] border-[#13F3F7] p-3 text-[#13F3F7] sm:mb-8 sm:p-4">
           <svg width="36" height="36" class="sm:w-[44px] sm:h-[44px]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -196,6 +196,81 @@
         <p class="text-xs leading-[1.65] text-[#91B5BD] sm:text-sm md:text-base">Discuta, pergunte e compartilhe conhecimento. Conecte equipes de diferentes campi do IFPR. Dúvidas de hardware, software e estratégias de competição.</p>
       </div>
 
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════
+       4.1 DO PROJETO AO CÓDIGO
+  ═══════════════════════════════════════ -->
+  <?php
+  $trituradorCards = [
+    ["titulo" => "Robô Seguidor de Linha", "tag" => "Arduino", "meta" => "Sensores infravermelhos", "codigo" => "void loop() {
+  if (lerSensor() == LINHA) {
+    frente();
+  } else {
+    girar();
+  }
+}"],
+    ["titulo" => "Braço Robótico Arduino", "tag" => "Servo", "meta" => "4 graus de liberdade", "codigo" => "Servo base;
+
+void setup() {
+  base.attach(9);
+}
+
+void mover(int a) {
+  base.write(a);
+}"],
+    ["titulo" => "Robô Sumô 500g", "tag" => "C++", "meta" => "Categoria sumô", "codigo" => "void atacar() {
+  if (distancia() < 30) {
+    motores(255, 255);
+  } else {
+    motores(120, -120);
+  }
+}"],
+    ["titulo" => "Controlador PID", "tag" => "Python", "meta" => "Controle de velocidade", "codigo" => "def pid(erro):
+    global soma, ant
+    soma += erro
+    d = erro - ant
+    ant = erro
+    return KP*erro + KI*soma \
+        + KD*d"],
+    ["titulo" => "Visão Computacional com OpenCV", "tag" => "Python", "meta" => "Detecção de cores", "codigo" => "cap = cv2.VideoCapture(0)
+while True:
+    ok, img = cap.read()
+    hsv = cv2.cvtColor(img,
+        cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv,
+        BAIXO, ALTO)"],
+  ];
+  ?>
+  <section class="border-b-[3px] border-[#07556A] bg-transparent">
+
+    <div class="flex flex-col items-start justify-between gap-4 border-b-[3px] border-[#07556A] bg-[rgba(8,43,58,.25)] px-4 pb-6 pt-10 sm:flex-row sm:items-end sm:gap-8 sm:px-8 sm:pb-10 sm:pt-16 lg:px-10">
+      <div>
+        <div class="mb-2 text-[.6rem] font-bold uppercase tracking-[.25em] text-[#91B5BD] sm:mb-3 sm:text-[.65rem]">CÓDIGO VERSIONADO</div>
+        <h2 class="text-[clamp(2rem,5vw,5rem)] font-black tracking-[-.04em] leading-[.95]">
+          DO PROJETO <span class="text-[#13F3F7]">AO CÓDIGO</span>
+        </h2>
+      </div>
+      <button type="button" id="trituradorPausa" class="rd-btn rd-btn-secondary rd-btn-sm">PAUSAR</button>
+    </div>
+
+    <div id="trituradorFaixa" class="rd-trit" aria-hidden="true">
+      <div class="rd-trit-faixa">
+        <?php foreach($trituradorCards as $trituradorCard): ?>
+          <div class="rd-trit-card">
+            <div class="rd-trit-face">
+              <span class="rd-badge rd-badge-public"><?= htmlspecialchars($trituradorCard["tag"]) ?></span>
+              <h3 class="mt-3 truncate font-['Orbitron'] text-base font-black text-[#F2FEFE]"><?= htmlspecialchars($trituradorCard["titulo"]) ?></h3>
+              <p class="mt-2 text-[.65rem] font-bold uppercase tracking-[.15em] text-[#91B5BD]"><?= htmlspecialchars($trituradorCard["meta"]) ?></p>
+            </div>
+            <pre class="rd-trit-codigo font-mono"><?= htmlspecialchars($trituradorCard["codigo"]) ?></pre>
+          </div>
+        <?php endforeach; ?>
+      </div>
+      <div class="rd-trit-halo"></div>
+      <div class="rd-trit-linha"></div>
     </div>
   </section>
 
@@ -576,3 +651,5 @@
   });
 </script>
 <script src="<?= js_url("wallpaper.js") ?>"></script>
+<script src="<?= js_url("brilhoCards.js") ?>"></script>
+<script src="<?= js_url("triturador.js") ?>"></script>

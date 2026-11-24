@@ -207,7 +207,7 @@ $obterImagem = static function ($item) {
                     $pId = method_exists($projeto, 'getId') ? $projeto->getId() : ($projeto['id'] ?? null);
                     $pCat = method_exists($projeto, 'getCategoria') ? $projeto->getCategoria()?->getNome() : 'Hardware';
                     ?>
-                    <div class="border-2 border-[#07556A] bg-[#06141C] p-4 hover:border-[#13F3F7] transition flex flex-col justify-between group shadow-[4px_4px_0_#000505]">
+                    <div class="rd-glow p-4 flex flex-col justify-between group">
                         <div>
                             <div class="flex items-center justify-between gap-2 mb-2">
                                 <span class="text-[.6rem] font-bold uppercase tracking-wider px-2 py-0.5 border border-[#0795A5] text-[#13F3F7] bg-[#07556A]/20 font-mono">
