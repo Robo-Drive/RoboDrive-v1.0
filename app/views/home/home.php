@@ -204,7 +204,7 @@
        4.1 DO PROJETO AO CÓDIGO
   ═══════════════════════════════════════ -->
   <?php
-  $trituradorCards = [
+  $trituradorCards = !empty($trituradorCards) ? $trituradorCards : [
     ["titulo" => "Robô Seguidor de Linha", "tag" => "Arduino", "meta" => "Sensores infravermelhos", "codigo" => "void loop() {
   if (lerSensor() == LINHA) {
     frente();
@@ -261,9 +261,9 @@ while True:
         <?php foreach($trituradorCards as $trituradorCard): ?>
           <div class="rd-trit-card">
             <div class="rd-trit-face">
-              <span class="rd-badge rd-badge-public"><?= htmlspecialchars($trituradorCard["tag"]) ?></span>
-              <h3 class="mt-3 truncate font-['Orbitron'] text-base font-black text-[#F2FEFE]"><?= htmlspecialchars($trituradorCard["titulo"]) ?></h3>
-              <p class="mt-2 text-[.65rem] font-bold uppercase tracking-[.15em] text-[#91B5BD]"><?= htmlspecialchars($trituradorCard["meta"]) ?></p>
+              <span class="rd-badge rd-badge-public"><?= htmlspecialchars(html_entity_decode($trituradorCard["tag"])) ?></span>
+              <h3 class="mt-3 truncate font-['Orbitron'] text-base font-black text-[#F2FEFE]"><?= htmlspecialchars(html_entity_decode($trituradorCard["titulo"])) ?></h3>
+              <p class="mt-2 truncate text-[.65rem] font-bold uppercase tracking-[.15em] text-[#91B5BD]"><?= htmlspecialchars(html_entity_decode($trituradorCard["meta"])) ?></p>
             </div>
             <pre class="rd-trit-codigo font-mono"><?= htmlspecialchars($trituradorCard["codigo"]) ?></pre>
           </div>
