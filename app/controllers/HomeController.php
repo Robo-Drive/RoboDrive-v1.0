@@ -19,6 +19,7 @@ class HomeController extends Controller
         $data["totalUsuarios"] = (new UsuarioRepositorySql())->contarAtivos();
 
         $data["trituradorCards"] = $this->cardsCodigoPublico();
+        $data["projetosRecentes"] = $this->projetosRecentes();
 
         $this->view("home/home", $data);
     }
@@ -57,5 +58,31 @@ class HomeController extends Controller
         }
 
         return $cards;
+    }
+
+    // Os 5 projetos públicos mais recentes da lista "da comunidade".
+    private function projetosRecentes(): array
+    {
+        $projetos = new ProjetoRepositorySql();
+        $componentes = new ComponenteRepositorySql();
+
+        $publicos = $projetos->listarPublico();
+        usort($publicos, fn($a, $b) => $b->getCriadoEm() <=> $a->getCriadoEm());
+
+        $lista = [];
+        foreach (array_slice($publicos, 0, 5) as $projeto)
+        {
+            $versao = $projetos->buscarUltimaVersao($projeto->getId());
+            $partes = array_filter([$projeto->getEquipe()?->getNome(), $projeto->getCategoria()?->getNome()]);
+
+            $lista[] = [
+                "id" => $projeto->getId(),
+                "nome" => (string) $projeto->getNome(),
+                "meta" => implode(" · ", $partes) ?: "Projeto público",
+                "componentes" => $versao ? count($componentes->buscarPorVersao((int) $versao["id"])) : 0,
+            ];
+        }
+
+        return $lista;
     }
 }

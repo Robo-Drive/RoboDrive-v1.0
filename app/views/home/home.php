@@ -50,7 +50,7 @@
 
       <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 sm:gap-8">
         <p class="max-w-[42ch] border-l-4 border-[#13F3F7] pl-4 text-sm leading-[1.55] text-[#91B5BD] sm:pl-5 sm:text-base lg:text-[clamp(1rem,2vw,1.4rem)]">
-          Repositório central de projetos de robótica educacional do IFPR. Centralize código, componentes, equipes e conhecimento — tudo em um lugar.
+          Repositório central de projetos de robótica educacional. Centralize código, componentes, equipes e conhecimento — tudo em um lugar.
         </p>
         <div class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 w-full lg:w-auto">
           <a href="<?= URL_BASE ?>/login" class="rd-btn rd-btn-primary w-full sm:w-auto">
@@ -154,7 +154,7 @@
           <h3 class="text-xl sm:text-[2rem] font-black tracking-[-.03em]">CÓDIGO</h3>
           <span class="border-2 border-[#07556A] px-2.5 py-0.5 text-[.6rem] font-bold uppercase tracking-[.25em] text-[#91B5BD] sm:px-3 sm:py-1 sm:text-[.65rem]">01</span>
         </div>
-        <p class="text-xs leading-[1.65] text-[#91B5BD] sm:text-sm md:text-base">Armazene e versione códigos dos seus robôs. Nunca mais perca uma linha de código importante entre turmas. Suporte a Arduino, Python e C++.</p>
+        <p class="text-xs leading-[1.65] text-[#91B5BD] sm:text-sm md:text-base">Armazene e versione códigos dos seus robôs. Nunca mais perca uma linha de código importante entre turmas.</p>
       </div>
 
       <!-- COMPONENTES -->
@@ -167,7 +167,7 @@
           <h3 class="text-xl sm:text-[2rem] font-black tracking-[-.03em]">COMPONENTES</h3>
           <span class="border-2 border-[#07556A] px-2.5 py-0.5 text-[.6rem] font-bold uppercase tracking-[.25em] text-[#91B5BD] sm:px-3 sm:py-1 sm:text-[.65rem]">02</span>
         </div>
-        <p class="text-xs leading-[1.65] text-[#91B5BD] sm:text-sm md:text-base">Catalogue sensores, motores e atuadores com imagens e especificações técnicas. Construa uma biblioteca reutilizável para todo o campus.</p>
+        <p class="text-xs leading-[1.65] text-[#91B5BD] sm:text-sm md:text-base">Catalogue sensores, motores e atuadores com imagens e especificações técnicas. Construa uma biblioteca reutilizável para todo mundo.</p>
       </div>
 
       <!-- EQUIPES -->
@@ -180,7 +180,7 @@
           <h3 class="text-xl sm:text-[2rem] font-black tracking-[-.03em]">EQUIPES</h3>
           <span class="border-2 border-[#07556A] px-2.5 py-0.5 text-[.6rem] font-bold uppercase tracking-[.25em] text-[#91B5BD] sm:px-3 sm:py-1 sm:text-[.65rem]">03</span>
         </div>
-        <p class="text-xs leading-[1.65] text-[#91B5BD] sm:text-sm md:text-base">Gerencie equipes por campus. Controle de acesso granular por roles — professor controla tudo, aluno contribui, visitante visualiza.</p>
+        <p class="text-xs leading-[1.65] text-[#91B5BD] sm:text-sm md:text-base">Gerencie suas equipes. Controle de acesso subdividido por hierarquias — professor controla tudo, aluno contribui.</p>
       </div>
 
       <!-- FÓRUM -->
@@ -193,7 +193,7 @@
           <h3 class="text-xl sm:text-[2rem] font-black tracking-[-.03em]">FÓRUM</h3>
           <span class="border-2 border-[#07556A] px-2.5 py-0.5 text-[.6rem] font-bold uppercase tracking-[.25em] text-[#91B5BD] sm:px-3 sm:py-1 sm:text-[.65rem]">04</span>
         </div>
-        <p class="text-xs leading-[1.65] text-[#91B5BD] sm:text-sm md:text-base">Discuta, pergunte e compartilhe conhecimento. Conecte equipes de diferentes campi do IFPR. Dúvidas de hardware, software e estratégias de competição.</p>
+        <p class="text-xs leading-[1.65] text-[#91B5BD] sm:text-sm md:text-base">Discuta, pergunte e compartilhe conhecimento. Conecte equipes de diferentes lugares do mundo. Dúvidas de hardware, software e estratégias de competição.</p>
       </div>
 
     </div>
@@ -275,91 +275,43 @@ while True:
   </section>
 
 
-  <!-- ═══════════════════════════════════════
-       5. PROJETOS
-  ═══════════════════════════════════════ -->
-  <section class="border-b-[3px] border-[#07556A] bg-transparent">
+    <!-- ═══════════════════════════════════════
+        5. PROJETOS
+    ═══════════════════════════════════════ -->
+    <section class="border-b-[3px] border-[#07556A] bg-transparent">
 
-    <div class="flex flex-col items-start justify-between gap-4 border-b-[3px] border-[#07556A] bg-[rgba(8,43,58,.25)] px-4 pb-6 pt-10 sm:flex-row sm:items-end sm:gap-8 sm:px-8 sm:pb-10 sm:pt-16 lg:px-10">
+      <div class="flex flex-col items-start justify-between gap-4 border-b-[3px] border-[#07556A] bg-[rgba(8,43,58,.25)] px-4 pb-6 pt-10 sm:flex-row sm:items-end sm:gap-8 sm:px-8 sm:pb-10 sm:pt-16 lg:px-10">
+        <div>
+          <div class="mb-2 text-[.6rem] font-bold uppercase tracking-[.25em] text-[#91B5BD] sm:mb-3 sm:text-[.65rem]">PROJETOS RECENTES</div>
+          <h2 class="text-[clamp(2rem,5vw,5rem)] font-black tracking-[-.04em] leading-[.95]">
+            DA<br>COMUNIDADE
+          </h2>
+        </div>
+        <a href="<?= URL_BASE."/projeto/listar" ?>" class="border-b-2 border-[#07556A] pb-1 text-xs font-bold uppercase tracking-[.08em] text-[#91B5BD] no-underline transition-colors duration-200 hover:border-[#13F3F7] hover:text-[#13F3F7] sm:text-sm">
+          VER TODOS →
+        </a>
+      </div>
+
       <div>
-        <div class="mb-2 text-[.6rem] font-bold uppercase tracking-[.25em] text-[#91B5BD] sm:mb-3 sm:text-[.65rem]">PROJETOS RECENTES</div>
-        <h2 class="text-[clamp(2rem,5vw,5rem)] font-black tracking-[-.04em] leading-[.95]">
-          DA<br>COMUNIDADE
-        </h2>
+        <?php if(empty($projetosRecentes)): ?> 
+          <p class="px-4 py-8 text-sm text-[#91B5BD] sm:px-8 lg:px-10">Nenhum projeto público cadastrado ainda.</p>
+        <?php endif; ?>
+        <?php foreach(($projetosRecentes ?? []) as $i => $recente): ?>
+          <a href="<?= URL_BASE ?>/projeto/perfil?id=<?= (int) $recente["id"] ?>" class="group relative grid cursor-pointer grid-cols-1 items-start gap-3 overflow-hidden border-b last:border-b-0 border-[#07556A] px-4 py-5 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:grid-cols-[3rem_1fr_auto] sm:items-center sm:gap-6 sm:px-8 sm:py-7 md:grid-cols-[4rem_1fr_auto] md:gap-8 lg:px-10">
+            <div class="absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
+            <div class="font-['Barlow_Condensed'] text-2xl font-black leading-none text-[#4E6B72] sm:text-[2.5rem]"><?= str_pad((string) ($i + 1), 2, "0", STR_PAD_LEFT) ?></div>
+            <div class="min-w-0">
+              <div class="mb-1 truncate text-base sm:text-[1.2rem] font-black tracking-[-.02em]"><?= htmlspecialchars(html_entity_decode($recente["nome"])) ?></div>
+              <div class="truncate text-[.65rem] font-bold uppercase tracking-[.15em] text-[#91B5BD] sm:tracking-[.25em]"><?= htmlspecialchars(html_entity_decode($recente["meta"])) ?></div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 sm:mt-0">
+              <span class="border-2 border-[#13F3F7] bg-[rgba(19,243,247,.12)] px-2.5 py-1 text-[.65rem] font-bold uppercase tracking-[.1em] text-[#13F3F7] sm:px-4 sm:py-1.5 sm:text-[.7rem]">PÚBLICO</span>
+              <span class="text-[.75rem] font-bold text-[#91B5BD] sm:text-[.85rem]"><?= (int) $recente["componentes"] ?> <?= $recente["componentes"] == 1 ? "componente" : "componentes" ?></span>
+            </div>
+          </a>
+        <?php endforeach; ?>
       </div>
-      <a href="#" class="border-b-2 border-[#07556A] pb-1 text-xs font-bold uppercase tracking-[.08em] text-[#91B5BD] no-underline transition-colors duration-200 hover:border-[#13F3F7] hover:text-[#13F3F7] sm:text-sm">
-        VER TODOS →
-      </a>
-    </div>
-
-    <div>
-      <div class="group relative grid cursor-pointer grid-cols-1 items-start gap-3 overflow-hidden border-b border-[#07556A] px-4 py-5 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:grid-cols-[3rem_1fr_auto] sm:items-center sm:gap-6 sm:px-8 sm:py-7 md:grid-cols-[4rem_1fr_auto] md:gap-8 lg:px-10">
-        <div class="absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
-        <div class="font-['Barlow_Condensed'] text-2xl font-black leading-none text-[#4E6B72] sm:text-[2.5rem]">01</div>
-        <div>
-          <div class="mb-1 text-base sm:text-[1.2rem] font-black tracking-[-.02em]">Robô Seguidor de Linha</div>
-          <div class="text-[.65rem] font-bold uppercase tracking-[.15em] text-[#91B5BD] sm:tracking-[.25em]">Equipe Alpha &nbsp;·&nbsp; Cascavel &nbsp;·&nbsp; Arduino</div>
-        </div>
-        <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 sm:mt-0">
-          <span class="border-2 border-[#13F3F7] bg-[rgba(19,243,247,.12)] px-2.5 py-1 text-[.65rem] font-bold uppercase tracking-[.1em] text-[#13F3F7] sm:px-4 sm:py-1.5 sm:text-[.7rem]">PÚBLICO</span>
-          <span class="text-[.75rem] font-bold text-[#91B5BD] sm:text-[.85rem]">12 componentes</span>
-        </div>
-      </div>
-
-      <div class="group relative grid cursor-pointer grid-cols-1 items-start gap-3 overflow-hidden border-b border-[#07556A] px-4 py-5 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:grid-cols-[3rem_1fr_auto] sm:items-center sm:gap-6 sm:px-8 sm:py-7 md:grid-cols-[4rem_1fr_auto] md:gap-8 lg:px-10">
-        <div class="absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
-        <div class="font-['Barlow_Condensed'] text-2xl font-black leading-none text-[#4E6B72] sm:text-[2.5rem]">02</div>
-        <div>
-          <div class="mb-1 text-base sm:text-[1.2rem] font-black tracking-[-.02em]">Braço Robótico Arduino</div>
-          <div class="text-[.65rem] font-bold uppercase tracking-[.15em] text-[#91B5BD] sm:tracking-[.25em]">Equipe Beta &nbsp;·&nbsp; Londrina &nbsp;·&nbsp; Servo Motors</div>
-        </div>
-        <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 sm:mt-0">
-          <span class="border-2 border-[#00D6B5] bg-[rgba(0,214,181,.12)] px-2.5 py-1 text-[.65rem] font-bold uppercase tracking-[.1em] text-[#00D6B5] sm:px-4 sm:py-1.5 sm:text-[.7rem]">EQUIPE</span>
-          <span class="text-[.75rem] font-bold text-[#91B5BD] sm:text-[.85rem]">8 componentes</span>
-        </div>
-      </div>
-
-      <div class="group relative grid cursor-pointer grid-cols-1 items-start gap-3 overflow-hidden border-b border-[#07556A] px-4 py-5 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:grid-cols-[3rem_1fr_auto] sm:items-center sm:gap-6 sm:px-8 sm:py-7 md:grid-cols-[4rem_1fr_auto] md:gap-8 lg:px-10">
-        <div class="absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
-        <div class="font-['Barlow_Condensed'] text-2xl font-black leading-none text-[#4E6B72] sm:text-[2.5rem]">03</div>
-        <div>
-          <div class="mb-1 text-base sm:text-[1.2rem] font-black tracking-[-.02em]">Robô Sumô 500g</div>
-          <div class="text-[.65rem] font-bold uppercase tracking-[.15em] text-[#91B5BD] sm:tracking-[.25em]">Equipe Gamma &nbsp;·&nbsp; Curitiba &nbsp;·&nbsp; C++</div>
-        </div>
-        <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 sm:mt-0">
-          <span class="border-2 border-[#13F3F7] bg-[rgba(19,243,247,.12)] px-2.5 py-1 text-[.65rem] font-bold uppercase tracking-[.1em] text-[#13F3F7] sm:px-4 sm:py-1.5 sm:text-[.7rem]">PÚBLICO</span>
-          <span class="text-[.75rem] font-bold text-[#91B5BD] sm:text-[.85rem]">19 componentes</span>
-        </div>
-      </div>
-
-      <div class="group relative grid cursor-pointer grid-cols-1 items-start gap-3 overflow-hidden border-b border-[#07556A] px-4 py-5 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:grid-cols-[3rem_1fr_auto] sm:items-center sm:gap-6 sm:px-8 sm:py-7 md:grid-cols-[4rem_1fr_auto] md:gap-8 lg:px-10">
-        <div class="absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
-        <div class="font-['Barlow_Condensed'] text-2xl font-black leading-none text-[#4E6B72] sm:text-[2.5rem]">04</div>
-        <div>
-          <div class="mb-1 text-base sm:text-[1.2rem] font-black tracking-[-.02em]">Controlador PID para Seguidor</div>
-          <div class="text-[.65rem] font-bold uppercase tracking-[.15em] text-[#91B5BD] sm:tracking-[.25em]">Equipe Alpha &nbsp;·&nbsp; Cascavel &nbsp;·&nbsp; Python</div>
-        </div>
-        <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 sm:mt-0">
-          <span class="border-2 border-[#07556A] bg-[#082B3A] px-2.5 py-1 text-[.65rem] font-bold uppercase tracking-[.1em] text-[#91B5BD] sm:px-4 sm:py-1.5 sm:text-[.7rem]">PRIVADO</span>
-          <span class="text-[.75rem] font-bold text-[#91B5BD] sm:text-[.85rem]">6 componentes</span>
-        </div>
-      </div>
-
-      <div class="group relative grid cursor-pointer grid-cols-1 items-start gap-3 overflow-hidden px-4 py-5 transition-colors duration-[250ms] hover:bg-[#07556A]/20 sm:grid-cols-[3rem_1fr_auto] sm:items-center sm:gap-6 sm:px-8 sm:py-7 md:grid-cols-[4rem_1fr_auto] md:gap-8 lg:px-10">
-        <div class="absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 bg-[#13F3F7] transition-transform duration-[600ms] ease-[cubic-bezier(.65,.05,0,1)] group-hover:scale-x-100"></div>
-        <div class="font-['Barlow_Condensed'] text-2xl font-black leading-none text-[#4E6B72] sm:text-[2.5rem]">05</div>
-        <div>
-          <div class="mb-1 text-base sm:text-[1.2rem] font-black tracking-[-.02em]">Visão Computacional com OpenCV</div>
-          <div class="text-[.65rem] font-bold uppercase tracking-[.15em] text-[#91B5BD] sm:tracking-[.25em]">Equipe Delta &nbsp;·&nbsp; Londrina &nbsp;·&nbsp; Python</div>
-        </div>
-        <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 sm:mt-0">
-          <span class="border-2 border-[#13F3F7] bg-[rgba(19,243,247,.12)] px-2.5 py-1 text-[.65rem] font-bold uppercase tracking-[.1em] text-[#13F3F7] sm:px-4 sm:py-1.5 sm:text-[.7rem]">PÚBLICO</span>
-          <span class="text-[.75rem] font-bold text-[#91B5BD] sm:text-[.85rem]">11 componentes</span>
-        </div>
-      </div>
-
-    </div>
-  </section>
+    </section>
 
 
   <!-- ═══════════════════════════════════════
