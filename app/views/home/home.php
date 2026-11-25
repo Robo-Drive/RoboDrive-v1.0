@@ -29,7 +29,7 @@
   <section class="relative flex min-h-[100svh] flex-col justify-end overflow-hidden border-b-[3px] border-[#07556A]">
 
     <div class="absolute top-4 left-4 text-[.55rem] font-bold uppercase tracking-[.15em] text-[#91B5BD] sm:left-10 sm:top-10 sm:text-[.65rem] sm:tracking-[.25em]">
-      IFPR &nbsp;·&nbsp; SISTEMA DE GESTÃO &nbsp;·&nbsp; <?php echo date("Y"); ?>
+    SISTEMA DE GESTÃO &nbsp;·&nbsp; <?php echo date("Y"); ?>
     </div>
 
     <!-- add dps quando estiver funcionando -->
@@ -333,7 +333,7 @@ while True:
     <div class="flex flex-col justify-between gap-8 sm:gap-12 px-6 sm:px-10 lg:px-12 py-10 sm:py-16 lg:py-20">
       <div class="flex flex-col gap-4 sm:gap-6">
         <p class="text-base leading-[1.7] text-[#91B5BD] sm:text-[1.15rem]">
-          O RoboDrive nasceu para resolver o problema da <strong class="text-[#F2FEFE]">dispersão de conhecimento</strong> em projetos de robótica educacional no IFPR.
+          O RoboDrive nasceu para resolver o problema da <strong class="text-[#F2FEFE]">dispersão de conhecimento</strong> em projetos de robótica educacional.
         </p>
         <p class="text-xs leading-[1.7] text-[#91B5BD] sm:text-base">
           Quando códigos, documentações e decisões técnicas ficam espalhados em dispositivos pessoais, grupos de WhatsApp e pen drives, perde-se a capacidade de reaproveitar esse conhecimento em turmas futuras — e todo o esforço se perde com a formatura.
@@ -374,7 +374,7 @@ while True:
           <svg width="28" height="28" class="sm:w-[32px] sm:h-[32px]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
         <h3 class="mb-2.5 sm:mb-3.5 text-xl sm:text-[1.6rem] font-black tracking-[-.03em]">CADASTRE-SE</h3>
-        <p class="text-xs leading-[1.7] text-[#91B5BD] sm:text-sm md:text-[.95rem]">Crie sua conta com e-mail institucional do IFPR. Professores validam membros e gerenciam equipes por campus.</p>
+        <p class="text-xs leading-[1.7] text-[#91B5BD] sm:text-sm md:text-[.95rem]">Crie sua conta com qualquer e-mail. Professores validam membros e gerenciam equipes e seus alunos.</p>
       </div>
 
       <div class="relative border-b-[3px] border-[#07556A] px-6 py-8 sm:px-8 sm:py-12 md:border-b-0 md:border-r-[3px] lg:px-10">
@@ -384,7 +384,7 @@ while True:
           <svg width="28" height="28" class="sm:w-[32px] sm:h-[32px]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
         </div>
         <h3 class="mb-2.5 sm:mb-3.5 text-xl sm:text-[1.6rem] font-black tracking-[-.03em]">CRIE PROJETOS</h3>
-        <p class="text-xs leading-[1.7] text-[#91B5BD] sm:text-sm md:text-[.95rem]">Documente robôs com código, componentes, imagens e descrições técnicas. Defina a visibilidade: equipe, campus ou público.</p>
+        <p class="text-xs leading-[1.7] text-[#91B5BD] sm:text-sm md:text-[.95rem]">Documente robôs com código, componentes, imagens e descrições técnicas. Defina a visibilidade: equipe, privado ou público.</p>
       </div>
 
       <div class="relative px-6 sm:px-8 lg:px-10 py-8 sm:py-12">
@@ -394,7 +394,7 @@ while True:
           <svg width="28" height="28" class="sm:w-[32px] sm:h-[32px]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
         <h3 class="mb-2.5 sm:mb-3.5 text-xl sm:text-[1.6rem] font-black tracking-[-.03em]">COLABORE</h3>
-        <p class="text-xs leading-[1.7] text-[#91B5BD] sm:text-sm md:text-[.95rem]">Compartilhe com sua equipe, publique para o campus ou abra para toda a comunidade IFPR. Use o fórum para tirar dúvidas.</p>
+        <p class="text-xs leading-[1.7] text-[#91B5BD] sm:text-sm md:text-[.95rem]">Compartilhe com sua equipe, publique para seus chegados ou abra para toda a comunidade. Use o fórum para tirar dúvidas.</p>
       </div>
 
     </div>
@@ -420,7 +420,7 @@ while True:
         <h3 class="mb-3 sm:mb-4 text-xl sm:text-[1.75rem] font-black tracking-[-.03em]">Controle Total</h3>
         <ul class="list-none p-0 text-xs leading-[1.8] text-[#91B5BD] sm:text-sm sm:leading-[2] md:text-[.95rem]">
           <li>→ &nbsp;Criar e gerenciar equipes</li>
-          <li>→ &nbsp;Validar alunos no campus</li>
+          <li>→ &nbsp;Validar participantes</li>
           <li>→ &nbsp;Definir visibilidade de projetos</li>
           <li>→ &nbsp;Acesso a todos os projetos da equipe</li>
           <li>→ &nbsp;Moderar fórum</li>
@@ -435,7 +435,7 @@ while True:
           <li>→ &nbsp;Usar componentes da biblioteca</li>
           <li>→ &nbsp;Colaborar com a equipe</li>
           <li>→ &nbsp;Participar do fórum</li>
-          <li>→ &nbsp;Ver projetos públicos de outros campi</li>
+          <li>→ &nbsp;Ver projetos públicos</li>
         </ul>
       </div>
 
@@ -464,7 +464,6 @@ while True:
         <li class="text-[#F2FEFE]"><span class="text-[#13F3F7]">Professor</span> orientador</li>
         <li class="text-[#F2FEFE]"><span class="text-[#13F3F7]">Aluno</span> desenvolvedor</li>
         <li class="text-[#F2FEFE]"><span class="text-[#13F3F7]">Equipe</span> colaborativa</li>
-        <li class="text-[#F2FEFE]"><span class="text-[#13F3F7]">Campus</span> integrado</li>
         <li class="text-[#F2FEFE]"><span class="text-[#13F3F7]">Repositório</span> central</li>
         <li class="text-[#F2FEFE]"><span class="text-[#13F3F7]">Projetos</span> publicados</li>
       </ul>
@@ -473,7 +472,6 @@ while True:
         <li class="text-[#F2FEFE]"><span class="text-[#13F3F7]">Professor</span> orientador</li>
         <li class="text-[#F2FEFE]"><span class="text-[#13F3F7]">Aluno</span> desenvolvedor</li>
         <li class="text-[#F2FEFE]"><span class="text-[#13F3F7]">Equipe</span> colaborativa</li>
-        <li class="text-[#F2FEFE]"><span class="text-[#13F3F7]">Campus</span> integrado</li>
         <li class="text-[#F2FEFE]"><span class="text-[#13F3F7]">Repositório</span> central</li>
         <li class="text-[#F2FEFE]"><span class="text-[#13F3F7]">Projetos</span> publicados</li>
       </ul>
